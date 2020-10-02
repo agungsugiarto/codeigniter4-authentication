@@ -111,7 +111,7 @@ class AuthenticationService implements AuthenticationInterface
         $result = $adapter->attempt();
 
         if ($this->hasIdentity()) {
-            $this->cleaIdentity();
+            $this->cleanIdentity();
         }
 
         if ($result->isValid()) {
@@ -146,8 +146,8 @@ class AuthenticationService implements AuthenticationInterface
     /**
      * {@inheritdoc}
      */
-    public function cleaIdentity()
+    public function cleanIdentity()
     {
-        $this->getStorage()->clear();
+        return $this->getStorage()->clear();
     }
 }

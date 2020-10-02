@@ -31,7 +31,6 @@ interface StorageInterface
     /**
      * Clear content from storage.
      *
-     * @return void
      * @throws ExceptionInterface If clearing contents from storage is impossible
      */
     public function clear();

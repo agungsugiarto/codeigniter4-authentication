@@ -30,5 +30,5 @@ interface AuthenticationInterface
     /**
      * Clear the identity.
      */
-    public function cleaIdentity();
+    public function cleanIdentity();
 }
