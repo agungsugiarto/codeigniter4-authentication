@@ -1,6 +1,6 @@
 <?php
 
-namespace Laminas\Authentication\Storage;
+namespace Fluent\Authentication\Storages;
 
 use Fluent\Authentication\Contracts\StorageInterface;
 
