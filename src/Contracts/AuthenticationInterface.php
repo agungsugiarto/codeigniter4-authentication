@@ -59,7 +59,7 @@ interface AuthenticationInterface
     /**
      * Returns the currently logged in user.
      *
-     * @return Authenticatable|null
+     * @return AuthenticatorInterface|null
      */
     public function getUser();
 }

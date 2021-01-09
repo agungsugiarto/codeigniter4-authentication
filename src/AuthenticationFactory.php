@@ -3,6 +3,7 @@
 namespace Fluent\Auth;
 
 use Fluent\Auth\Config\Auth as AuthConfig;
+use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Exceptions\AuthenticationException;
 
@@ -10,7 +11,7 @@ use function array_key_exists;
 use function key;
 use function property_exists;
 
-class Authentication
+class AuthenticationFactory
 {
     /**
      * Instantiated handler objects,
@@ -38,7 +39,8 @@ class Authentication
      * will return an instance of the first handler specified
      * in the Auth config file.
      *
-     * @return mixed
+     * @return AuthenticationInterface
+     * @throws AuthenticationException
      */
     public function factory(string $handler = 'default')
     {

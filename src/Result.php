@@ -55,7 +55,7 @@ class Result
     }
 
     /**
-     * @return string
+     * @return object
      */
     public function extraInfo()
     {

@@ -3,8 +3,9 @@
 namespace Fluent\Auth\Config;
 
 use Config\Services as BaseService;
-use Fluent\Auth\Authentication;
+use Fluent\Auth\AuthenticationFactory;
 use Fluent\Auth\AuthenticationService;
+use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Passwords;
 
 class Services extends BaseService
@@ -12,7 +13,7 @@ class Services extends BaseService
     /**
      * The base auth class.
      *
-     * @return AuthenticationService
+     * @return AuthenticationService|AuthenticationInterface
      */
     public static function auth(bool $getShared = true)
     {
@@ -20,9 +21,7 @@ class Services extends BaseService
             return self::getSharedInstance('auth');
         }
 
-        $config = config('Auth');
-
-        return new AuthenticationService(new Authentication($config));
+        return new AuthenticationService(new AuthenticationFactory(config('Auth')));
     }
 
     /**

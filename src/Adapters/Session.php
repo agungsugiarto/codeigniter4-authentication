@@ -3,355 +3,322 @@
 namespace Fluent\Auth\Adapters;
 
 use CodeIgniter\Events\Events;
-use Fluent\Auth\Exceptions\AuthenticationException;
 use Config\App;
+use Exception;
+use Fluent\Auth\Contracts\AuthenticationInterface;
+use Fluent\Auth\Contracts\AuthenticatorInterface;
+use Fluent\Auth\Exceptions\AuthenticationException;
 use Fluent\Auth\Models\LoginModel;
 use Fluent\Auth\Models\RememberModel;
 use Fluent\Auth\Result;
-use Fluent\Auth\Contracts\AuthenticationInterface;
-use Fluent\Auth\Contracts\AuthenticatorInterface;
+
+use function bin2hex;
+use function count;
+use function date;
+use function hash;
+use function mt_rand;
+use function random_bytes;
+use function time;
 
 class Session implements AuthenticationInterface
 {
-	/**
-	 * @var array
-	 */
-	protected $config;
+    /** @var array */
+    protected $config;
 
-	/**
-	 * The persistence engine
-	 */
-	protected $provider;
+    /**
+     * The persistence engine
+     */
+    protected $provider;
 
-	/**
-	 * @var \Fluent\Auth\Contracts\AuthenticatorInterface
-	 */
-	protected $user;
+    /** @var AuthenticatorInterface */
+    protected $user;
 
-	/**
-	 * @var LoginModel
-	 */
-	protected $loginModel;
+    /** @var LoginModel */
+    protected $loginModel;
 
-	/**
-	 * @var RememberModel
-	 */
-	protected $rememberModel;
+    /** @var RememberModel */
+    protected $rememberModel;
 
-	public function __construct(array $config, $provider)
-	{
-		$this->config        = $config;
-		$this->provider      = $provider;
-		$this->loginModel    = model(LoginModel::class);
-		$this->rememberModel = model(RememberModel::class);
-	}
+    public function __construct(array $config, $provider)
+    {
+        $this->config        = $config;
+        $this->provider      = $provider;
+        $this->loginModel    = model(LoginModel::class);
+        $this->rememberModel = model(RememberModel::class);
+    }
 
-	/**
-	 * Attempts to authenticate a user with the given $credentials.
-	 * Logs the user in with a successful check.
-	 *
-	 * @param array   $credentials
-	 * @param boolean $remember
-	 *
-	 * @return Result
-	 */
-	public function attempt(array $credentials, bool $remember = false)
-	{
-		$ipAddress = service('request')->getIPAddress();
-		$result    = $this->check($credentials);
+    /**
+     * Attempts to authenticate a user with the given $credentials.
+     * Logs the user in with a successful check.
+     *
+     * @param array   $credentials
+     * @return Result
+     */
+    public function attempt(array $credentials, bool $remember = false)
+    {
+        $ipAddress = service('request')->getIPAddress();
+        $result    = $this->check($credentials);
 
-		if (! $result->isOK())
-		{
-			// Always record a login attempt, whether success or not.
-			$this->loginModel->recordLoginAttempt($credentials['email'] ?? $credentials['username'], false, $ipAddress, null);
+        if (! $result->isOK()) {
+            // Always record a login attempt, whether success or not.
+            $this->loginModel->recordLoginAttempt($credentials['email'] ?? $credentials['username'], false, $ipAddress, null);
 
-			$this->user = null;
+            $this->user = null;
 
-			// Fire an event on failure so devs have the chance to
-			// let them know someone attempted to login to their account
-			Events::trigger('failedLoginAttempt', $credentials);
+            // Fire an event on failure so devs have the chance to
+            // let them know someone attempted to login to their account
+            Events::trigger('failedLoginAttempt', $credentials);
 
-			return $result;
-		}
+            return $result;
+        }
 
-		$this->login($result->extraInfo(), $remember);
+        $this->login($result->extraInfo(), $remember);
 
-		$this->loginModel->recordLoginAttempt($credentials['email'] ?? $credentials['username'], true, $ipAddress, $this->user->id ?? null);
+        $this->loginModel->recordLoginAttempt($credentials['email'] ?? $credentials['username'], true, $ipAddress, $this->user->id ?? null);
 
-		return $result;
-	}
+        return $result;
+    }
 
-	/**
-	 * Checks a user's $credentials to see if they match an
-	 * existing user.
-	 *
-	 * @param array $credentials
-	 *
-	 * @return Result
-	 */
-	public function check(array $credentials)
-	{
-		// Can't validate without a password.
-		if (empty($credentials['password']) || count($credentials) < 2)
-		{
-			return new Result([
-				'success' => false,
-				'reason'  => lang('Auth.badAttempt'),
-			]);
-		}
+    /**
+     * Checks a user's $credentials to see if they match an
+     * existing user.
+     *
+     * @param array $credentials
+     * @return Result
+     */
+    public function check(array $credentials)
+    {
+        // Can't validate without a password.
+        if (empty($credentials['password']) || count($credentials) < 2) {
+            return new Result([
+                'success' => false,
+                'reason'  => lang('Auth.badAttempt'),
+            ]);
+        }
 
-		// Remove the password from credentials so we can
-		// check afterword.
-		$givenPassword = $credentials['password'] ?? null;
-		unset($credentials['password']);
+        // Remove the password from credentials so we can
+        // check afterword.
+        $givenPassword = $credentials['password'] ?? null;
+        unset($credentials['password']);
 
-		// Find the existing user
-		$user = $this->provider->findByCredentials($credentials);
+        // Find the existing user
+        $user = $this->provider->findByCredentials($credentials);
 
-		if ($user === null)
-		{
-			return new Result([
-				'success' => false,
-				'reason'  => lang('Auth.badAttempt'),
-			]);
-		}
+        if ($user === null) {
+            return new Result([
+                'success' => false,
+                'reason'  => lang('Auth.badAttempt'),
+            ]);
+        }
 
-		// Now, try matching the passwords.
-		$passwords = service('passwords');
+        // Now, try matching the passwords.
+        $passwords = service('passwords');
 
-		if (! $passwords->verify($givenPassword, $user->password_hash))
-		{
-			return new Result([
-				'success' => false,
-				'reason'  => lang('Auth.invalidPassword'),
-			]);
-		}
+        if (! $passwords->verify($givenPassword, $user->password_hash)) {
+            return new Result([
+                'success' => false,
+                'reason'  => lang('Auth.invalidPassword'),
+            ]);
+        }
 
-		// Check to see if the password needs to be rehashed.
-		// This would be due to the hash algorithm or hash
-		// cost changing since the last time that a user
-		// logged in.
-		if ($passwords->needsRehash($user->password_hash))
-		{
-			$user->password_hash = $passwords->hash($givenPassword);
-			$this->provider->save($user);
-		}
+        // Check to see if the password needs to be rehashed.
+        // This would be due to the hash algorithm or hash
+        // cost changing since the last time that a user
+        // logged in.
+        if ($passwords->needsRehash($user->password_hash)) {
+            $user->password_hash = $passwords->hash($givenPassword);
+            $this->provider->save($user);
+        }
 
-		return new Result([
-			'success'   => true,
-			'extraInfo' => $user,
-		]);
-	}
+        return new Result([
+            'success'   => true,
+            'extraInfo' => $user,
+        ]);
+    }
 
-	/**
-	 * Checks if the user is currently logged in.
-	 *
-	 * @return boolean
-	 */
-	public function loggedIn(): bool
-	{
-		if ($this->user instanceof AuthenticatorInterface)
-		{
-			return true;
-		}
+    /**
+     * Checks if the user is currently logged in.
+     */
+    public function loggedIn(): bool
+    {
+        if ($this->user instanceof AuthenticatorInterface) {
+            return true;
+        }
 
-		if ($userId = session($this->config['field']))
-		{
-			$this->user = $this->provider->findById($userId);
+        if ($userId = session($this->config['field'])) {
+            $this->user = $this->provider->findById($userId);
 
-			return $this->user instanceof AuthenticatorInterface;
-		}
+            return $this->user instanceof AuthenticatorInterface;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	/**
-	 * Logs the given user in.
-	 *
-	 * @param AuthenticatorInterface $user
-	 * @param boolean         $remember
-	 *
-	 * @return mixed
-	 */
-	public function login(AuthenticatorInterface $user, bool $remember = false)
-	{
-		$this->user = $user;
+    /**
+     * Logs the given user in.
+     *
+     * @return mixed
+     */
+    public function login(AuthenticatorInterface $user, bool $remember = false)
+    {
+        $this->user = $user;
 
-		// Always record a login attempt
-		$ipAddress = service('request')->getIPAddress();
-		$this->recordLoginAttempt($user->getAuthEmail(), true, $ipAddress, $user->getAuthId() ?? null);
+        // Always record a login attempt
+        $ipAddress = service('request')->getIPAddress();
+        $this->recordLoginAttempt($user->getAuthEmail(), true, $ipAddress, $user->getAuthId() ?? null);
 
-		// Regenerate the session ID to help protect against session fixation
-		if (ENVIRONMENT !== 'testing')
-		{
-			session()->regenerate();
-		}
+        // Regenerate the session ID to help protect against session fixation
+        if (ENVIRONMENT !== 'testing') {
+            session()->regenerate();
+        }
 
-		// Let the session know we're logged in
-		session()->set($this->config['field'], $this->user->id);
+        // Let the session know we're logged in
+        session()->set($this->config['field'], $this->user->id);
 
-		// When logged in, ensure cache control headers are in place
-		service('response')->noCache();
+        // When logged in, ensure cache control headers are in place
+        service('response')->noCache();
 
-		if ($remember && $this->config['allowRemembering'])
-		{
-			$this->rememberUser($this->user->id);
-		}
+        if ($remember && $this->config['allowRemembering']) {
+            $this->rememberUser($this->user->id);
+        }
 
-		// We'll give a 20% chance to need to do a purge since we
-		// don't need to purge THAT often, it's just a maintenance issue.
-		// to keep the table from getting out of control.
-		if (mt_rand(1, 100) <= 20)
-		{
-			$this->rememberModel->purgeOldRememberTokens();
-		}
+        // We'll give a 20% chance to need to do a purge since we
+        // don't need to purge THAT often, it's just a maintenance issue.
+        // to keep the table from getting out of control.
+        if (mt_rand(1, 100) <= 20) {
+            $this->rememberModel->purgeOldRememberTokens();
+        }
 
-		// trigger login event, in case anyone cares
-		Events::trigger('login', $user);
+        // trigger login event, in case anyone cares
+        Events::trigger('login', $user);
 
-		return true;
-	}
+        return true;
+    }
 
-	/**
-	 * Logs a user in based on their ID.
-	 *
-	 * @param integer $userId
-	 * @param boolean $remember
-	 *
-	 * @return mixed
-	 */
-	public function loginById(int $userId, bool $remember = false)
-	{
-		$user = $this->provider->findById($userId);
+    /**
+     * Logs a user in based on their ID.
+     *
+     * @return mixed
+     */
+    public function loginById(int $userId, bool $remember = false)
+    {
+        $user = $this->provider->findById($userId);
 
-		if (empty($user))
-		{
-			throw AuthenticationException::forInvalidUser();
-		}
+        if (empty($user)) {
+            throw AuthenticationException::forInvalidUser();
+        }
 
-		return $this->login($user, $remember);
-	}
+        return $this->login($user, $remember);
+    }
 
-	/**
-	 * Logs the current user out.
-	 *
-	 * @return mixed
-	 */
-	public function logout()
-	{
-		helper('cookie');
+    /**
+     * Logs the current user out.
+     *
+     * @return mixed
+     */
+    public function logout()
+    {
+        helper('cookie');
 
-		// Destroy the session data - but ensure a session is still
-		// available for flash messages, etc.
-		if (isset($_SESSION))
-		{
-			foreach ($_SESSION as $key => $value)
-			{
-				$_SESSION[$key] = null;
-				unset( $_SESSION[$key] );
-			}
-		}
+        // Destroy the session data - but ensure a session is still
+        // available for flash messages, etc.
+        if (isset($_SESSION)) {
+            foreach ($_SESSION as $key => $value) {
+                $_SESSION[$key] = null;
+                unset($_SESSION[$key]);
+            }
+        }
 
-		// Regenerate the session ID for a touch of added safety.
-		session()->regenerate(true);
+        // Regenerate the session ID for a touch of added safety.
+        session()->regenerate(true);
 
-		// Take care of any remember me functionality
-		$this->rememberModel->purgeRememberTokens($this->user->id ?? null);
+        // Take care of any remember me functionality
+        $this->rememberModel->purgeRememberTokens($this->user->id ?? null);
 
-		// trigger logout event
-		Events::trigger('logout', $this->user);
+        // trigger logout event
+        Events::trigger('logout', $this->user);
 
-		$this->user = null;
-	}
+        $this->user = null;
+    }
 
-	/**
-	 * Removes any remember-me tokens, if applicable.
-	 *
-	 * @param integer|null $id ID of user to forget.
-	 *
-	 * @return void
-	 */
-	public function forget(?int $id = null)
-	{
-		if (empty($id))
-		{
-			if (! $this->loggedIn())
-			{
-				return;
-			}
+    /**
+     * Removes any remember-me tokens, if applicable.
+     *
+     * @param integer|null $id ID of user to forget.
+     * @return void
+     */
+    public function forget(?int $id = null)
+    {
+        if (empty($id)) {
+            if (! $this->loggedIn()) {
+                return;
+            }
 
-			$id = $this->user->id;
-		}
+            $id = $this->user->id;
+        }
 
-		$this->rememberModel->purgeRememberTokens($id);
-	}
+        $this->rememberModel->purgeRememberTokens($id);
+    }
 
-	/**
-	 * Returns the current user instance.
-	 *
-	 * @return \Fluent\Auth\Contracts\AuthenticatorInterface|null
-	 */
-	public function getUser()
-	{
-		return $this->user;
-	}
+    /**
+     * Returns the current user instance.
+     *
+     * @return AuthenticatorInterface|null
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
 
-	/**
-	 * Record a login attempt
-	 *
-	 * @param string       $email
-	 * @param boolean      $success
-	 * @param string|null  $ipAddress
-	 * @param integer|null $userID
-	 *
-	 * @return boolean|integer|string
-	 */
-	protected function recordLoginAttempt(string $email, bool $success, string $ipAddress = null, int $userID = null)
-	{
-		return $this->loginModel->insert([
-			'ip_address' => $ipAddress,
-			'email'      => $email,
-			'user_id'    => $userID,
-			'date'       => date('Y-m-d H:i:s'),
-			'success'    => (int)$success,
-		]);
-	}
+    /**
+     * Record a login attempt
+     *
+     * @return boolean|integer|string
+     */
+    protected function recordLoginAttempt(string $email, bool $success, ?string $ipAddress = null, ?int $userID = null)
+    {
+        return $this->loginModel->insert([
+            'ip_address' => $ipAddress,
+            'email'      => $email,
+            'user_id'    => $userID,
+            'date'       => date('Y-m-d H:i:s'),
+            'success'    => (int) $success,
+        ]);
+    }
 
-	/**
-	 * Generates a timing-attack safe remember me token
-	 * and stores the necessary info in the db and a cookie.
-	 *
-	 * @see https://paragonie.com/blog/2015/04/secure-authentication-php-with-long-term-persistence
-	 *
-	 * @param integer $userID
-	 *
-	 * @throws \Exception
-	 */
-	protected function rememberUser(int $userID)
-	{
-		$selector  = bin2hex(random_bytes(12));
-		$validator = bin2hex(random_bytes(20));
-		$expires   = date('Y-m-d H:i:s', time() + $this->config['rememberLength']);
+    /**
+     * Generates a timing-attack safe remember me token
+     * and stores the necessary info in the db and a cookie.
+     *
+     * @see https://paragonie.com/blog/2015/04/secure-authentication-php-with-long-term-persistence
+     *
+     * @throws Exception
+     */
+    protected function rememberUser(int $userID)
+    {
+        $selector  = bin2hex(random_bytes(12));
+        $validator = bin2hex(random_bytes(20));
+        $expires   = date('Y-m-d H:i:s', time() + $this->config['rememberLength']);
 
-		$token = $selector . ':' . $validator;
+        $token = $selector . ':' . $validator;
 
-		// Store it in the database
-		$this->rememberModel->rememberUser($userID, $selector, hash('sha256', $validator), $expires);
+        // Store it in the database
+        $this->rememberModel->rememberUser($userID, $selector, hash('sha256', $validator), $expires);
 
-		// Save it to the user's browser in a cookie.
-		$appConfig = new App();
-		$response  = service('response');
+        // Save it to the user's browser in a cookie.
+        $appConfig = new App();
+        $response  = service('response');
 
-		// Create the cookie
-		$response->setCookie(
-			$this->config['rememberCookieName'],
-			$token,                             // Value
-			$this->config['rememberLength'],    // # Seconds until it expires
-			$appConfig->cookieDomain,
-			$appConfig->cookiePath,
-			$appConfig->cookiePrefix,
-			false,                          // Only send over HTTPS?
-			true                            // Hide from Javascript?
-		);
-	}
+        // Create the cookie
+        $response->setCookie(
+            $this->config['rememberCookieName'],
+            $token, // Value
+            $this->config['rememberLength'], // # Seconds until it expires
+            $appConfig->cookieDomain,
+            $appConfig->cookiePath,
+            $appConfig->cookiePrefix,
+            false, // Only send over HTTPS?
+            true                            // Hide from Javascript?
+        );
+    }
 }

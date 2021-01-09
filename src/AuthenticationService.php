@@ -2,159 +2,92 @@
 
 namespace Fluent\Auth;
 
-use Fluent\Auth\Exceptions\AuthenticationException;
+use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Entities\User;
+use Fluent\Auth\Exceptions\AuthenticationException;
+
+use function property_exists;
 
 class AuthenticationService
 {
+    /** @var AuthenticationFactory|AuthenticationInterface */
+    protected $authenticate;
+
+    protected $authorize;
+
     /**
-	 * @var Authentication
-	 */
-	protected $authenticate;
+     * The handler to use for this request.
+     *
+     * @var string
+     */
+    protected $handler = 'default';
 
-	protected $authorize;
+    /** @var User */
+    protected $user;
 
-	/**
-	 * The handler to use for this request.
-	 *
-	 * @var string
-	 */
-	protected $handler = 'default';
+    /** @var UserProviderInterface */
+    protected $userProvider;
 
-	/**
-	 * @var User
-	 */
-	protected $user;
+    /**
+     * Authentication service constructor.
+     *
+     * @return void
+     */
+    public function __construct(AuthenticationFactory $authenticate)
+    {
+        $this->authenticate = $authenticate->setProvider($this->getProvider());
+    }
 
-	/**
-	 * @var UserProviderInterface
-	 */
-	protected $userProvider;
+    /**
+     * Sets the handler that should be used for this request.
+     *
+     * @return $this
+     */
+    public function withHandler(?string $handler = null)
+    {
+        $this->handler = $handler;
 
-	public function __construct(Authentication $authenticate)
-	{
-		$this->authenticate = $authenticate->setProvider($this->getProvider());
-	}
+        return $this;
+    }
 
-	/**
-	 * Sets the handler that should be used for this request.
-	 *
-	 * @param string|null $handler
-	 */
-	public function withHandler(string $handler = null)
-	{
-		$this->handler = $handler;
+    /**
+     * Difine routes method.
+     */
+    public function routes(?array $config = null)
+    {
+    }
 
-		return $this;
-	}
+    public function authorize($entity, string $permission)
+    {
+    }
 
-	/**
-	 * Returns the current user, if logged in.
-	 *
-	 * @return \Fluent\Auth\Authentication
-	 */
-	public function user()
-	{
-        return $this->authenticate
-            ->factory($this->handler)
-            ->getUser();
-	}
+    public function getProvider()
+    {
+        if ($this->userProvider !== null) {
+            return $this->userProvider;
+        }
 
-	/**
-	 * Returns the current user's id, if logged in.
-	 *
-	 * @return int|null
-	 */
-	public function id()
-	{
-		return $this->authenticate
-		   ->factory($this->handler)
-           ->getUser()
-           ->id ?? null;
-	}
+        $config = config('Auth');
 
-	public function authenticate(array $credentials)
-	{
-		$response = $this->authenticate
-			->factory($this->handler)
-			->attempt($credentials);
+        if (! property_exists($config, 'userProvider')) {
+            throw AuthenticationException::forUnknownUserProvider();
+        }
 
-		if ($response->isOk())
-		{
-			$this->user = $response->extraInfo();
-		}
+        $className          = $config->userProvider;
+        $this->userProvider = new $className();
 
-		return $response;
-	}
+        return $this->userProvider;
+    }
 
-	public function check(array $credentials): bool
-	{
-		return $this->authenticate
-			->factory($this->handler)
-			->check($credentials);
-	}
-
-	public function loggedIn(): bool
-	{
-		return $this->authenticate
-			->factory($this->handler)
-			->loggedIn();
-	}
-
-	public function login(User $user)
-	{
-		return $this->authenticate
-			->factory($this->handler)
-			->login($user);
-	}
-
-	public function loginById(int $userId)
-	{
-		return $this->authenticate
-			->factory($this->handler)
-			->loginById($userId);
-	}
-
-	public function logout()
-	{
-		return $this->authenticate
-			->factory($this->handler)
-			->logout();
-	}
-
-	public function forget()
-	{
-		return $this->authenticate
-			->factory($this->handler)
-			->forget();
-	}
-
-	public function routes(array $config = null)
-	{
-	}
-
-	public function authorize($entity, string $permission)
-	{
-	}
-
-	public function getProvider()
-	{
-		if ($this->userProvider !== null)
-		{
-			return $this->userProvider;
-		}
-
-		$config = config('Auth');
-
-		if (! property_exists($config, 'userProvider'))
-		{
-			throw AuthenticationException::forUnknownUserProvider();
-		}
-
-		$className          = $config->userProvider;
-		$this->userProvider = new $className();
-
-		return $this->userProvider;
-	}
+    /**
+     * Dynamically call the default adapter instance.
+     *
+     * @param string $method
+     * @param array $arguments
+     */
+    public function __call($method, $arguments)
+    {
+        return $this->authenticate->factory($this->handler)->{$method}(...$arguments);
+    }
 }
