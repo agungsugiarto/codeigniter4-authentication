@@ -1,8 +1,9 @@
 <?php
 
-namespace CodeIgniter\Shield\Config;
+namespace Fluent\Auth\Config;
 
 use Config\Services as BaseService;
+use Fluent\Auth\Authentication;
 use Fluent\Auth\AuthenticationService;
 use Fluent\Auth\Passwords;
 
@@ -11,7 +12,7 @@ class Services extends BaseService
     /**
      * The base auth class.
      *
-     * @return Auth
+     * @return AuthenticationService
      */
     public static function auth(bool $getShared = true)
     {
