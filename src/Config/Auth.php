@@ -19,7 +19,7 @@ class Auth extends BaseConfig
      */
     public $authenticators = [
         'session' => Session::class,
-        'tokens'  => AccessTokens::class,
+        'token'   => AccessTokens::class,
     ];
 
     public $authorizers = [

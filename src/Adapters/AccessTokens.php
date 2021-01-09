@@ -2,6 +2,7 @@
 
 namespace Fluent\Auth\Adapters;
 
+use CodeIgniter\Events\Events;
 use Fluent\Auth\Config\Auth;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
@@ -55,6 +56,12 @@ class AccessTokens implements AuthenticationInterface
         if (! $result->isOK()) {
             // Always record a login attempt, whether success or not.
             $this->loginModel->recordLoginAttempt('token: ' . ($credentials['token'] ?? ''), false, $ipAddress, null);
+
+            $this->user = null;
+
+            // Fire an event on failure so devs have the chance to
+            // let them know someone attempted to login to their account
+            Events::trigger('failedLoginAttempt', $credentials);
 
             return $result;
         }

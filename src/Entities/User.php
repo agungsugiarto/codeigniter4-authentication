@@ -3,6 +3,7 @@
 namespace Fluent\Auth\Entities;
 
 use CodeIgniter\Entity;
+use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\Traits\Authenticatable;
 use Fluent\Auth\Traits\HasAccessTokens;
@@ -16,4 +17,16 @@ class User extends Entity implements AuthenticatorInterface
         'active'           => 'boolean',
         'force_pass_reset' => 'boolean',
     ];
+
+    /**
+     * Fill set password hash.
+     *
+     * @return $this
+     */
+    public function setPasswordHash(string $password)
+    {
+        $this->attributes['password_hash'] = Services::passwords()->hash($password);
+
+        return $this;
+    }
 }
