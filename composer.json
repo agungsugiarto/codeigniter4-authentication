@@ -13,11 +13,12 @@
     ],
     "require": {
         "codeigniter4/framework": "^4.0",
-        "php": "^7.2"
+        "php": "^7.2",
+        "fakerphp/faker": "^1.13"
     },
     "autoload": {
         "psr-4": {
-            "Fluent\\Authentication\\": "src"
+            "Fluent\\Auth\\": "src"
         }
     },
     "require-dev": {

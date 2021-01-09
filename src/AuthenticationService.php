@@ -1,153 +1,160 @@
 <?php
 
-namespace Fluent\Authentication;
+namespace Fluent\Auth;
 
-use Fluent\Authentication\Contracts\{AuthenticationInterface, StorageInterface, AdapterInterface};
-use Fluent\Authentication\Exceptions\RuntimeException;
-use Fluent\Authentication\Storages\SessionStorage;
+use Fluent\Auth\Exceptions\AuthenticationException;
+use Fluent\Auth\Contracts\UserProviderInterface;
+use Fluent\Auth\Entities\User;
 
-use function is_null;
-
-class AuthenticationService implements AuthenticationInterface
+class AuthenticationService
 {
     /**
-     * Persistent storage handler.
-     *
-     * @var Contracts\StorageInterface
-     */
-    protected $storage;
+	 * @var Authentication
+	 */
+	protected $authenticate;
 
-    /**
-     * Authentication adapter.
-     *
-     * @var Contracts\AdapterInterface
-     */
-    protected $adapter;
+	protected $authorize;
 
-    /**
-     * The constructor Authentication Service.
-     *
-     * @param null|Contracts\StorageInterface $storage
-     * @param null|Contracts\AdapterInterface $adapter
-     */
-    public function __construct(?StorageInterface $storage = null, ?AdapterInterface $adapter = null)
-    {
-        if ($storage !== null) {
-            $this->setStorage($storage);
-        }
+	/**
+	 * The handler to use for this request.
+	 *
+	 * @var string
+	 */
+	protected $handler = 'default';
 
-        if ($adapter !== null) {
-            $this->setAdapter($adapter);
-        }
-    }
+	/**
+	 * @var User
+	 */
+	protected $user;
 
-    /**
-     * Set the authentication $adapter
-     *
-     * The adapter does not have a default if the storage adapter has not been set.
-     *
-     * @param Contracts\AdapterInterface $adapter
-     * @return $this Provides a fluent interface
-     */
-    public function setAdapter(AdapterInterface $adapter)
-    {
-        $this->adapter = $adapter;
+	/**
+	 * @var UserProviderInterface
+	 */
+	protected $userProvider;
 
-        return $this;
-    }
+	public function __construct(Authentication $authenticate)
+	{
+		$this->authenticate = $authenticate->setProvider($this->getProvider());
+	}
 
-    /**
-     * Returns the authentication adapter.
-     *
-     * The adapter does not have a default if the storage adapter has not been set.
-     *
-     * @return null|Contracts\AdapterInterface
-     */
-    public function getAdapter()
-    {
-        return $this->adapter;
-    }
+	/**
+	 * Sets the handler that should be used for this request.
+	 *
+	 * @param string|null $handler
+	 */
+	public function withHandler(string $handler = null)
+	{
+		$this->handler = $handler;
 
-    /**
-     * Set the persistent sorage handler.
-     *
-     * @param Contracts\StorageInterface $storage
-     * @return $this Provides a fluent interface
-     */
-    public function setStorage(StorageInterface $storage)
-    {
-        $this->storage = $storage;
+		return $this;
+	}
 
-        return $this;
-    }
+	/**
+	 * Returns the current user, if logged in.
+	 *
+	 * @return \Fluent\Auth\Authentication
+	 */
+	public function user()
+	{
+        return $this->authenticate
+            ->factory($this->handler)
+            ->getUser();
+	}
 
-    /**
-     * Returns the persistent storage handler.
-     *
-     * @return Contracts\StorageInterface
-     */
-    public function getStorage()
-    {
-        if (is_null($this->storage)) {
-            $this->setStorage(new SessionStorage());
-        }
+	/**
+	 * Returns the current user's id, if logged in.
+	 *
+	 * @return int|null
+	 */
+	public function id()
+	{
+		return $this->authenticate
+		   ->factory($this->handler)
+           ->getUser()
+           ->id ?? null;
+	}
 
-        return $this->storage;
-    }
-    
-    /**
-     * {@inheritdoc}
-     */
-    public function authenticate(?AdapterInterface $adapter = null)
-    {
-        if (! $adapter) {
-            if (! $adapter = $this->getAdapter()) {
-                throw new RuntimeException(
-                    'An adapter must be set or passed prior to calling authenticate()'
-                );
-            }
-        }
+	public function authenticate(array $credentials)
+	{
+		$response = $this->authenticate
+			->factory($this->handler)
+			->attempt($credentials);
 
-        $result = $adapter->attempt();
+		if ($response->isOk())
+		{
+			$this->user = $response->extraInfo();
+		}
 
-        if ($this->hasIdentity()) {
-            $this->cleanIdentity();
-        }
+		return $response;
+	}
 
-        if ($result->isValid()) {
-            $this->getStorage()->write($result->getIdentity());
-        }
+	public function check(array $credentials): bool
+	{
+		return $this->authenticate
+			->factory($this->handler)
+			->check($credentials);
+	}
 
-        return $result;
-    }
+	public function loggedIn(): bool
+	{
+		return $this->authenticate
+			->factory($this->handler)
+			->loggedIn();
+	}
 
-    /**
-     * {@inheritdoc}
-     */
-    public function hasIdentity()
-    {
-        return ! $this->getStorage()->isEmpty();
-    }
+	public function login(User $user)
+	{
+		return $this->authenticate
+			->factory($this->handler)
+			->login($user);
+	}
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getIdentity()
-    {
-        $storage = $this->getStorage();
+	public function loginById(int $userId)
+	{
+		return $this->authenticate
+			->factory($this->handler)
+			->loginById($userId);
+	}
 
-        if ($storage->isEmpty()) {
-            return;
-        }
+	public function logout()
+	{
+		return $this->authenticate
+			->factory($this->handler)
+			->logout();
+	}
 
-        return $storage->read();
-    }
+	public function forget()
+	{
+		return $this->authenticate
+			->factory($this->handler)
+			->forget();
+	}
 
-    /**
-     * {@inheritdoc}
-     */
-    public function cleanIdentity()
-    {
-        return $this->getStorage()->clear();
-    }
+	public function routes(array $config = null)
+	{
+	}
+
+	public function authorize($entity, string $permission)
+	{
+	}
+
+	public function getProvider()
+	{
+		if ($this->userProvider !== null)
+		{
+			return $this->userProvider;
+		}
+
+		$config = config('Auth');
+
+		if (! property_exists($config, 'userProvider'))
+		{
+			throw AuthenticationException::forUnknownUserProvider();
+		}
+
+		$className          = $config->userProvider;
+		$this->userProvider = new $className();
+
+		return $this->userProvider;
+	}
 }

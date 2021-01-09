@@ -1,34 +1,65 @@
 <?php
 
-namespace Fluent\Authentication\Contracts;
-
-use Fluent\Authentication\Result;
+namespace Fluent\Auth\Contracts;
 
 interface AuthenticationInterface
 {
     /**
-     * Authentication and provides an authentication result.
+     * Attempts to authenticate a user with the given $credentials.
+     * Logs the user in with a successful check.
      *
-     * @return Result
+     * @param array   $credentials
+     * @return mixed
+     * @throws AuthenticationException
      */
-    public function authenticate();
+    public function attempt(array $credentials, bool $remember = false);
 
     /**
-     * Return true if and only if an identity is avaliable.
+     * Checks a user's $credentials to see if they match an existing user.
      *
-     * @return bool
+     * @param array $credentials
+     * @return mixed
      */
-    public function hasIdentity();
+    public function check(array $credentials);
 
     /**
-     * Return the authenticated identity or null if no identity i avaliable.
-     *
-     * @return mixed|null
+     * Checks if the user is currently logged in.
      */
-    public function getIdentity();
+    public function loggedIn(): bool;
 
     /**
-     * Clear the identity.
+     * Logs the given user in.
+     *
+     * @param Authenticatable $user
+     * @return mixed
      */
-    public function cleanIdentity();
+    public function login(AuthenticatorInterface $user, bool $remember = false);
+
+    /**
+     * Logs a user in based on their ID.
+     *
+     * @return mixed
+     */
+    public function loginById(int $userId, bool $remember = false);
+
+    /**
+     * Logs the current user out.
+     *
+     * @return mixed
+     */
+    public function logout();
+
+    /**
+     * Removes any remember-me tokens, if applicable.
+     *
+     * @return mixed
+     */
+    public function forget(?int $id);
+
+    /**
+     * Returns the currently logged in user.
+     *
+     * @return Authenticatable|null
+     */
+    public function getUser();
 }

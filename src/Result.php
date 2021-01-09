@@ -1,114 +1,64 @@
 <?php
 
-namespace Fluent\Authentication;
+namespace Fluent\Auth;
+
+use function property_exists;
 
 class Result
 {
-    /**
-     * General Failure
-     */
-    const FAILURE = 0;
+    /** @var boolean */
+    protected $success = false;
 
     /**
-     * Failure due to identity not being found.
-     */
-    const FAILURE_IDENTITY_NOT_FOUND = -1;
-
-    /**
-     * Failure due to identity being ambiguous.
-     */
-    const FAILURE_IDENTITY_AMBIGUOUS = -2;
-
-    /**
-     * Failure due to invalid credential being supplied.
-     */
-    const FAILURE_CREDENTIAL_INVALID = -3;
-
-    /**
-     * Failure due to uncategorized reasons.
-     */
-    const FAILURE_UNCATEGORIZED = -4;
-
-    /**
-     * Authentication success.
-     */
-    const SUCCESS = 1;
-
-    /**
-     * Authentication result code
+     * Provides a simple explanation of
+     * the error that happened.
+     * Typically a single sentence.
      *
-     * @var int
+     * @var string
      */
-    protected $code;
+    protected $reason;
 
     /**
-     * The identity used in the authentication attempt
+     * Extra information available to describe
+     * the error. No particular format is
+     * specified.
      *
      * @var mixed
      */
-    protected $identity;
+    protected $extraInfo;
 
-    /**
-     * An array of string reasons why the authentication attempt was unsuccessful
-     *
-     * If authentication was successful, this should be an empty array.
-     *
-     * @var array
-     */
-    protected $messages;
-
-    /**
-     * Sets the result code, identity, and failure messages
-     *
-     * @param  int   $code
-     * @param  mixed $identity
-     */
-    public function __construct($code, $identity, array $messages = [])
+    public function __construct(array $details)
     {
-        $this->code     = (int) $code;
-        $this->identity = $identity;
-        $this->messages = $messages;
+        foreach ($details as $key => $value) {
+            if (property_exists($this, $key)) {
+                $this->$key = $value;
+            }
+        }
     }
 
     /**
-     * Returns whether the result represents a successful authentication attempt
+     * Was the result a success?
      *
-     * @return bool
+     * @return boolean
      */
-    public function isValid()
+    public function isOK()
     {
-        return $this->code > 0;
+        return $this->success;
     }
 
     /**
-     * getCode() - Get the result code for this authentication attempt
-     *
-     * @return int
+     * @return string
      */
-    public function getCode()
+    public function reason()
     {
-        return $this->code;
+        return $this->reason;
     }
 
     /**
-     * Returns the identity used in the authentication attempt
-     *
-     * @return mixed
+     * @return string
      */
-    public function getIdentity()
+    public function extraInfo()
     {
-        return $this->identity;
-    }
-
-    /**
-     * Returns an array of string reasons why the authentication attempt was unsuccessful
-     *
-     * If authentication was successful, this method returns an empty array.
-     *
-     * @return array
-     */
-    public function getMessages()
-    {
-        return $this->messages;
+        return $this->extraInfo;
     }
 }
