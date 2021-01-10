@@ -9,7 +9,6 @@ use Fluent\Auth\Exceptions\AuthenticationException;
 
 use function array_key_exists;
 use function key;
-use function property_exists;
 
 class AuthenticationFactory
 {

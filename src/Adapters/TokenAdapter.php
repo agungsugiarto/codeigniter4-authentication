@@ -161,7 +161,7 @@ class TokenAdapter implements AuthenticationInterface
     {
         // trigger logout event
         Events::trigger('logout', $this->user);
-        
+
         $this->user = null;
     }
 

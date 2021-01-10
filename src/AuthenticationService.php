@@ -87,7 +87,7 @@ class AuthenticationService
 
     /**
      * Get the name of the class that handles user persistence.
-     * 
+     *
      * @return UserProviderInterface
      */
     public function getProvider()
