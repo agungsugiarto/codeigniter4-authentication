@@ -4,11 +4,13 @@ namespace Fluent\Auth\Entities;
 
 use CodeIgniter\Entity;
 use Fluent\Auth\Config\Services;
+use Fluent\Auth\Contracts\AuthenticatableInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
+use Fluent\Auth\Contracts\HasAccessTokensInterface;
 use Fluent\Auth\Traits\Authenticatable;
 use Fluent\Auth\Traits\HasAccessTokens;
 
-class User extends Entity implements AuthenticatorInterface
+class User extends Entity implements AuthenticatorInterface, AuthenticatableInterface, HasAccessTokensInterface
 {
     use Authenticatable;
     use HasAccessTokens;

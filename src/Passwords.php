@@ -19,7 +19,7 @@ class Passwords
     /** @var Auth */
     protected $config;
 
-    public function __construct(Auth $config)
+    public function __construct($config)
     {
         $this->config = $config;
     }

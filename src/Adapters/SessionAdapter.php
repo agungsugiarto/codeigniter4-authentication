@@ -3,10 +3,13 @@
 namespace Fluent\Auth\Adapters;
 
 use CodeIgniter\Events\Events;
+use CodeIgniter\HTTP\IncomingRequest;
+use CodeIgniter\HTTP\Response;
 use Config\App;
-use Exception;
+use Fluent\Auth\Config\Auth;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
+use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Exceptions\AuthenticationException;
 use Fluent\Auth\Models\LoginModel;
 use Fluent\Auth\Models\RememberModel;
@@ -16,18 +19,17 @@ use function bin2hex;
 use function count;
 use function date;
 use function hash;
+use function is_null;
 use function mt_rand;
 use function random_bytes;
 use function time;
 
-class Session implements AuthenticationInterface
+class SessionAdapter implements AuthenticationInterface
 {
-    /** @var array */
+    /** @var Auth */
     protected $config;
 
-    /**
-     * The persistence engine
-     */
+    /** @var UserProviderInterface */
     protected $provider;
 
     /** @var AuthenticatorInterface */
@@ -39,24 +41,31 @@ class Session implements AuthenticationInterface
     /** @var RememberModel */
     protected $rememberModel;
 
-    public function __construct(array $config, $provider)
+    /** @var IncomingRequest */
+    protected $request;
+
+    /** @var Response */
+    protected $response;
+
+    /**
+     * Session adapter constructor.
+     */
+    public function __construct($config, UserProviderInterface $provider)
     {
         $this->config        = $config;
         $this->provider      = $provider;
-        $this->loginModel    = model(LoginModel::class);
-        $this->rememberModel = model(RememberModel::class);
+        $this->loginModel    = new LoginModel();
+        $this->rememberModel = new RememberModel();
+        $this->request       = service('request');
+        $this->response      = service('response');
     }
 
     /**
-     * Attempts to authenticate a user with the given $credentials.
-     * Logs the user in with a successful check.
-     *
-     * @param array   $credentials
-     * @return Result
+     * {@inheritdoc}
      */
-    public function attempt(array $credentials, bool $remember = false)
+    public function attempt($credentials, bool $remember = false)
     {
-        $ipAddress = service('request')->getIPAddress();
+        $ipAddress = $this->request->getIPAddress();
         $result    = $this->check($credentials);
 
         if (! $result->isOK()) {
@@ -67,7 +76,7 @@ class Session implements AuthenticationInterface
 
             // Fire an event on failure so devs have the chance to
             // let them know someone attempted to login to their account
-            Events::trigger('failedLoginAttempt', $credentials);
+            Events::trigger('failed_login_attempt', $credentials);
 
             return $result;
         }
@@ -80,11 +89,7 @@ class Session implements AuthenticationInterface
     }
 
     /**
-     * Checks a user's $credentials to see if they match an
-     * existing user.
-     *
-     * @param array $credentials
-     * @return Result
+     * {@inheritdoc}
      */
     public function check(array $credentials)
     {
@@ -104,7 +109,7 @@ class Session implements AuthenticationInterface
         // Find the existing user
         $user = $this->provider->findByCredentials($credentials);
 
-        if ($user === null) {
+        if (is_null($user)) {
             return new Result([
                 'success' => false,
                 'reason'  => lang('Auth.badAttempt'),
@@ -137,7 +142,7 @@ class Session implements AuthenticationInterface
     }
 
     /**
-     * Checks if the user is currently logged in.
+     * {@inheritdoc}
      */
     public function loggedIn(): bool
     {
@@ -145,7 +150,7 @@ class Session implements AuthenticationInterface
             return true;
         }
 
-        if ($userId = session($this->config['field'])) {
+        if ($userId = session($this->config->sessionConfig['field'])) {
             $this->user = $this->provider->findById($userId);
 
             return $this->user instanceof AuthenticatorInterface;
@@ -155,16 +160,14 @@ class Session implements AuthenticationInterface
     }
 
     /**
-     * Logs the given user in.
-     *
-     * @return mixed
+     * {@inheritdoc}
      */
     public function login(AuthenticatorInterface $user, bool $remember = false)
     {
         $this->user = $user;
 
         // Always record a login attempt
-        $ipAddress = service('request')->getIPAddress();
+        $ipAddress = $this->request->getIPAddress();
         $this->recordLoginAttempt($user->getAuthEmail(), true, $ipAddress, $user->getAuthId() ?? null);
 
         // Regenerate the session ID to help protect against session fixation
@@ -173,12 +176,12 @@ class Session implements AuthenticationInterface
         }
 
         // Let the session know we're logged in
-        session()->set($this->config['field'], $this->user->id);
+        session()->set($this->config->sessionConfig['field'], $this->user->id);
 
         // When logged in, ensure cache control headers are in place
         service('response')->noCache();
 
-        if ($remember && $this->config['allowRemembering']) {
+        if ($remember && $this->config->sessionConfig['allowRemembering']) {
             $this->rememberUser($this->user->id);
         }
 
@@ -196,9 +199,7 @@ class Session implements AuthenticationInterface
     }
 
     /**
-     * Logs a user in based on their ID.
-     *
-     * @return mixed
+     * {@inheritdoc}
      */
     public function loginById(int $userId, bool $remember = false)
     {
@@ -212,9 +213,7 @@ class Session implements AuthenticationInterface
     }
 
     /**
-     * Logs the current user out.
-     *
-     * @return mixed
+     * {@inheritdoc}
      */
     public function logout()
     {
@@ -242,12 +241,9 @@ class Session implements AuthenticationInterface
     }
 
     /**
-     * Removes any remember-me tokens, if applicable.
-     *
-     * @param integer|null $id ID of user to forget.
-     * @return void
+     * {@inheritdoc}
      */
-    public function forget(?int $id = null)
+    public function forget(?int $id)
     {
         if (empty($id)) {
             if (! $this->loggedIn()) {
@@ -261,9 +257,7 @@ class Session implements AuthenticationInterface
     }
 
     /**
-     * Returns the current user instance.
-     *
-     * @return AuthenticatorInterface|null
+     * {@inheritdoc}
      */
     public function getUser()
     {
@@ -271,7 +265,7 @@ class Session implements AuthenticationInterface
     }
 
     /**
-     * Record a login attempt
+     * Record a login attempt.
      *
      * @return boolean|integer|string
      */
@@ -298,7 +292,7 @@ class Session implements AuthenticationInterface
     {
         $selector  = bin2hex(random_bytes(12));
         $validator = bin2hex(random_bytes(20));
-        $expires   = date('Y-m-d H:i:s', time() + $this->config['rememberLength']);
+        $expires   = date('Y-m-d H:i:s', time() + $this->config->sessionConfig['rememberLength']);
 
         $token = $selector . ':' . $validator;
 
@@ -307,18 +301,17 @@ class Session implements AuthenticationInterface
 
         // Save it to the user's browser in a cookie.
         $appConfig = new App();
-        $response  = service('response');
 
         // Create the cookie
-        $response->setCookie(
-            $this->config['rememberCookieName'],
+        $this->response->setCookie(
+            $this->config->sessionConfig['rememberCookieName'],
             $token, // Value
-            $this->config['rememberLength'], // # Seconds until it expires
+            $this->config->sessionConfig['rememberLength'], // # Seconds until it expires
             $appConfig->cookieDomain,
             $appConfig->cookiePath,
             $appConfig->cookiePrefix,
             false, // Only send over HTTPS?
-            true                            // Hide from Javascript?
+            true // Hide from Javascript?
         );
     }
 }

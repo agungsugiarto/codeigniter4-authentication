@@ -3,8 +3,8 @@
 namespace Fluent\Auth\Config;
 
 use CodeIgniter\Config\BaseConfig;
-use Fluent\Auth\Adapters\AccessTokens;
-use Fluent\Auth\Adapters\Session;
+use Fluent\Auth\Adapters\SessionAdapter;
+use Fluent\Auth\Adapters\TokenAdapter;
 use Fluent\Auth\Models\UserModel;
 
 use const PASSWORD_DEFAULT;
@@ -12,18 +12,14 @@ use const PASSWORD_DEFAULT;
 class Auth extends BaseConfig
 {
     /**
-     * The available authentication systems, listed
-     * with alias and class name. These can be referenced
-     * by alias in the auth helper:
+     * The available authentication systems, list with alias and class name.
+     * Default adapter is using first key array of authenticators.
+     * These can be referenced by alias in the auth helper:
      *      auth('api')->attempt($credentials);
      */
     public $authenticators = [
-        'session' => Session::class,
-        'token'   => AccessTokens::class,
-    ];
-
-    public $authorizers = [
-        'policy' => '\Fluent\Auth\Authorizers\Policy',
+        'session' => SessionAdapter::class,
+        'token'   => TokenAdapter::class,
     ];
 
     /**
@@ -33,6 +29,9 @@ class Auth extends BaseConfig
      */
     public $userProvider = UserModel::class;
 
+    /**
+     * Session config.
+     */
     public $sessionConfig = [
         'field'              => 'logged_in',
         'allowRemembering'   => true,
@@ -67,20 +66,22 @@ class Auth extends BaseConfig
      * and the power of your hardware, you might want to increase the
      * cost. This makes the hashing process takes longer.
      */
-    public $hashMemoryCost = 2048;  // PASSWORD_ARGON2_DEFAULT_MEMORY_COST;
-    public $hashTimeCost   = 4;       // PASSWORD_ARGON2_DEFAULT_TIME_COST;
-    public $hashThreads    = 4;        // PASSWORD_ARGON2_DEFAULT_THREADS;
+    public $hashMemoryCost = 2048; // PASSWORD_ARGON2_DEFAULT_MEMORY_COST;
+    public $hashTimeCost   = 4;    // PASSWORD_ARGON2_DEFAULT_TIME_COST;
+    public $hashThreads    = 4;    // PASSWORD_ARGON2_DEFAULT_THREADS;
 
-    //--------------------------------------------------------------------
-    // Password Hashing Cost
-    //--------------------------------------------------------------------
-    // The BCRYPT method of encryption allows you to define the "cost"
-    // or number of iterations made, whenever a password hash is created.
-    // This defaults to a value of 10 which is an acceptable number.
-    // However, depending on the security needs of your application
-    // and the power of your hardware, you might want to increase the
-    // cost. This makes the hashing process takes longer.
-    //
-    // Valid range is between 4 - 31.
+    /**
+     * --------------------------------------------------------------------
+     * Password Hashing Cost
+     * --------------------------------------------------------------------
+     * The BCRYPT method of encryption allows you to define the "cost"
+     * or number of iterations made, whenever a password hash is created.
+     * This defaults to a value of 10 which is an acceptable number.
+     * However, depending on the security needs of your application
+     * and the power of your hardware, you might want to increase the
+     * cost. This makes the hashing process takes longer.
+     *
+     * Valid range is between 4 - 31.
+     */
     public $hashCost = 10;
 }

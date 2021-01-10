@@ -12,7 +12,7 @@ if (! defined('auth')) {
      *
      * @return AuthenticationService|AuthenticationInterface
      */
-    function auth(?string $authenticator = null)
+    function auth(?string $authenticator = 'default')
     {
         return Services::auth()->withHandler($authenticator);
     }

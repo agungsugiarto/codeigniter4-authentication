@@ -2,10 +2,13 @@
 
 namespace Fluent\Auth\Adapters;
 
+use CodeIgniter\Config\Services;
 use CodeIgniter\Events\Events;
+use CodeIgniter\HTTP\IncomingRequest;
 use Fluent\Auth\Config\Auth;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
+use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Exceptions\AuthenticationException;
 use Fluent\Auth\Models\AccessTokenModel;
 use Fluent\Auth\Models\LoginModel;
@@ -13,18 +16,17 @@ use Fluent\Auth\Result;
 
 use function array_key_exists;
 use function hash;
+use function is_null;
 use function strpos;
 use function substr;
 use function trim;
 
-class AccessTokens implements AuthenticationInterface
+class TokenAdapter implements AuthenticationInterface
 {
-    /** @var array */
+    /** @var Auth */
     protected $config;
 
-    /**
-     * The persistence engine
-     */
+    /** @var UserProviderInterface */
     protected $provider;
 
     /** @var AuthenticatorInterface */
@@ -33,24 +35,26 @@ class AccessTokens implements AuthenticationInterface
     /** @var LoginModel */
     protected $loginModel;
 
-    public function __construct(Auth $config, $provider)
+    /** @var IncomingRequest */
+    protected $request;
+
+    /**
+     * Token adapter constructor.
+     */
+    public function __construct($config, UserProviderInterface $provider)
     {
         $this->config     = $config;
         $this->provider   = $provider;
-        $this->loginModel = model(LoginModel::class);
+        $this->loginModel = new LoginModel();
+        $this->request    = Services::request();
     }
 
     /**
-     * Attempts to authenticate a user with the given $credentials.
-     * Logs the user in with a successful check.
-     *
-     * @param array   $credentials
-     * @return mixed
-     * @throws AuthenticationException
+     * {@inheritdoc}
      */
     public function attempt(array $credentials, bool $remember = false)
     {
-        $ipAddress = service('request')->getIPAddress();
+        $ipAddress = $this->request->getIPAddress();
         $result    = $this->check($credentials);
 
         if (! $result->isOK()) {
@@ -61,7 +65,7 @@ class AccessTokens implements AuthenticationInterface
 
             // Fire an event on failure so devs have the chance to
             // let them know someone attempted to login to their account
-            Events::trigger('failedLoginAttempt', $credentials);
+            Events::trigger('failed_login_attempt', $credentials);
 
             return $result;
         }
@@ -80,21 +84,14 @@ class AccessTokens implements AuthenticationInterface
     }
 
     /**
-     * Checks a user's $credentials to see if they match an
-     * existing user.
-     *
-     * In this case, $credentials has only a single valid value: token,
-     * which is the plain text token to return.
-     *
-     * @param array $credentials
-     * @return Result
+     * {@inheritdoc}
      */
     public function check(array $credentials)
     {
         if (! array_key_exists('token', $credentials) || empty($credentials['token'])) {
             return new Result([
                 'success' => false,
-                'reason'  => lang('Auth.noToken'),
+                'reason'  => lang('auth.noToken'),
             ]);
         }
 
@@ -102,13 +99,13 @@ class AccessTokens implements AuthenticationInterface
             $credentials['token'] = trim(substr($credentials['token'], 6));
         }
 
-        $tokens = model(AccessTokenModel::class);
+        $tokens = new AccessTokenModel();
         $token  = $tokens->where('token', hash('sha256', $credentials['token']))->first();
 
-        if ($token === null) {
+        if (is_null($token)) {
             return new Result([
                 'success' => false,
-                'reason'  => lang('Auth.badToken'),
+                'reason'  => lang('auth.badToken'),
             ]);
         }
 
@@ -119,10 +116,7 @@ class AccessTokens implements AuthenticationInterface
     }
 
     /**
-     * Checks if the user is currently logged in.
-     * Since AccessToken usage is inherently stateless,
-     * returns simply whether a user has been
-     * authenticated or not.
+     * {@inheritdoc}
      */
     public function loggedIn(): bool
     {
@@ -130,28 +124,26 @@ class AccessTokens implements AuthenticationInterface
     }
 
     /**
-     * Logs the given user in by saving them to the class.
-     * Since AccessTokens are stateless, $remember has no functionality.
-     *
-     * @return mixed
+     * {@inheritdoc}
      */
     public function login(AuthenticatorInterface $user, bool $remember = false)
     {
         $this->user = $user;
 
+        // trigger login event, in case anyone cares
+        Events::trigger('login', $user);
+
         return $this;
     }
 
     /**
-     * Logs a user in based on their ID.
-     *
-     * @return mixed
+     * {@inheritdoc}
      */
     public function loginById(int $userId, bool $remember = false)
     {
         $user = $this->provider->findById($userId);
 
-        if (empty($user)) {
+        if (is_null($user)) {
             throw AuthenticationException::forInvalidUser();
         }
 
@@ -163,19 +155,18 @@ class AccessTokens implements AuthenticationInterface
     }
 
     /**
-     * Logs the current user out.
-     *
-     * @return mixed
+     * {@inheritdoc}
      */
     public function logout()
     {
+        // trigger logout event
+        Events::trigger('logout', $this->user);
+        
         $this->user = null;
     }
 
     /**
-     * Removes any remember-me tokens, if applicable.
-     *
-     * @return mixed
+     * {@inheritdoc}
      */
     public function forget(?int $id)
     {
@@ -183,9 +174,7 @@ class AccessTokens implements AuthenticationInterface
     }
 
     /**
-     * Returns the currently logged in user.
-     *
-     * @return AuthenticatorInterface|null
+     * {@inheritdoc}
      */
     public function getUser()
     {
@@ -194,11 +183,7 @@ class AccessTokens implements AuthenticationInterface
 
     public function getBearerToken()
     {
-        $request = service('request');
-
-        $header = $request->getHeaderLine('Authorization');
-
-        if (empty($header)) {
+        if (empty($header = $this->request->getHeaderLine('Authorization'))) {
             return null;
         }
 

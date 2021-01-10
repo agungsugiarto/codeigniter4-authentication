@@ -20,7 +20,7 @@ class Services extends BaseService
         if ($getShared) {
             return self::getSharedInstance('auth');
         }
-
+        
         return new AuthenticationService(new AuthenticationFactory(config('Auth')));
     }
 

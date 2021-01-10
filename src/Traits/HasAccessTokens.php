@@ -20,9 +20,9 @@ trait HasAccessTokens
     /**
      * Generates a new personal access token for this user.
      *
-     * @param array  $scopes
+     * @param array $scopes
      */
-    public function generateAccessToken(string $name, array $scopes = ['*'])
+    public function generateAccessToken(string $name, array $scopes = ['*']): array
     {
         $tokens = model(AccessTokenModel::class);
         helper('text');
@@ -44,6 +44,8 @@ trait HasAccessTokens
     /**
      * Given the token, will retrieve the token to
      * verify it exists, then delete it.
+     *
+     * @return mixed
      */
     public function revokeAccessToken(string $token)
     {
@@ -56,6 +58,8 @@ trait HasAccessTokens
 
     /**
      * Revokes all access tokens for this user.
+     *
+     * @return mixed
      */
     public function revokeAllAccessTokens()
     {
@@ -152,6 +156,7 @@ trait HasAccessTokens
     /**
      * Sets the current active token for this user.
      *
+     * @param AccessToken|null
      * @return $this
      */
     public function withAccessToken(?AccessToken $accessToken)

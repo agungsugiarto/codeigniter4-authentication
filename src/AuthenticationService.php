@@ -3,6 +3,7 @@
 namespace Fluent\Auth;
 
 use Fluent\Auth\Contracts\AuthenticationInterface;
+use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Entities\User;
 use Fluent\Auth\Exceptions\AuthenticationException;
@@ -44,7 +45,7 @@ class AuthenticationService
      *
      * @return $this
      */
-    public function withHandler(?string $handler = null)
+    public function withHandler(?string $handler = 'default')
     {
         $this->handler = $handler;
 
@@ -52,16 +53,43 @@ class AuthenticationService
     }
 
     /**
+     * Returns the currently logged in user.
+     *
+     * @return AuthenticatorInterface|null
+     */
+    public function user()
+    {
+        return $this->getUser();
+    }
+
+    /**
+     * Returns the currently logged in user id.
+     *
+     * @return AuthenticatorInterface|null
+     */
+    public function id()
+    {
+        return $this->getUser()->id;
+    }
+
+    /**
      * Difine routes method.
      */
     public function routes(?array $config = null)
     {
+        // TODO: difine route
     }
 
     public function authorize($entity, string $permission)
     {
+        // TODO: authorize policy
     }
 
+    /**
+     * Get the name of the class that handles user persistence.
+     * 
+     * @return UserProviderInterface
+     */
     public function getProvider()
     {
         if ($this->userProvider !== null) {

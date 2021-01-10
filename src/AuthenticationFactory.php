@@ -2,7 +2,7 @@
 
 namespace Fluent\Auth;
 
-use Fluent\Auth\Config\Auth as AuthConfig;
+use Fluent\Auth\Config\Auth;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Exceptions\AuthenticationException;
@@ -24,10 +24,10 @@ class AuthenticationFactory
     /** @var UserProviderInterface */
     protected $userProvider;
 
-    /** @var AuthConfig */
+    /** @var Auth */
     protected $config;
 
-    public function __construct(AuthConfig $config)
+    public function __construct($config)
     {
         $this->config = $config;
     }
@@ -61,12 +61,7 @@ class AuthenticationFactory
 
         $className = $this->config->authenticators[$handler];
 
-        $property    = "{$handler}Config";
-        $localConfig = property_exists($this->config, $property)
-            ? $this->config->$property
-            : $this->config;
-
-        $this->instances[$handler] = new $className($localConfig, $this->userProvider);
+        $this->instances[$handler] = new $className($this->config, $this->userProvider);
 
         return $this->instances[$handler];
     }
