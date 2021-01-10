@@ -21,18 +21,19 @@ trait HasAccessTokens
      * Generates a new personal access token for this user.
      *
      * @param array $scopes
+     * @return object
      */
-    public function generateAccessToken(string $name, array $scopes = ['*']): array
+    public function generateAccessToken(string $name, array $scopes = ['*'])
     {
         $tokens = model(AccessTokenModel::class);
         helper('text');
 
-        $tokens->insert([
+        $tokens->insert(new AccessToken([
             'user_id' => $this->id,
             'name'    => $name,
             'token'   => hash('sha256', $rawToken = random_string('crypto', 64)),
             'scopes'  => $scopes,
-        ]);
+        ]));
 
         $token = $tokens->find($tokens->insertId());
 

@@ -27,7 +27,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Fluent\\Authentication\\Tests\\": "test/"
+            "Fluent\\Auth\\Tests\\": "tests/"
         }
     },
     "extra": {

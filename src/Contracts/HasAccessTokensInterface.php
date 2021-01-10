@@ -10,8 +10,9 @@ interface HasAccessTokensInterface
      * Generates a new personal access token for this user.
      *
      * @param array $scopes
+     * @return object
      */
-    public function generateAccessToken(string $name, array $scopes = ['*']): array;
+    public function generateAccessToken(string $name, array $scopes = ['*']);
 
     /**
      * Given the token, will retrieve the token to

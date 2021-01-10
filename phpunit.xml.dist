@@ -11,7 +11,7 @@
 		stopOnSkipped="false"
 		testdox="true">
 	<testsuites>
-		<testsuite name="CodeIgniter4 Repository">
+		<testsuite name="CodeIgniter4 Authentication">
 			<directory>./tests</directory>
 		</testsuite>
 	</testsuites>
@@ -37,5 +37,7 @@
 		<const name="HOMEPATH" value="./"/>
 		<const name="CONFIGPATH" value="./vendor/codeigniter4/framework/app/Config/"/>
 		<const name="PUBLICPATH" value="./vendor/codeigniter4/framework/public/"/>
+		<env name="database.tests.database" value=":memory:"/>
+		<env name="database.tests.DBDriver" value="SQLite3"/>
 	</php>
 </phpunit>
