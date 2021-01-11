@@ -10,6 +10,7 @@ use Fluent\Auth\AuthenticationService;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Entities\AccessToken;
 use Fluent\Auth\Entities\User;
+use Fluent\Auth\Facades\Auth;
 use Fluent\Auth\Models\UserModel;
 use Fluent\Auth\Result;
 
@@ -135,6 +136,32 @@ class TokenAdapterTest extends CIDatabaseTestCase
         $this->setRequestHeader($token->raw_token);
 
         $result = $this->auth->attempt([
+            'token' => $token->raw_token,
+        ]);
+
+        $this->assertInstanceOf(Result::class, $result);
+        $this->assertTrue($result->isOK());
+
+        $foundUser = $result->extraInfo();
+        $this->assertInstanceOf(User::class, $foundUser);
+        $this->assertEquals($user->id, $foundUser->id);
+        $this->assertInstanceOf(AccessToken::class, $foundUser->currentAccessToken());
+        $this->assertEquals($token->token, $foundUser->currentAccessToken()->token);
+
+        // A login attempt should have been recorded
+        $this->seeInDatabase('auth_logins', [
+            'email'   => 'token: ' . $token->raw_token,
+            'success' => 1,
+        ]);
+    }
+
+    public function testAuthTokenFacade()
+    {
+        $user  = fake(UserModel::class);
+        $token = $user->generateAccessToken('foo');
+        $this->setRequestHeader($token->raw_token);
+
+        $result = Auth::withHandler('token')->attempt([
             'token' => $token->raw_token,
         ]);
 

@@ -12,6 +12,7 @@ use Fluent\Auth\Config\Auth;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Entities\User;
 use Fluent\Auth\Exceptions\AuthenticationException;
+use Fluent\Auth\Facades\Auth as FacadesAuth;
 use Fluent\Auth\Models\RememberModel;
 use Fluent\Auth\Models\UserModel;
 use Fluent\Auth\Result;
@@ -247,6 +248,35 @@ class SessionAdapterTest extends CIDatabaseTestCase
         $result = $this->auth->attempt([
             'email'    => $user->email,
             'password' => 'passwords',
+        ]);
+
+        $this->assertInstanceOf(Result::class, $result);
+        $this->assertTrue($result->isOK());
+
+        $foundUser = $result->extraInfo();
+        $this->assertEquals($user, $foundUser);
+
+        $this->assertTrue(session()->has('logged_in'));
+        $this->assertEquals($user->id, session()->get('logged_in'));
+
+        // A login attempt should have been recorded
+        $this->seeInDatabase('auth_logins', [
+            'email'   => $user->email,
+            'success' => 1,
+        ]);
+    }
+
+    public function testAuthSessionFacade()
+    {
+        $user = fake(UserModel::class, [
+            'password_hash' => 'password'
+        ]);
+
+        $this->assertFalse(session()->has('logged_in'));
+
+        $result = FacadesAuth::attempt([
+            'email'    => $user->email,
+            'password' => 'password'
         ]);
 
         $this->assertInstanceOf(Result::class, $result);

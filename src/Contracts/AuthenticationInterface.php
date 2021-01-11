@@ -2,25 +2,26 @@
 
 namespace Fluent\Auth\Contracts;
 
+use Fluent\Auth\Entities\User;
+use Fluent\Auth\Result;
+
 interface AuthenticationInterface
 {
     /**
      * Attempts to authenticate a user with the given $credentials.
      * Logs the user in with a successful check.
      *
-     * @param array   $credentials
-     * @return mixed
+     * @param array $credentials
      * @throws AuthenticationException
      */
-    public function attempt(array $credentials, bool $remember = false);
+    public function attempt(array $credentials, bool $remember = false): Result;
 
     /**
      * Checks a user's $credentials to see if they match an existing user.
      *
      * @param array $credentials
-     * @return mixed
      */
-    public function check(array $credentials);
+    public function check(array $credentials): Result;
 
     /**
      * Checks if the user is currently logged in.
@@ -29,16 +30,14 @@ interface AuthenticationInterface
 
     /**
      * Logs the given user in.
-     *
-     * @param Authenticatable $user
-     * @return mixed
      */
-    public function login(AuthenticatorInterface $user, bool $remember = false);
+    public function login(AuthenticatorInterface $user, bool $remember = false): bool;
 
     /**
      * Logs a user in based on their ID.
      *
      * @return mixed
+     * @throws AuthenticationException
      */
     public function loginById(int $userId, bool $remember = false);
 
@@ -59,7 +58,7 @@ interface AuthenticationInterface
     /**
      * Returns the currently logged in user.
      *
-     * @return AuthenticatorInterface|null
+     * @return AuthenticatorInterface|User|null
      */
     public function getUser();
 }

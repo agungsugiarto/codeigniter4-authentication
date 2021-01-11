@@ -63,7 +63,7 @@ class SessionAdapter implements AuthenticationInterface
     /**
      * {@inheritdoc}
      */
-    public function attempt($credentials, bool $remember = false)
+    public function attempt($credentials, bool $remember = false): Result
     {
         $ipAddress = $this->request->getIPAddress();
         $result    = $this->check($credentials);
@@ -91,7 +91,7 @@ class SessionAdapter implements AuthenticationInterface
     /**
      * {@inheritdoc}
      */
-    public function check(array $credentials)
+    public function check(array $credentials): Result
     {
         // Can't validate without a password.
         if (empty($credentials['password']) || count($credentials) < 2) {
@@ -162,7 +162,7 @@ class SessionAdapter implements AuthenticationInterface
     /**
      * {@inheritdoc}
      */
-    public function login(AuthenticatorInterface $user, bool $remember = false)
+    public function login(AuthenticatorInterface $user, bool $remember = false): bool
     {
         $this->user = $user;
 

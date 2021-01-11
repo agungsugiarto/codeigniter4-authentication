@@ -55,7 +55,7 @@ class AuthenticationService
     /**
      * Returns the currently logged in user.
      *
-     * @return AuthenticatorInterface|null
+     * @return AuthenticatorInterface|User|null
      */
     public function user()
     {
@@ -65,7 +65,7 @@ class AuthenticationService
     /**
      * Returns the currently logged in user id.
      *
-     * @return AuthenticatorInterface|null
+     * @return int|null
      */
     public function id()
     {
