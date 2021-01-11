@@ -84,4 +84,9 @@ class Auth extends BaseConfig
      * Valid range is between 4 - 31.
      */
     public $hashCost = 10;
+
+    /**
+     * Throttler login max request attempt within a minute.
+     */
+    public $throttler = 60;
 }

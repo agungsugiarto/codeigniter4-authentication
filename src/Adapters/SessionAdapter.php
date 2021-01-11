@@ -179,7 +179,7 @@ class SessionAdapter implements AuthenticationInterface
         session()->set($this->config->sessionConfig['field'], $this->user->id);
 
         // When logged in, ensure cache control headers are in place
-        service('response')->noCache();
+        $this->response->noCache();
 
         if ($remember && $this->config->sessionConfig['allowRemembering']) {
             $this->rememberUser($this->user->id);

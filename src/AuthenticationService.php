@@ -69,20 +69,7 @@ class AuthenticationService
      */
     public function id()
     {
-        return $this->getUser()->id;
-    }
-
-    /**
-     * Difine routes method.
-     */
-    public function routes(?array $config = null)
-    {
-        // TODO: difine route
-    }
-
-    public function authorize($entity, string $permission)
-    {
-        // TODO: authorize policy
+        return $this->getUser()->id ?? null;
     }
 
     /**
