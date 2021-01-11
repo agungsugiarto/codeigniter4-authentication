@@ -7,8 +7,7 @@ use Fluent\Auth\Passwords;
 
 if (! defined('auth')) {
     /**
-     * Provides convenient access to the main Auth class
-     * for CodeIgniter Shield.
+     * Provides convenient access to the main AuthenticationService class.
      *
      * @return AuthenticationService|AuthenticationInterface
      */

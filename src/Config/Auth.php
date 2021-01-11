@@ -15,7 +15,7 @@ class Auth extends BaseConfig
      * The available authentication systems, list with alias and class name.
      * Default adapter is using first key array of authenticators.
      * These can be referenced by alias in the auth helper:
-     *      auth('api')->attempt($credentials);
+     *      auth('token')->attempt($credentials);
      */
     public $authenticators = [
         'session' => SessionAdapter::class,

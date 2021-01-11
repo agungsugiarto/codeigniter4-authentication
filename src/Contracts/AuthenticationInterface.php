@@ -3,6 +3,7 @@
 namespace Fluent\Auth\Contracts;
 
 use Fluent\Auth\Entities\User;
+use Fluent\Auth\Exceptions\AuthenticationException;
 use Fluent\Auth\Result;
 
 interface AuthenticationInterface
