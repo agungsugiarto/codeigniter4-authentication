@@ -91,7 +91,7 @@ class TokenAdapter implements AuthenticationInterface
         if (! array_key_exists('token', $credentials) || empty($credentials['token'])) {
             return new Result([
                 'success' => false,
-                'reason'  => lang('auth.noToken'),
+                'reason'  => lang('Auth.noToken'),
             ]);
         }
 
@@ -105,7 +105,7 @@ class TokenAdapter implements AuthenticationInterface
         if (is_null($token)) {
             return new Result([
                 'success' => false,
-                'reason'  => lang('auth.badToken'),
+                'reason'  => lang('Auth.badToken'),
             ]);
         }
 

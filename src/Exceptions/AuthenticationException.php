@@ -12,16 +12,16 @@ class AuthenticationException extends Exception
 
     public static function forUnknownHandler(string $handler)
     {
-        return new self(lang('auth.unknownHandler', [$handler]));
+        return new self(lang('Auth.unknownHandler', [$handler]));
     }
 
     public static function forUnknownUserProvider()
     {
-        return new self(lang('auth.unknownUserProvider'));
+        return new self(lang('Auth.unknownUserProvider'));
     }
 
     public static function forInvalidUser()
     {
-        return new self(lang('auth.invalidUser'));
+        return new self(lang('Auth.invalidUser'));
     }
 }

@@ -89,7 +89,7 @@ class JwtAdapter implements AuthenticationInterface
         if (empty($credentials['password']) || count($credentials) < 2) {
             return new Result([
                 'success' => false,
-                'reason'  => lang('auth.noToken'),
+                'reason'  => lang('Auth.noToken'),
             ]);
         }
 
@@ -104,7 +104,7 @@ class JwtAdapter implements AuthenticationInterface
         if (is_null($user)) {
             return new Result([
                 'success' => false,
-                'reason'  => lang('auth.badAttempt'),
+                'reason'  => lang('Auth.badAttempt'),
             ]);
         }
 
