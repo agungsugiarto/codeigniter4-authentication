@@ -188,7 +188,7 @@ class SessionAdapterTest extends CIDatabaseTestCase
     public function testCheckBadPassword()
     {
         $user = fake(UserModel::class, [
-            'password_hash' => 'passwords',
+            'password' => 'passwords',
         ]);
 
         $result = $this->auth->check([
@@ -204,7 +204,7 @@ class SessionAdapterTest extends CIDatabaseTestCase
     public function testCheckSuccess()
     {
         $user = fake(UserModel::class, [
-            'password_hash' => 'passwords',
+            'password' => 'passwords',
         ]);
 
         $result = $this->auth->check([
@@ -240,7 +240,7 @@ class SessionAdapterTest extends CIDatabaseTestCase
     public function testAttemptSuccess()
     {
         $user = fake(UserModel::class, [
-            'password_hash' => 'passwords',
+            'password' => 'passwords',
         ]);
 
         $this->assertFalse(session()->has('logged_in'));
@@ -269,7 +269,7 @@ class SessionAdapterTest extends CIDatabaseTestCase
     public function testAuthSessionFacade()
     {
         $user = fake(UserModel::class, [
-            'password_hash' => 'password'
+            'password' => 'password'
         ]);
 
         $this->assertFalse(session()->has('logged_in'));

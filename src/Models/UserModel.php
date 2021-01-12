@@ -25,7 +25,7 @@ class UserModel extends Model implements UserProviderInterface
     protected $allowedFields = [
         'email',
         'username',
-        'password_hash',
+        'password',
         'reset_hash',
         'reset_at',
         'reset_expires',
@@ -44,7 +44,7 @@ class UserModel extends Model implements UserProviderInterface
         return [
             'email'                => $faker->email,
             'username'             => $faker->userName,
-            'password_hash'        => password_hash('secret', PASSWORD_DEFAULT),
+            'password'             => password_hash('secret', PASSWORD_DEFAULT),
             'active'               => true,
             'force_password_reset' => false,
         ];

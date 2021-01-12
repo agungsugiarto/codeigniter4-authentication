@@ -24,9 +24,9 @@ class User extends Entity implements AuthenticatorInterface, HasAccessTokensInte
      *
      * @return $this
      */
-    public function setPasswordHash(string $password)
+    public function setPassword(string $password)
     {
-        $this->attributes['password_hash'] = Services::passwords()->hash($password);
+        $this->attributes['password'] = Services::passwords()->hash($password);
 
         return $this;
     }

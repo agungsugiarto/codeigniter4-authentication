@@ -119,7 +119,7 @@ class SessionAdapter implements AuthenticationInterface
         // Now, try matching the passwords.
         $passwords = service('passwords');
 
-        if (! $passwords->verify($givenPassword, $user->password_hash)) {
+        if (! $passwords->verify($givenPassword, $user->password)) {
             return new Result([
                 'success' => false,
                 'reason'  => lang('Auth.invalidPassword'),
@@ -130,8 +130,8 @@ class SessionAdapter implements AuthenticationInterface
         // This would be due to the hash algorithm or hash
         // cost changing since the last time that a user
         // logged in.
-        if ($passwords->needsRehash($user->password_hash)) {
-            $user->password_hash = $passwords->hash($givenPassword);
+        if ($passwords->needsRehash($user->password)) {
+            $user->password = $passwords->hash($givenPassword);
             $this->provider->save($user);
         }
 
