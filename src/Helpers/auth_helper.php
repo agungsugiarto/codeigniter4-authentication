@@ -13,7 +13,7 @@ if (! defined('auth')) {
      */
     function auth(?string $authenticator = 'default')
     {
-        return Services::auth()->withHandler($authenticator);
+        return Services::auth()->adapter($authenticator);
     }
 }
 

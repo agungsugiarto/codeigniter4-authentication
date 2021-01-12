@@ -15,11 +15,11 @@ use Fluent\Auth\Result;
  * @see \Fluent\Auth\Contracts\AuthenticationInterface
  * @see \Fluent\Auth\AuthenticationService
  *
- * @method static $this withHandler(?string $handler = 'default')
+ * @method static $this adapter(?string $adapter = 'default')
  * @method static AuthenticatorInterface|User|null user()
  * @method static int|null id()
  * @method static UserProviderInterface getProvider()
- * @method static AuthenticationInterface factory(string $handler = 'default')
+ * @method static AuthenticationInterface factory(string $adapter = 'default')
  * @method static $this setProvider(UserProviderInterface $provider)
  * @method static Result attempt(array $credentials, bool $remember = false)
  * @method static Result check(array $credentials)

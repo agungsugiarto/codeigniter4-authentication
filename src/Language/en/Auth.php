@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'unknownHandler'      => '{0} is not a valid auth handler.',
+    'unknownAdapter'      => '{0} is not a valid auth adapter.',
     'unknownUserProvider' => 'Unable to determine the User Provider to use.',
     'invalidUser'         => 'Unable to locate the specified user.',
     'badAttempt'          => 'Unable to log you in. Please check your credentials.',

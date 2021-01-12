@@ -44,8 +44,8 @@ class Auth extends BaseConfig
      * Encryption Algorithm to use
      * --------------------------------------------------------------------
      * Valid values are
-     * - PASSWORD_DEFAULT (default)
-     * - PASSWORD_BCRYPT
+     * - PASSWORD_DEFAULT
+     * - PASSWORD_BCRYPT (deafault)
      * - PASSWORD_ARGON2I  - As of PHP 7.2 only if compiled with support for it
      * - PASSWORD_ARGON2ID - As of PHP 7.3 only if compiled with support for it
      *

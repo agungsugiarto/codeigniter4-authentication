@@ -10,9 +10,9 @@ class AuthenticationException extends Exception
     /** @var string */
     protected $code = ResponseInterface::HTTP_FORBIDDEN;
 
-    public static function forUnknownHandler(string $handler)
+    public static function forUnknownAdapter(string $adapter)
     {
-        return new self(lang('Auth.unknownHandler', [$handler]));
+        return new self(lang('Auth.unknownAdapter', [$adapter]));
     }
 
     public static function forUnknownUserProvider()

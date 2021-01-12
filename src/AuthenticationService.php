@@ -18,11 +18,11 @@ class AuthenticationService
     protected $authorize;
 
     /**
-     * The handler to use for this request.
+     * The adapter to use for this request.
      *
      * @var string
      */
-    protected $handler = 'default';
+    protected $adapter = 'default';
 
     /** @var User */
     protected $user;
@@ -41,13 +41,13 @@ class AuthenticationService
     }
 
     /**
-     * Sets the handler that should be used for this request.
+     * Sets the adapter that should be used for this request.
      *
      * @return $this
      */
-    public function withHandler(?string $handler = 'default')
+    public function adapter(?string $adapter = 'default')
     {
-        $this->handler = $handler;
+        $this->adapter = $adapter;
 
         return $this;
     }
@@ -103,6 +103,6 @@ class AuthenticationService
      */
     public function __call($method, $arguments)
     {
-        return $this->authenticate->factory($this->handler)->{$method}(...$arguments);
+        return $this->authenticate->factory($this->adapter)->{$method}(...$arguments);
     }
 }

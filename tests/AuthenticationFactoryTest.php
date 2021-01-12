@@ -22,10 +22,10 @@ class AuthenticationFactoryTest extends CIUnitTestCase
         $this->auth = (new AuthenticationFactory(new Auth()))->setProvider(new UserModel());
     }
 
-    public function testThrowsOnUnknownHandler()
+    public function testThrowsOnUnknownAdapter()
     {
         $this->expectException(AuthenticationException::class);
-        $this->expectExceptionMessage(lang('Auth.unknownHandler', ['foo']));
+        $this->expectExceptionMessage(lang('Auth.unknownAdapter', ['foo']));
 
         $this->auth->factory('foo');
     }

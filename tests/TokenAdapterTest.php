@@ -161,7 +161,7 @@ class TokenAdapterTest extends CIDatabaseTestCase
         $token = $user->generateAccessToken('foo');
         $this->setRequestHeader($token->raw_token);
 
-        $result = Auth::withHandler('token')->attempt([
+        $result = Auth::adapter('token')->attempt([
             'token' => $token->raw_token,
         ]);
 

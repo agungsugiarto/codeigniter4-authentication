@@ -13,8 +13,8 @@ use function key;
 class AuthenticationFactory
 {
     /**
-     * Instantiated handler objects,
-     * stored by handler alias.
+     * Instantiated adapter objects,
+     * stored by adapter alias.
      *
      * @var array
      */
@@ -32,37 +32,37 @@ class AuthenticationFactory
     }
 
     /**
-     * Returns an instance of the specified handler.
+     * Returns an instance of the specified adapter.
      *
-     * You can pass 'default' as the handler and it
-     * will return an instance of the first handler specified
+     * You can pass 'default' as the adapter and it
+     * will return an instance of the first adapter specified
      * in the Auth config file.
      *
      * @return AuthenticationInterface
      * @throws AuthenticationException
      */
-    public function factory(string $handler = 'default')
+    public function factory(string $adapter = 'default')
     {
-        // Determine actual handler name
-        $handler = $handler === 'default'
+        // Determine actual adapter name
+        $adapter = $adapter === 'default'
             ? key($this->config->authenticators)
-            : $handler;
+            : $adapter;
 
         // Return the cached instance if we have it
-        if (! empty($this->instances[$handler])) {
-            return $this->instances[$handler];
+        if (! empty($this->instances[$adapter])) {
+            return $this->instances[$adapter];
         }
 
         // Otherwise, try to create a new instance.
-        if (! array_key_exists($handler, $this->config->authenticators)) {
-            throw AuthenticationException::forUnknownHandler($handler);
+        if (! array_key_exists($adapter, $this->config->authenticators)) {
+            throw AuthenticationException::forUnknownAdapter($adapter);
         }
 
-        $className = $this->config->authenticators[$handler];
+        $className = $this->config->authenticators[$adapter];
 
-        $this->instances[$handler] = new $className($this->config, $this->userProvider);
+        $this->instances[$adapter] = new $className($this->config, $this->userProvider);
 
-        return $this->instances[$handler];
+        return $this->instances[$adapter];
     }
 
     /**
