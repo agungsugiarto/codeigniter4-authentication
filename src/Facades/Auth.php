@@ -13,6 +13,7 @@ use Fluent\Auth\Result;
 
 /**
  * @see \Fluent\Auth\Contracts\AuthenticationInterface
+ * @see \Fluent\Auth\AuthenticationFactory
  * @see \Fluent\Auth\AuthenticationService
  *
  * @method static $this adapter(?string $adapter = 'default')

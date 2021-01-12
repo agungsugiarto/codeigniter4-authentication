@@ -10,6 +10,7 @@ use Fluent\Auth\Config\Auth;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
+use Fluent\Auth\Entities\User;
 use Fluent\Auth\Exceptions\AuthenticationException;
 use Fluent\Auth\Models\LoginModel;
 use Fluent\Auth\Models\RememberModel;
@@ -32,7 +33,7 @@ class SessionAdapter implements AuthenticationInterface
     /** @var UserProviderInterface */
     protected $provider;
 
-    /** @var AuthenticatorInterface */
+    /** @var AuthenticatorInterface|User */
     protected $user;
 
     /** @var LoginModel */
@@ -217,8 +218,6 @@ class SessionAdapter implements AuthenticationInterface
      */
     public function logout()
     {
-        helper('cookie');
-
         // Destroy the session data - but ensure a session is still
         // available for flash messages, etc.
         if (isset($_SESSION)) {

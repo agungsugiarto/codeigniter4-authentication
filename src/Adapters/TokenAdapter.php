@@ -9,6 +9,7 @@ use Fluent\Auth\Config\Auth;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
+use Fluent\Auth\Entities\User;
 use Fluent\Auth\Exceptions\AuthenticationException;
 use Fluent\Auth\Models\AccessTokenModel;
 use Fluent\Auth\Models\LoginModel;
@@ -29,7 +30,7 @@ class TokenAdapter implements AuthenticationInterface
     /** @var UserProviderInterface */
     protected $provider;
 
-    /** @var AuthenticatorInterface */
+    /** @var AuthenticatorInterface|User */
     protected $user;
 
     /** @var LoginModel */
