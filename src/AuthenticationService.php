@@ -15,8 +15,6 @@ class AuthenticationService
     /** @var AuthenticationFactory|AuthenticationInterface */
     protected $authenticate;
 
-    protected $authorize;
-
     /**
      * The adapter to use for this request.
      *

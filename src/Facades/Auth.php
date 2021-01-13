@@ -29,7 +29,7 @@ use Fluent\Auth\Result;
  * @method static bool loginById(int $userId, bool $remember = false)
  * @method static null logout()
  * @method static mixed forget(?int $id)
- * @method static AuthenticatorInterface|User|null getUuser()
+ * @method static AuthenticatorInterface|User|null getUser()
  */
 class Auth
 {
