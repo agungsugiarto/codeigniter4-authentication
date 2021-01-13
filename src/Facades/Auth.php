@@ -2,9 +2,7 @@
 
 namespace Fluent\Auth\Facades;
 
-use Fluent\Auth\AuthenticationFactory;
-use Fluent\Auth\AuthenticationService;
-use Fluent\Auth\Config\Auth as ConfigAuth;
+use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
@@ -29,7 +27,7 @@ use Fluent\Auth\Result;
  * @method static bool loginById(int $userId, bool $remember = false)
  * @method static null logout()
  * @method static mixed forget(?int $id)
- * @method static AuthenticatorInterface|User|null getUser()
+ * @method static AuthenticatorInterface|User|null getUuser()
  */
 class Auth
 {
@@ -41,6 +39,6 @@ class Auth
      */
     public static function __callStatic($method, $arguments)
     {
-        return (new AuthenticationService(new AuthenticationFactory(new ConfigAuth())))->$method(...$arguments);
+        return Services::auth()->$method(...$arguments);
     }
 }

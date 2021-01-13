@@ -15,7 +15,7 @@ class TokenFilter implements FilterInterface
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        $result = Auth::adapter('token')->check([
+        $result = Auth::adapter('token')->attempt([
             'token' => $request->getHeaderLine('Authorization'),
         ]);
 
