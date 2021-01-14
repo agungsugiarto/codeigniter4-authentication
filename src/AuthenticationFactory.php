@@ -8,7 +8,6 @@ use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Exceptions\AuthenticationException;
 
 use function array_key_exists;
-use function key;
 
 class AuthenticationFactory
 {
@@ -45,35 +44,44 @@ class AuthenticationFactory
     {
         // Determine actual adapter name
         $adapter = $adapter === 'default'
-            ? key($this->config->authenticators)
+            ? $this->config->defaults['adapter']
             : $adapter;
+
+        // Otherwise, try to create a new instance.
+        if (! array_key_exists($adapter, $this->config->adapters)) {
+            throw AuthenticationException::forUnknownAdapter($adapter);
+        }
 
         // Return the cached instance if we have it
         if (! empty($this->instances[$adapter])) {
             return $this->instances[$adapter];
         }
 
-        // Otherwise, try to create a new instance.
-        if (! array_key_exists($adapter, $this->config->authenticators)) {
-            throw AuthenticationException::forUnknownAdapter($adapter);
-        }
+        // Class adapter implement AuthenticationInterface
+        $classAdapter = $this->config->adapters[$adapter]['driver'];
 
-        $className = $this->config->authenticators[$adapter];
+        // Class user provider
+        $this->userProvider = $this->config->adapters[$adapter]['provider'];
 
-        $this->instances[$adapter] = new $className($this->config, $this->userProvider);
+        // Instance authentication
+        $this->instances[$adapter] = new $classAdapter($this->config, $this->userProvider());
 
         return $this->instances[$adapter];
     }
 
     /**
-     * Sets the User provider to use
+     * Set the name of the class that handles user persistence.
      *
-     * @return $this
+     * @return UserProviderInterface
      */
-    public function setProvider(UserProviderInterface $provider)
+    public function userProvider()
     {
-        $this->userProvider = $provider;
+        $adapter = new $this->userProvider();
 
-        return $this;
+        if (! $adapter instanceof UserProviderInterface) {
+            throw AuthenticationException::forUnknownUserProvider();
+        }
+
+        return $adapter;
     }
 }

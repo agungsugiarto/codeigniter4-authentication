@@ -7,9 +7,6 @@ use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\Contracts\HasAccessTokensInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Entities\User;
-use Fluent\Auth\Exceptions\AuthenticationException;
-
-use function property_exists;
 
 class AuthenticationService
 {
@@ -36,7 +33,7 @@ class AuthenticationService
      */
     public function __construct(AuthenticationFactory $authenticate)
     {
-        $this->authenticate = $authenticate->setProvider($this->getProvider());
+        $this->authenticate = $authenticate;
     }
 
     /**
@@ -72,26 +69,13 @@ class AuthenticationService
     }
 
     /**
-     * Get the name of the class that handles user persistence.
+     * Get the nama of class that handles user persistance.
      *
      * @return UserProviderInterface
      */
     public function getProvider()
     {
-        if ($this->userProvider !== null) {
-            return $this->userProvider;
-        }
-
-        $config = config('Auth');
-
-        if (! property_exists($config, 'userProvider')) {
-            throw AuthenticationException::forUnknownUserProvider();
-        }
-
-        $className          = $config->userProvider;
-        $this->userProvider = new $className();
-
-        return $this->userProvider;
+        return $this->authenticate->userProvider();
     }
 
     /**

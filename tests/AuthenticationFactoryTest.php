@@ -8,7 +8,6 @@ use Fluent\Auth\Adapters\TokenAdapter;
 use Fluent\Auth\AuthenticationFactory;
 use Fluent\Auth\Config\Auth;
 use Fluent\Auth\Exceptions\AuthenticationException;
-use Fluent\Auth\Models\UserModel;
 
 class AuthenticationFactoryTest extends CIUnitTestCase
 {
@@ -19,7 +18,7 @@ class AuthenticationFactoryTest extends CIUnitTestCase
     {
         parent::setUp();
 
-        $this->auth = (new AuthenticationFactory(new Auth()))->setProvider(new UserModel());
+        $this->auth = (new AuthenticationFactory(new Auth()));
     }
 
     public function testThrowsOnUnknownAdapter()
@@ -32,11 +31,11 @@ class AuthenticationFactoryTest extends CIUnitTestCase
 
     public function testFactoryLoadsDefault()
     {
-        $shield1 = $this->auth->factory();
-        $shield2 = $this->auth->factory('default');
+        $adapter1 = $this->auth->factory();
+        $adapter2 = $this->auth->factory('default');
 
-        $this->assertInstanceOf(SessionAdapter::class, $shield1);
-        $this->assertSame($shield1, $shield2);
+        $this->assertInstanceOf(SessionAdapter::class, $adapter1);
+        $this->assertSame($adapter1, $adapter2);
     }
 
     public function testFactorySessionAdapter()

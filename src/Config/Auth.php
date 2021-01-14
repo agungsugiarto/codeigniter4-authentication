@@ -12,22 +12,43 @@ use const PASSWORD_DEFAULT;
 class Auth extends BaseConfig
 {
     /**
-     * The available authentication systems, list with alias and class name.
-     * Default adapter is using first key array of authenticators.
-     * These can be referenced by alias in the auth helper:
-     *      auth('token')->attempt($credentials);
+     * --------------------------------------------------------------------------
+     * Authentication Defaults
+     * --------------------------------------------------------------------------
+     * This option controls the default authentication "adapter".
+     * You may change these defaults as required,
+     * but they're a perfect start for
+     * most applications.
      */
-    public $authenticators = [
-        'session' => SessionAdapter::class,
-        'token'   => TokenAdapter::class,
+    public $defaults = [
+        'adapter' => 'session',
     ];
 
     /**
-     * The name of the class that handles user persistence.
-     * By default, this is the included UserModel, which
-     * works with any of the database engines supported by CodeIgniter.
+     * --------------------------------------------------------------------------
+     * Authentication Adapters
+     * --------------------------------------------------------------------------
+     * Next, you may define every authentication adapter for your application.
+     * Of course, a great default configuration has been defined for you
+     * here which uses session storage and the user provider.
+     *
+     * All authentication drivers have a user provider. This defines how the
+     * users are actually retrieved out of your database or other storage
+     * mechanisms used by this application to persist your user's data.
+     *
+     * Supported: "session", "token"
      */
-    public $userProvider = UserModel::class;
+    public $adapters = [
+        'session' => [
+            'driver'   => SessionAdapter::class,
+            'provider' => UserModel::class,
+        ],
+        'token' => [
+            'driver'   => TokenAdapter::class,
+            'provider' => UserModel::class,
+        ],
+        // etc your implementation
+    ];
 
     /**
      * Session config.

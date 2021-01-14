@@ -2,7 +2,7 @@
 
 namespace Fluent\Auth\Config;
 
-use Config\Services as BaseService;
+use CodeIgniter\Config\Services as BaseService;
 use Fluent\Auth\AuthenticationFactory;
 use Fluent\Auth\AuthenticationService;
 use Fluent\Auth\Contracts\AuthenticationInterface;
@@ -27,7 +27,7 @@ class Services extends BaseService
     /**
      * Password utilities.
      *
-     * @return Passwords|mixed
+     * @return Passwords
      */
     public static function passwords(bool $getShared = true)
     {

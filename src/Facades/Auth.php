@@ -19,7 +19,6 @@ use Fluent\Auth\Result;
  * @method static int|null id()
  * @method static UserProviderInterface getProvider()
  * @method static AuthenticationInterface factory(string $adapter = 'default')
- * @method static $this setProvider(UserProviderInterface $provider)
  * @method static Result attempt(array $credentials, bool $remember = false)
  * @method static Result check(array $credentials)
  * @method static bool loggedIn()
