@@ -5,8 +5,8 @@ namespace Fluent\Auth\Facades;
 use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
+use Fluent\Auth\Contracts\HasAccessTokensInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
-use Fluent\Auth\Entities\User;
 use Fluent\Auth\Result;
 
 /**
@@ -15,7 +15,7 @@ use Fluent\Auth\Result;
  * @see \Fluent\Auth\AuthenticationService
  *
  * @method static $this adapter(?string $adapter = 'default')
- * @method static AuthenticatorInterface|User|null user()
+ * @method static AuthenticatorInterface|HasAccessTokensInterface|null user()
  * @method static int|null id()
  * @method static UserProviderInterface getProvider()
  * @method static AuthenticationInterface factory(string $adapter = 'default')
@@ -27,7 +27,7 @@ use Fluent\Auth\Result;
  * @method static bool loginById(int $userId, bool $remember = false)
  * @method static null logout()
  * @method static mixed forget(?int $id)
- * @method static AuthenticatorInterface|User|null getUuser()
+ * @method static AuthenticatorInterface|HasAccessTokensInterface|null getUser()
  */
 class Auth
 {

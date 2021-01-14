@@ -2,7 +2,6 @@
 
 namespace Fluent\Auth\Contracts;
 
-use Fluent\Auth\Entities\User;
 use Fluent\Auth\Exceptions\AuthenticationException;
 use Fluent\Auth\Result;
 
@@ -59,7 +58,7 @@ interface AuthenticationInterface
     /**
      * Returns the currently logged in user.
      *
-     * @return AuthenticatorInterface|User|null
+     * @return AuthenticatorInterface|HasAccessTokensInterface|null
      */
     public function getUser();
 }

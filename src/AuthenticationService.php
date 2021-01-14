@@ -4,6 +4,7 @@ namespace Fluent\Auth;
 
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
+use Fluent\Auth\Contracts\HasAccessTokensInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Entities\User;
 use Fluent\Auth\Exceptions\AuthenticationException;
@@ -53,7 +54,7 @@ class AuthenticationService
     /**
      * Returns the currently logged in user.
      *
-     * @return AuthenticatorInterface|User|null
+     * @return AuthenticatorInterface|HasAccessTokensInterface|null
      */
     public function user()
     {

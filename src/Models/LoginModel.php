@@ -3,9 +3,8 @@
 namespace Fluent\Auth\Models;
 
 use CodeIgniter\Database\BaseResult;
+use CodeIgniter\I18n\Time;
 use CodeIgniter\Model;
-
-use function date;
 
 class LoginModel extends Model
 {
@@ -45,7 +44,7 @@ class LoginModel extends Model
             'ip_address' => $ipAddress,
             'email'      => $email,
             'user_id'    => $userID,
-            'date'       => date('Y-m-d H:i:s'),
+            'date'       => Time::now(),
             'success'    => (int) $success,
         ]);
     }

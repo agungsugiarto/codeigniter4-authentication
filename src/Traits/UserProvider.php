@@ -11,7 +11,7 @@ trait UserProvider
     /**
      * Locates an identity object by ID.
      *
-     * @return AuthenticatorInterface|null
+     * @return AuthenticatorInterface|HasAccessTokensInterface|null
      */
     public function findById(int $id)
     {
@@ -22,7 +22,7 @@ trait UserProvider
      * Locate a user by the given credentials.
      *
      * @param array $credentials
-     * @return AuthenticatorInterface|null
+     * @return AuthenticatorInterface|HasAccessTokensInterface|null
      */
     public function findByCredentials(array $credentials)
     {
@@ -32,7 +32,7 @@ trait UserProvider
     /**
      * Find a user by their ID and "remember-me" token.
      *
-     * @return AuthenticatorInterface|null
+     * @return AuthenticatorInterface|HasAccessTokensInterface|null
      */
     public function findByRememberToken(int $id, string $token)
     {

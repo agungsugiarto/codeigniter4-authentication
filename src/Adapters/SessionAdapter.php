@@ -5,12 +5,13 @@ namespace Fluent\Auth\Adapters;
 use CodeIgniter\Events\Events;
 use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\Response;
+use CodeIgniter\I18n\Time;
 use Config\App;
 use Fluent\Auth\Config\Auth;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
+use Fluent\Auth\Contracts\HasAccessTokensInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
-use Fluent\Auth\Entities\User;
 use Fluent\Auth\Exceptions\AuthenticationException;
 use Fluent\Auth\Models\LoginModel;
 use Fluent\Auth\Models\RememberModel;
@@ -18,12 +19,10 @@ use Fluent\Auth\Result;
 
 use function bin2hex;
 use function count;
-use function date;
 use function hash;
 use function is_null;
 use function mt_rand;
 use function random_bytes;
-use function time;
 
 class SessionAdapter implements AuthenticationInterface
 {
@@ -33,7 +32,7 @@ class SessionAdapter implements AuthenticationInterface
     /** @var UserProviderInterface */
     protected $provider;
 
-    /** @var AuthenticatorInterface|User */
+    /** @var AuthenticatorInterface|HasAccessTokensInterface */
     protected $user;
 
     /** @var LoginModel */
@@ -206,7 +205,7 @@ class SessionAdapter implements AuthenticationInterface
     {
         $user = $this->provider->findById($userId);
 
-        if (empty($user)) {
+        if (is_null($user)) {
             throw AuthenticationException::forInvalidUser();
         }
 
@@ -220,12 +219,7 @@ class SessionAdapter implements AuthenticationInterface
     {
         // Destroy the session data - but ensure a session is still
         // available for flash messages, etc.
-        if (isset($_SESSION)) {
-            foreach ($_SESSION as $key => $value) {
-                $_SESSION[$key] = null;
-                unset($_SESSION[$key]);
-            }
-        }
+        session()->remove($this->config->sessionConfig['field']);
 
         // Regenerate the session ID for a touch of added safety.
         session()->regenerate(true);
@@ -274,7 +268,7 @@ class SessionAdapter implements AuthenticationInterface
             'ip_address' => $ipAddress,
             'email'      => $email,
             'user_id'    => $userID,
-            'date'       => date('Y-m-d H:i:s'),
+            'date'       => Time::now(),
             'success'    => (int) $success,
         ]);
     }
@@ -291,7 +285,7 @@ class SessionAdapter implements AuthenticationInterface
     {
         $selector  = bin2hex(random_bytes(12));
         $validator = bin2hex(random_bytes(20));
-        $expires   = date('Y-m-d H:i:s', time() + $this->config->sessionConfig['rememberLength']);
+        $expires   = Time::now()->addSeconds($this->config->sessionConfig['rememberLength']);
 
         $token = $selector . ':' . $validator;
 

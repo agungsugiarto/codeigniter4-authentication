@@ -25,7 +25,7 @@ trait HasAccessTokens
      */
     public function generateAccessToken(string $name, array $scopes = ['*'])
     {
-        $tokens = model(AccessTokenModel::class);
+        $tokens = new AccessTokenModel();
         helper('text');
 
         $tokens->insert(new AccessToken([
@@ -50,7 +50,7 @@ trait HasAccessTokens
      */
     public function revokeAccessToken(string $token)
     {
-        $tokens = model(AccessTokenModel::class);
+        $tokens = new AccessTokenModel();
 
         return $tokens->where('user_id', $this->id)
             ->where('token', hash('sha256', $token))
@@ -64,7 +64,7 @@ trait HasAccessTokens
      */
     public function revokeAllAccessTokens()
     {
-        $tokens = model(AccessTokenModel::class);
+        $tokens = new AccessTokenModel();
 
         return $tokens->where('user_id', $this->id)
             ->delete();
@@ -77,7 +77,7 @@ trait HasAccessTokens
      */
     public function accessTokens(): array
     {
-        $tokens = model(AccessTokenModel::class);
+        $tokens = new AccessTokenModel();
 
         return $tokens->where('user_id', $this->id)
             ->find();
@@ -95,7 +95,7 @@ trait HasAccessTokens
             return null;
         }
 
-        $tokens = model(AccessTokenModel::class);
+        $tokens = new AccessTokenModel();
 
         return $tokens->where('user_id', $this->id)
             ->where('token', hash('sha256', $token))
@@ -109,7 +109,7 @@ trait HasAccessTokens
      */
     public function getAccessTokenById(int $id)
     {
-        $tokens = model(AccessTokenModel::class);
+        $tokens = new AccessTokenModel();
 
         return $tokens->where('user_id', $this->id)
             ->where('id', $id)

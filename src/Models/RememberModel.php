@@ -2,10 +2,9 @@
 
 namespace Fluent\Auth\Models;
 
+use CodeIgniter\I18n\Time;
 use CodeIgniter\Model;
-use DateTime;
 
-use function date;
 use function hash;
 
 class RememberModel extends Model
@@ -32,7 +31,7 @@ class RememberModel extends Model
      */
     public function rememberUser(int $userID, string $selector, string $validator, string $expires)
     {
-        $expires = new DateTime($expires);
+        $expires = new Time($expires);
 
         return $this->insert([
             'user_id'         => $userID,
@@ -86,7 +85,7 @@ class RememberModel extends Model
      */
     public function purgeOldRememberTokens()
     {
-        $this->where('expires <=', date('Y-m-d H:i:s'))
+        $this->where('expires <=', Time::now())
             ->delete();
     }
 }

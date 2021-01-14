@@ -55,7 +55,7 @@ class Result
     }
 
     /**
-     * @return object
+     * @return mixed
      */
     public function extraInfo()
     {
