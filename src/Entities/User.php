@@ -15,8 +15,7 @@ class User extends Entity implements AuthenticatorInterface, HasAccessTokensInte
     use HasAccessTokens;
 
     protected $casts = [
-        'active'           => 'boolean',
-        'force_pass_reset' => 'boolean',
+        'email_verified_at' => 'datetime',
     ];
 
     /**

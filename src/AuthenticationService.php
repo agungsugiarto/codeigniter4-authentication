@@ -3,8 +3,6 @@
 namespace Fluent\Auth;
 
 use Fluent\Auth\Contracts\AuthenticationInterface;
-use Fluent\Auth\Contracts\AuthenticatorInterface;
-use Fluent\Auth\Contracts\HasAccessTokensInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Entities\User;
 
@@ -46,36 +44,6 @@ class AuthenticationService
         $this->adapter = $adapter;
 
         return $this;
-    }
-
-    /**
-     * Returns the currently logged in user.
-     *
-     * @return AuthenticatorInterface|HasAccessTokensInterface|null
-     */
-    public function user()
-    {
-        return $this->getUser();
-    }
-
-    /**
-     * Returns the currently logged in user id.
-     *
-     * @return int|null
-     */
-    public function id()
-    {
-        return $this->getUser()->id ?? null;
-    }
-
-    /**
-     * Get the nama of class that handles user persistance.
-     *
-     * @return UserProviderInterface
-     */
-    public function getProvider()
-    {
-        return $this->authenticate->userProvider();
     }
 
     /**

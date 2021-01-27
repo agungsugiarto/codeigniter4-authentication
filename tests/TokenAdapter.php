@@ -14,7 +14,7 @@ use Fluent\Auth\Facades\Auth;
 use Fluent\Auth\Models\UserModel;
 use Fluent\Auth\Result;
 
-class TokenAdapterTest extends CIDatabaseTestCase
+class TokenAdapter extends CIDatabaseTestCase
 {
     /** @var AuthenticationService|AuthenticationInterface */
     protected $auth;

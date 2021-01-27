@@ -2,6 +2,7 @@
 
 namespace Fluent\Auth\Traits;
 
+use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
 
 use function trim;
@@ -26,7 +27,7 @@ trait UserProvider
      */
     public function findByCredentials(array $credentials)
     {
-        return $this->where($credentials)->first();
+        return $this->where('email', $credentials['email'])->orWhere($credentials)->first();
     }
 
     /**
@@ -34,11 +35,32 @@ trait UserProvider
      *
      * @return AuthenticatorInterface|HasAccessTokensInterface|null
      */
-    public function findByRememberToken(int $id, string $token)
+    public function findByRememberToken(int $id, $token)
     {
-        return $this->where([
-            'id'          => $id,
-            'remember_me' => trim($token),
-        ])->first();
+        return $this->where(['id' => $id, 'remember_token' => trim($token)])->first();
+    }
+
+    /**
+     * Update the "remember me" token for the given user in storage.
+     *
+     * @param string $token
+     * @return void
+     */
+    public function updateRememberToken(AuthenticatorInterface $user, $token = null)
+    {
+        return $this->where('id', $user->getAuthId())->set('remember_token', $token)->update();
+    }
+
+    /**
+     * Validate a user against the given credentials.
+     *
+     * @param array $credentials
+     * @return bool
+     */
+    public function validateCredentials(AuthenticatorInterface $user, array $credentials)
+    {
+        $plain = $credentials['password'];
+
+        return Services::passwords()->verify($plain, $user->getAuthPassword());
     }
 }

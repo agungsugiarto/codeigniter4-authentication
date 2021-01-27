@@ -43,7 +43,7 @@ class Auth extends BaseConfig
             'driver'   => SessionAdapter::class,
             'provider' => UserModel::class,
         ],
-        'token' => [
+        'token'   => [
             'driver'   => TokenAdapter::class,
             'provider' => UserModel::class,
         ],
@@ -55,7 +55,6 @@ class Auth extends BaseConfig
      */
     public $sessionConfig = [
         'field'              => 'logged_in',
-        'allowRemembering'   => true,
         'rememberCookieName' => 'remember',
         'rememberLength'     => 30 * DAY,
     ];

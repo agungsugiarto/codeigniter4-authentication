@@ -3,40 +3,47 @@
 namespace Fluent\Auth\Contracts;
 
 use Fluent\Auth\Exceptions\AuthenticationException;
-use Fluent\Auth\Result;
 
 interface AuthenticationInterface
 {
     /**
-     * Attempts to authenticate a user with the given $credentials.
-     * Logs the user in with a successful check.
+     * Determine if current user is authenticated. If not, throw an exception.
      *
-     * @param array $credentials
+     * @return AuthenticatorInterface
      * @throws AuthenticationException
      */
-    public function attempt(array $credentials, bool $remember = false): Result;
+    public function authenticate();
 
     /**
-     * Checks a user's $credentials to see if they match an existing user.
+     * Attempts to authenticate a user with the given $credentials.
      *
      * @param array $credentials
+     * @return bool
+     * @throws AuthenticationException
      */
-    public function check(array $credentials): Result;
+    public function attempt(array $credentials, bool $remember = false);
+
+    /**
+     * Validate a user's credentials.
+     *
+     * @param  array  $credentials
+     */
+    public function validate(array $credentials): bool;
 
     /**
      * Checks if the user is currently logged in.
      */
-    public function loggedIn(): bool;
+    public function check(): bool;
 
     /**
      * Logs the given user in.
      */
-    public function login(AuthenticatorInterface $user, bool $remember = false): bool;
+    public function login(AuthenticatorInterface $user, bool $remember = false): void;
 
     /**
      * Logs a user in based on their ID.
      *
-     * @return mixed
+     * @return AuthenticatorInterface|bool
      * @throws AuthenticationException
      */
     public function loginById(int $userId, bool $remember = false);
@@ -44,21 +51,47 @@ interface AuthenticationInterface
     /**
      * Logs the current user out.
      *
-     * @return mixed
+     * @return void
      */
     public function logout();
-
-    /**
-     * Removes any remember-me tokens, if applicable.
-     *
-     * @return mixed
-     */
-    public function forget(?int $id);
 
     /**
      * Returns the currently logged in user.
      *
      * @return AuthenticatorInterface|HasAccessTokensInterface|null
      */
-    public function getUser();
+    public function user();
+
+    /**
+     * Get the ID for the currently authenticated user.
+     *
+     * @return int|null
+     */
+    public function id();
+
+    /**
+     * Determine if the adapter has a user instance.
+     */
+    public function hasUser(): bool;
+
+    /**
+     * Set the current user.
+     *
+     * @return $this
+     */
+    public function setUser(AuthenticatorInterface $user);
+
+    /**
+     * Get the user provider used by the adapter.
+     *
+     * @return UserProviderInterface
+     */
+    public function getProvider();
+
+    /**
+     * Set the user provider used by the adapter.
+     *
+     * @return $this
+     */
+    public function setProvider(UserProviderInterface $provider);
 }

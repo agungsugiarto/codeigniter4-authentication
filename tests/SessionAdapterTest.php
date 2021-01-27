@@ -5,19 +5,15 @@ namespace Fluent\Auth\Tests;
 use CodeIgniter\Config\Services;
 use CodeIgniter\Events\Events;
 use CodeIgniter\Test\CIDatabaseTestCase;
-use CodeIgniter\Test\Mock\MockEvents;
-use Fluent\Auth\AuthenticationFactory;
+use Fluent\Auth\Adapters\SessionAdapter;
 use Fluent\Auth\AuthenticationService;
-use Fluent\Auth\Config\Auth;
 use Fluent\Auth\Contracts\AuthenticationInterface;
-use Fluent\Auth\Entities\User;
+use Fluent\Auth\Contracts\AuthenticatorInterface;
+use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Exceptions\AuthenticationException;
-use Fluent\Auth\Facades\Auth as FacadesAuth;
-use Fluent\Auth\Models\RememberModel;
 use Fluent\Auth\Models\UserModel;
-use Fluent\Auth\Result;
 
-class SessionAdapterTest extends CIDatabaseTestCase
+class SessionAdapterTest extends CIDatabaseTestCase implements AuthenticationTestInterface
 {
     /** @var AuthenticationService|AuthenticationInterface */
     protected $auth;
@@ -27,71 +23,181 @@ class SessionAdapterTest extends CIDatabaseTestCase
     /** @var Events */
     protected $events;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
-        $this->auth = new AuthenticationService(new AuthenticationFactory(new Auth()));
-
-        $this->events = new MockEvents();
-        Services::injectMock('events', $this->events);
+        helper('auth');
+        $this->auth = Services::auth();
     }
 
-    public function testLoggedIn()
+    protected function tearDown(): void
     {
-        $this->assertFalse($this->auth->loggedIn());
+        parent::tearDown();
+
+        $this->auth->logout();
+    }
+
+    public function testAuthenticate()
+    {
+        $this->expectException(AuthenticationException::class);
+        $this->expectExceptionMessage(lang('Auth.invalidUser'));
+
+        $this->auth->authenticate();
 
         $user = fake(UserModel::class);
-        session()->set('logged_in', $user->id);
 
-        $this->assertTrue($this->auth->loggedIn());
+        $this->auth->login($user);
 
-        $authUser = $this->auth->user();
-        $this->assertInstanceOf(User::class, $authUser);
-        $this->assertEquals($user->id, $authUser->id);
+        $this->assertNotNull($this->auth->authenticate());
+        $this->assertEquals($user, $this->auth->authenticate());
     }
 
-    public function testLoginNoRemember()
-    {
-        $user = fake(UserModel::class);
-
-        $this->assertTrue($this->auth->login($user, false));
-        $this->assertEquals($user->id, session()->get('logged_in'));
-
-        // Login attempt should have been recorded
-        $this->seeInDatabase('auth_logins', [
-            'user_id' => $user->id,
-            'email'   => $user->email,
-            'success' => true,
-        ]);
-
-        $this->dontSeeInDatabase('auth_remember_tokens', [
-            'user_id' => $user->id,
-        ]);
-    }
-
-    public function testLoginWithRemember()
+    public function testAttempt()
     {
         $user = fake(UserModel::class);
 
-        $this->assertTrue($this->auth->login($user, true));
-
-        $this->assertEquals($user->id, session()->get('logged_in'));
-
-        // Login attempt should have been recorded
-        $this->seeInDatabase('auth_logins', [
-            'user_id' => $user->id,
-            'email'   => $user->email,
-            'success' => true,
+        $result = $this->auth->attempt([
+            'email'    => $user->email,
+            'password' => 'secret',
         ]);
 
-        $this->seeInDatabase('auth_remember_tokens', [
-            'user_id' => $user->id,
+        $this->assertTrue($result);
+    }
+
+    public function testFailedAttempt()
+    {
+        $user = fake(UserModel::class, [
+            'password' => 'valid-password',
         ]);
 
-        // Cookie should have been set
-        $response = service('response');
-        $this->assertNotNull($response->getCookie('remember'));
+        $result = $this->auth->attempt([
+            'email'    => $user->email,
+            'password' => 'secret',
+        ]);
+
+        $this->assertFalse($result);
+    }
+
+    public function testRememberAttempt()
+    {
+        $user = fake(UserModel::class);
+
+        $result = $this->auth->attempt([
+            'email'    => $user->email,
+            'password' => 'secret',
+        ], true);
+
+        $this->assertTrue($result);
+
+        $this->seeInDatabase('users', [
+            'remember_token' => $this->auth->user()->getRememberToken(),
+        ]);
+
+        $this->assertNotNull($this->auth->getResponse()->getCookie('remember'));
+        $this->assertNotNull($this->auth->user()->getRememberToken());
+    }
+
+    public function testNotRememberAttempt()
+    {
+        $user = fake(UserModel::class);
+
+        $result = $this->auth->attempt([
+            'email'    => $user->email,
+            'password' => 'secret',
+        ], false);
+
+        $this->assertTrue($result);
+
+        $this->assertNull($this->auth->user()->getRememberToken());
+    }
+
+    public function testFailedUserAttempt()
+    {
+        $result = $this->auth->attempt([
+            'email'    => 'notfounduser@mail.com',
+            'password' => 'password',
+        ]);
+
+        $this->assertFalse($result);
+    }
+
+    public function testValidate()
+    {
+        $user = fake(UserModel::class);
+
+        $result = $this->auth->validate([
+            'email'    => $user->email,
+            'password' => 'secret',
+        ]);
+
+        $this->assertTrue($result);
+    }
+
+    public function testFailedValidate()
+    {
+        $user = fake(UserModel::class);
+
+        $result = $this->auth->validate([
+            'email'    => $user->email,
+            'password' => 'not-valid-password',
+        ]);
+
+        $this->assertFalse($result);
+    }
+
+    public function testFailedUserValidate()
+    {
+        $result = $this->auth->validate([
+            'email'    => 'notfounduser@mail.com',
+            'password' => 'secret',
+        ]);
+
+        $this->assertFalse($result);
+    }
+
+    public function testCheck()
+    {
+        $user = fake(UserModel::class);
+
+        $this->assertFalse($this->auth->check());
+
+        $this->auth->login($user);
+
+        $this->assertTrue($this->auth->check());
+    }
+
+    public function testLogin()
+    {
+        $user = fake(UserModel::class);
+
+        $this->auth->login($user);
+
+        $this->assertTrue(session()->has('logged_in'));
+        $this->assertEquals(session('logged_in'), $this->auth->id());
+        $this->assertEquals($user->id, $this->auth->id());
+    }
+
+    public function testLoginById()
+    {
+        $user = fake(UserModel::class);
+
+        $result = $this->auth->loginById($user->id);
+
+        $this->assertNotNull($result);
+        $this->assertEquals($user, $result);
+        $this->assertTrue(session()->has('logged_in'));
+        $this->assertEquals(session('logged_in'), $this->auth->id());
+        $this->assertEquals($user->id, $this->auth->id());
+    }
+
+    public function testFailedLoginById()
+    {
+        $result = $this->auth->loginById(123);
+
+        $this->assertFalse($result);
+        $this->assertNull(session('logged_in'));
+        $this->assertEquals(session('logged_in'), $this->auth->id());
     }
 
     public function testLogout()
@@ -99,199 +205,69 @@ class SessionAdapterTest extends CIDatabaseTestCase
         $user = fake(UserModel::class);
         $this->auth->login($user, true);
 
-        $this->seeInDatabase('auth_remember_tokens', ['user_id' => $user->id]);
+        $this->assertTrue(session()->has('logged_in'));
+
+        $this->seeInDatabase('users', ['remember_token' => $this->auth->user()->getRememberToken()]);
 
         $this->auth->logout();
 
         $this->assertFalse(session()->has('logged_in'));
-        $this->dontSeeInDatabase('auth_remember_tokens', ['user_id' => $user->id]);
     }
 
-    public function testLoginByIdBadUser()
-    {
-        $this->expectException(AuthenticationException::class);
-        $this->expectExceptionMessage(lang('Auth.invalidUser'));
-
-        $this->auth->loginById(123);
-    }
-
-    public function testLoginById()
+    public function testUser()
     {
         $user = fake(UserModel::class);
 
-        $this->auth->loginById($user->id);
+        $this->assertNull($this->auth->user());
 
-        $this->assertEquals($user->id, session()->get('logged_in'));
+        $this->auth->login($user);
 
-        $this->dontSeeInDatabase('auth_remember_tokens', ['user_id' => $user->id]);
+        $this->assertNotNull($this->auth->user());
     }
 
-    public function testLoginByIdRemember()
+    public function testId()
     {
         $user = fake(UserModel::class);
 
-        $this->auth->loginById($user->id, true);
+        $this->assertNull($this->auth->id());
 
-        $this->assertEquals($user->id, session()->get('logged_in'));
+        $this->auth->login($user);
 
-        $this->seeInDatabase('auth_remember_tokens', ['user_id' => $user->id]);
+        $this->assertNotNull($this->auth->id());
     }
 
-    public function testForgetCurrentUser()
+    public function testHasUser()
     {
         $user = fake(UserModel::class);
-        $this->auth->loginById($user->id, true);
-        $this->assertEquals($user->id, session()->get('logged_in'));
 
-        $this->seeInDatabase('auth_remember_tokens', ['user_id' => $user->id]);
+        $this->assertFalse($this->auth->hasUser());
 
-        $this->auth->forget(null);
+        $this->auth->login($user);
 
-        $this->dontSeeInDatabase('auth_remember_tokens', ['user_id' => $user->id]);
+        $this->assertTrue($this->auth->hasUser());
     }
 
-    public function testForgetAnotherUser()
+    public function testSetUser()
     {
         $user = fake(UserModel::class);
-        fake(RememberModel::class, ['user_id' => $user->id]);
 
-        $this->seeInDatabase('auth_remember_tokens', ['user_id' => $user->id]);
+        $result = $this->auth->loginById($user->id);
 
-        $this->auth->forget($user->id);
+        $setUser = $this->auth->setUser($result);
 
-        $this->dontSeeInDatabase('auth_remember_tokens', ['user_id' => $user->id]);
+        $this->assertInstanceOf(SessionAdapter::class, $setUser);
+        $this->assertInstanceOf(AuthenticatorInterface::class, $this->auth->user());
     }
 
-    public function testCheckNoPassword()
+    public function testGetProvider()
     {
-        $result = $this->auth->check([
-            'email' => 'johnsmith@example.com',
-        ]);
-
-        $this->assertInstanceOf(Result::class, $result);
-        $this->assertFalse($result->isOK());
-        $this->assertEquals(lang('Auth.badAttempt'), $result->reason());
+        $this->assertInstanceOf(UserProviderInterface::class, $this->auth->getProvider());
     }
 
-    public function testCheckCannotFindUser()
+    public function testSetProvider()
     {
-        $result = $this->auth->check([
-            'email'    => 'johnsmith@example.com',
-            'password' => 'secret',
-        ]);
+        $setProvider = $this->auth->setProvider($this->auth->getProvider());
 
-        $this->assertInstanceOf(Result::class, $result);
-        $this->assertFalse($result->isOK());
-        $this->assertEquals(lang('Auth.badAttempt'), $result->reason());
-    }
-
-    public function testCheckBadPassword()
-    {
-        $user = fake(UserModel::class, [
-            'password' => 'passwords',
-        ]);
-
-        $result = $this->auth->check([
-            'email'    => $user->email,
-            'password' => 'secret',
-        ]);
-
-        $this->assertInstanceOf(Result::class, $result);
-        $this->assertFalse($result->isOK());
-        $this->assertEquals(lang('Auth.invalidPassword'), $result->reason());
-    }
-
-    public function testCheckSuccess()
-    {
-        $user = fake(UserModel::class, [
-            'password' => 'passwords',
-        ]);
-
-        $result = $this->auth->check([
-            'email'    => $user->email,
-            'password' => 'passwords',
-        ]);
-
-        $this->assertInstanceOf(Result::class, $result);
-        $this->assertTrue($result->isOK());
-
-        $foundUser = $result->extraInfo();
-        $this->assertEquals($user, $foundUser);
-    }
-
-    public function testAttemptCanotFindUser()
-    {
-        $result = $this->auth->attempt([
-            'email'    => 'johnsmith@example.com',
-            'password' => 'secret',
-        ]);
-
-        $this->assertInstanceOf(Result::class, $result);
-        $this->assertFalse($result->isOK());
-        $this->assertEquals(lang('Auth.badAttempt'), $result->reason());
-
-        // A login attempt should have always been recorded
-        $this->seeInDatabase('auth_logins', [
-            'email'   => 'johnsmith@example.com',
-            'success' => 0,
-        ]);
-    }
-
-    public function testAttemptSuccess()
-    {
-        $user = fake(UserModel::class, [
-            'password' => 'passwords',
-        ]);
-
-        $this->assertFalse(session()->has('logged_in'));
-
-        $result = $this->auth->attempt([
-            'email'    => $user->email,
-            'password' => 'passwords',
-        ]);
-
-        $this->assertInstanceOf(Result::class, $result);
-        $this->assertTrue($result->isOK());
-
-        $foundUser = $result->extraInfo();
-        $this->assertEquals($user, $foundUser);
-
-        $this->assertTrue(session()->has('logged_in'));
-        $this->assertEquals($user->id, session()->get('logged_in'));
-
-        // A login attempt should have been recorded
-        $this->seeInDatabase('auth_logins', [
-            'email'   => $user->email,
-            'success' => 1,
-        ]);
-    }
-
-    public function testAuthSessionFacade()
-    {
-        $user = fake(UserModel::class, [
-            'password' => 'password'
-        ]);
-
-        $this->assertFalse(session()->has('logged_in'));
-
-        $result = FacadesAuth::attempt([
-            'email'    => $user->email,
-            'password' => 'password'
-        ]);
-
-        $this->assertInstanceOf(Result::class, $result);
-        $this->assertTrue($result->isOK());
-
-        $foundUser = $result->extraInfo();
-        $this->assertEquals($user, $foundUser);
-
-        $this->assertTrue(session()->has('logged_in'));
-        $this->assertEquals($user->id, session()->get('logged_in'));
-
-        // A login attempt should have been recorded
-        $this->seeInDatabase('auth_logins', [
-            'email'   => $user->email,
-            'success' => 1,
-        ]);
+        $this->assertInstanceOf(SessionAdapter::class, $setProvider);
     }
 }

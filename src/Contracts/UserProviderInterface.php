@@ -2,8 +2,6 @@
 
 namespace Fluent\Auth\Contracts;
 
-use ReflectionException;
-
 interface UserProviderInterface
 {
     /**
@@ -26,18 +24,21 @@ interface UserProviderInterface
      *
      * @return AuthenticatorInterface|HasAccessTokensInterface|null
      */
-    public function findByRememberToken(int $id, string $token);
+    public function findByRememberToken(int $id, $token);
 
     /**
-     * A convenience method that will attempt to determine whether the
-     * data should be inserted or updated. Will work with either
-     * an array or object. When using with custom class objects,
-     * you must ensure that the class will provide access to the class
-     * variables, even if through a magic method.
+     * Update the "remember me" token for the given user in storage.
      *
-     * @param array|object $data
-     * @return boolean
-     * @throws ReflectionException
+     * @param string $token
+     * @return void
      */
-    public function save($data);
+    public function updateRememberToken(AuthenticatorInterface $user, $token);
+
+    /**
+     * Validate a user against the given credentials.
+     *
+     * @param array $credentials
+     * @return bool
+     */
+    public function validateCredentials(AuthenticatorInterface $user, array $credentials);
 }
