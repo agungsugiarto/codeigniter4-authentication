@@ -8,7 +8,7 @@ use Fluent\Auth\Models\UserModel;
 
 use function hash;
 
-class HasAccessTokens extends CIDatabaseTestCase
+class HasAccessTokensTest extends CIDatabaseTestCase
 {
     protected $namespace = 'Fluent\Auth';
 

@@ -19,7 +19,6 @@ interface AuthenticationInterface
      *
      * @param array $credentials
      * @return bool
-     * @throws AuthenticationException
      */
     public function attempt(array $credentials, bool $remember = false);
 
@@ -44,7 +43,6 @@ interface AuthenticationInterface
      * Logs a user in based on their ID.
      *
      * @return AuthenticatorInterface|bool
-     * @throws AuthenticationException
      */
     public function loginById(int $userId, bool $remember = false);
 

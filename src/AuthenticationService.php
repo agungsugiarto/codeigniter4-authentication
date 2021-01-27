@@ -28,7 +28,7 @@ class AuthenticationService
     /** @var Auth */
     protected $config;
 
-    public function __construct(Auth $config)
+    public function __construct($config)
     {
         $this->config = $config;
     }
@@ -78,7 +78,7 @@ class AuthenticationService
         // Class user provider implement UserProviderInterface
         $userProvider = $this->config->adapters[$adapter]['provider'];
 
-        // Instance authentication
+        // Instance authentication adapter
         $this->instances[$adapter] = new $classAdapter($this->config, new $userProvider());
 
         return $this->instances[$adapter];

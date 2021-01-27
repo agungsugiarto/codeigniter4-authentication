@@ -5,7 +5,7 @@ namespace Fluent\Auth\Tests;
 use CodeIgniter\Test\CIDatabaseTestCase;
 use Fluent\Auth\Models\AccessTokenModel;
 
-class AccessToken extends CIDatabaseTestCase
+class AccessTokenTest extends CIDatabaseTestCase
 {
     protected $namespace = 'Fluent\Auth';
 

@@ -14,9 +14,7 @@ class SessionFilter implements FilterInterface
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        helper('auth');
-
-        if (! auth()->loggedIn()) {
+        if (! auth()->check()) {
             throw PageNotFoundException::forPageNotFound(lang('Auth.badAttempt'));
         }
     }
