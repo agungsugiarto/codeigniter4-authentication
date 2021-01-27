@@ -2,31 +2,33 @@
 
 namespace Fluent\Auth\Facades;
 
+use CodeIgniter\HTTP\Response;
 use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\Contracts\HasAccessTokensInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
-use Fluent\Auth\Result;
 
 /**
  * @see \Fluent\Auth\Contracts\AuthenticationInterface
- * @see \Fluent\Auth\AuthenticationFactory
  * @see \Fluent\Auth\AuthenticationService
  *
  * @method static $this adapter(?string $adapter = 'default')
- * @method static AuthenticatorInterface|HasAccessTokensInterface|null user()
+ * @method static AuthenticationInterface factory(?string $adapter = 'default')
+ * @method static AuthenticatorInterface authenticate()
+ * @method static bool hasUser()
+ * @method static bool check()
  * @method static int|null id()
+ * @method static $this setUser(AuthenticatorInterface $user)
  * @method static UserProviderInterface getProvider()
- * @method static AuthenticationInterface factory(string $adapter = 'default')
- * @method static Result attempt(array $credentials, bool $remember = false)
- * @method static Result check(array $credentials)
- * @method static bool loggedIn()
- * @method static bool login(AuthenticatorInterface $user, bool $remember = false)
- * @method static bool loginById(int $userId, bool $remember = false)
- * @method static null logout()
- * @method static mixed forget(?int $id)
- * @method static AuthenticatorInterface|HasAccessTokensInterface|null getUser()
+ * @method static $this setRequest(RequestInterface $request)
+ * @method static Response getResponse()
+ * @method static bool attempt(array $credentials, bool $remember = false)
+ * @method static bool validate(array $credentials)
+ * @method static void login(AuthenticatorInterface $user, bool $remember = false)
+ * @method static AuthenticatorInterface|bool loginById(int $userId, bool $remember = false)
+ * @method static void logout()
+ * @method static AuthenticatorInterface|HasAccessTokensInterface user()
  */
 class Auth
 {

@@ -75,7 +75,7 @@ class AuthenticationService
         // Class adapter implement AuthenticationInterface
         $classAdapter = $this->config->adapters[$adapter]['driver'];
 
-        // Class user provider
+        // Class user provider implement UserProviderInterface
         $userProvider = $this->config->adapters[$adapter]['provider'];
 
         // Instance authentication

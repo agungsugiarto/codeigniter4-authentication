@@ -19,7 +19,10 @@
     "autoload": {
         "psr-4": {
             "Fluent\\Auth\\": "src"
-        }
+        },
+        "files": [
+            "src/Helpers/auth_helper.php"
+        ]
     },
     "require-dev": {
         "phpunit/phpunit": "^8.5",
