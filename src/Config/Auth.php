@@ -51,6 +51,37 @@ class Auth extends BaseConfig
     ];
 
     /**
+     * --------------------------------------------------------------------------
+     * Resetting Passwords
+     * --------------------------------------------------------------------------
+     *
+     * You may specify multiple password reset configurations if you have more
+     * than one user table or model in the application and you want to have
+     * separate password reset settings based on the specific user types.
+     *
+     * The expire time is the number of minutes that the reset token should be
+     * considered valid. This security feature keeps tokens short-lived so
+     * they have less time to be guessed. You may change this as needed.
+     */
+    public $passwords = [
+        'provider' => UserModel::class,
+        'table'    => 'password_resets',
+        'expire'   => 1 * HOUR,
+        'throttle' => 60,
+    ];
+
+    /**
+     * --------------------------------------------------------------------------
+     * Password Confirmation Timeout
+     * --------------------------------------------------------------------------
+     *
+     * Here you may define the amount of seconds before a password confirmation
+     * times out and the user is prompted to re-enter their password via the
+     * confirmation screen. By default, the timeout lasts for three hours.
+     */
+    public $password_timeout = 3 * HOUR;
+
+    /**
      * Session config.
      */
     public $sessionConfig = [
@@ -104,9 +135,4 @@ class Auth extends BaseConfig
      * Valid range is between 4 - 31.
      */
     public $hashCost = 10;
-
-    /**
-     * Throttler login max request attempt within a minute.
-     */
-    public $throttler = 60;
 }

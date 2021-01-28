@@ -2,7 +2,7 @@
 
 namespace Fluent\Auth\Contracts;
 
-interface MustVerifyEmail
+interface MustVerifyEmailInterface
 {
     /**
      * Determine if the user has verified their email address.

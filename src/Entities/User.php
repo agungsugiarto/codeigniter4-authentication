@@ -5,14 +5,24 @@ namespace Fluent\Auth\Entities;
 use CodeIgniter\Entity;
 use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
+use Fluent\Auth\Contracts\CanResetPasswordInterface;
 use Fluent\Auth\Contracts\HasAccessTokensInterface;
+use Fluent\Auth\Contracts\MustVerifyEmailInterface;
 use Fluent\Auth\Traits\Authenticatable;
+use Fluent\Auth\Traits\CanResetPassword;
 use Fluent\Auth\Traits\HasAccessTokens;
+use Fluent\Auth\Traits\MustVerifyEmail;
 
-class User extends Entity implements AuthenticatorInterface, HasAccessTokensInterface
+class User extends Entity implements
+    AuthenticatorInterface,
+    // CanResetPasswordInterface,
+    // MustVerifyEmailInterface,
+    HasAccessTokensInterface
 {
     use Authenticatable;
+    use CanResetPassword;
     use HasAccessTokens;
+    use MustVerifyEmail;
 
     protected $casts = [
         'email_verified_at' => 'datetime',

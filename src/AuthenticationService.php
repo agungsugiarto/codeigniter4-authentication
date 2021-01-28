@@ -85,7 +85,7 @@ class AuthenticationService
     }
 
     /**
-     * Dynamically call the default adapter instance.
+     * Dynamically call the adapter instance.
      *
      * @param string $method
      * @param array $arguments
