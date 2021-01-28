@@ -22,8 +22,7 @@ class AccessToken extends Entity
     public function user()
     {
         if (empty($this->attributes['user'])) {
-            helper('auth');
-            $users                    = auth()->getProvider();
+            $users                    = auth('token')->getProvider();
             $this->attributes['user'] = $users->findById($this->user_id);
         }
 

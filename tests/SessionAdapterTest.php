@@ -63,6 +63,20 @@ class SessionAdapterTest extends CIDatabaseTestCase implements AuthenticationTes
         ]);
 
         $this->assertTrue($result);
+        $this->assertNotNull($this->auth->user());
+    }
+
+    public function testAttemptWithUsername()
+    {
+        $user = fake(UserModel::class);
+
+        $result = $this->auth->attempt([
+            'username' => $user->username,
+            'password' => 'secret',
+        ]);
+
+        $this->assertTrue($result);
+        $this->assertNotNull($this->auth->user());
     }
 
     public function testFailedAttempt()

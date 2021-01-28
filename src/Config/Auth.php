@@ -65,7 +65,6 @@ class Auth extends BaseConfig
      */
     public $passwords = [
         'provider' => UserModel::class,
-        'table'    => 'password_resets',
         'expire'   => 1 * HOUR,
         'throttle' => 60,
     ];

@@ -12,12 +12,27 @@ class UserModel extends Model implements UserProviderInterface
 {
     use UserProviderTrait;
 
-    protected $table      = 'users';
-    protected $primaryKey = 'id';
+    /**
+     * Name of database table
+     *
+     * @var string
+     */
+    protected $table = 'users';
 
-    protected $returnType     = User::class;
-    protected $useSoftDeletes = true;
+    /**
+     * The format that the results should be returned as.
+     * Will be overridden if the as* methods are used.
+     *
+     * @var User
+     */
+    protected $returnType = User::class;
 
+    /**
+     * An array of field names that are allowed
+     * to be set by the user in inserts/updates.
+     *
+     * @var array
+     */
     protected $allowedFields = [
         'email',
         'username',
@@ -26,8 +41,19 @@ class UserModel extends Model implements UserProviderInterface
         'remember_token',
     ];
 
+    /**
+     * If true, will set created_at, and updated_at
+     * values during insert and update routines.
+     *
+     * @var boolean
+     */
     protected $useTimestamps = true;
 
+    /**
+     * Generate fake data.
+     *
+     * @return array
+     */
     public function fake(Generator &$faker)
     {
         return [

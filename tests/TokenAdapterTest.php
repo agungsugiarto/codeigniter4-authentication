@@ -90,6 +90,12 @@ class TokenAdapterTest extends CIDatabaseTestCase implements AuthenticationTestI
         $this->assertFalse($this->auth->user()->tokenCant('post:delete'));
     }
 
+    public function testAttemptWithUsername()
+    {
+        // not implemented
+        $this->assertTrue(true);
+    }
+
     public function testRememberAttempt()
     {
         // not implemented

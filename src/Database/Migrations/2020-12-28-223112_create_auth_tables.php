@@ -40,6 +40,7 @@ class CreateAuthTables extends Migration
             'email'      => ['type' => 'varchar', 'constraint' => 255],
             'token'      => ['type' => 'varchar', 'constraint' => 255, 'null' => true],
             'created_at' => ['type' => 'datetime', 'null' => false],
+            'updated_at' => ['type' => 'datetime', 'null' => true],
         ]);
 
         $this->forge->addPrimaryKey('id');

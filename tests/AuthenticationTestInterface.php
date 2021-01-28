@@ -8,6 +8,8 @@ interface AuthenticationTestInterface
 
     public function testAttempt();
 
+    public function testAttemptWithUsername();
+
     public function testRememberAttempt();
 
     public function testNotRememberAttempt();
