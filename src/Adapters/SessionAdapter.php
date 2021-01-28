@@ -3,157 +3,71 @@
 namespace Fluent\Auth\Adapters;
 
 use CodeIgniter\Events\Events;
-use CodeIgniter\HTTP\IncomingRequest;
-use CodeIgniter\HTTP\Response;
-use CodeIgniter\I18n\Time;
 use Config\App;
-use Fluent\Auth\Config\Auth;
-use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
-use Fluent\Auth\Contracts\HasAccessTokensInterface;
-use Fluent\Auth\Contracts\UserProviderInterface;
-use Fluent\Auth\Exceptions\AuthenticationException;
-use Fluent\Auth\Models\LoginModel;
-use Fluent\Auth\Models\RememberModel;
-use Fluent\Auth\Result;
 
 use function bin2hex;
-use function count;
-use function hash;
 use function is_null;
-use function mt_rand;
 use function random_bytes;
 
-class SessionAdapter implements AuthenticationInterface
+class SessionAdapter extends AbstractAdapter
 {
-    /** @var Auth */
-    protected $config;
-
-    /** @var UserProviderInterface */
-    protected $provider;
-
-    /** @var AuthenticatorInterface|HasAccessTokensInterface */
-    protected $user;
-
-    /** @var LoginModel */
-    protected $loginModel;
-
-    /** @var RememberModel */
-    protected $rememberModel;
-
-    /** @var IncomingRequest */
-    protected $request;
-
-    /** @var Response */
-    protected $response;
-
-    /**
-     * Session adapter constructor.
-     */
-    public function __construct($config, UserProviderInterface $provider)
-    {
-        $this->config        = $config;
-        $this->provider      = $provider;
-        $this->loginModel    = new LoginModel();
-        $this->rememberModel = new RememberModel();
-        $this->request       = service('request');
-        $this->response      = service('response');
-    }
-
     /**
      * {@inheritdoc}
      */
-    public function attempt($credentials, bool $remember = false): Result
+    public function attempt(array $credentials, bool $remember = false)
     {
-        $ipAddress = $this->request->getIPAddress();
-        $result    = $this->check($credentials);
+        Events::trigger('fireAttemptEvent', $credentials, $remember);
 
-        if (! $result->isOK()) {
-            // Always record a login attempt, whether success or not.
-            $this->loginModel->recordLoginAttempt($credentials['email'] ?? $credentials['username'], false, $ipAddress, null);
+        $this->lastAttempted = $user = $this->provider->findByCredentials($credentials);
 
-            $this->user = null;
+        if ($this->hasValidCredentials($user, $credentials)) {
+            $this->login($user, $remember);
 
-            // Fire an event on failure so devs have the chance to
-            // let them know someone attempted to login to their account
-            Events::trigger('failed_login_attempt', $credentials);
-
-            return $result;
-        }
-
-        $this->login($result->extraInfo(), $remember);
-
-        $this->loginModel->recordLoginAttempt($credentials['email'] ?? $credentials['username'], true, $ipAddress, $this->user->id ?? null);
-
-        return $result;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function check(array $credentials): Result
-    {
-        // Can't validate without a password.
-        if (empty($credentials['password']) || count($credentials) < 2) {
-            return new Result([
-                'success' => false,
-                'reason'  => lang('Auth.badAttempt'),
-            ]);
-        }
-
-        // Remove the password from credentials so we can
-        // check afterword.
-        $givenPassword = $credentials['password'] ?? null;
-        unset($credentials['password']);
-
-        // Find the existing user
-        $user = $this->provider->findByCredentials($credentials);
-
-        if (is_null($user)) {
-            return new Result([
-                'success' => false,
-                'reason'  => lang('Auth.badAttempt'),
-            ]);
-        }
-
-        // Now, try matching the passwords.
-        $passwords = service('passwords');
-
-        if (! $passwords->verify($givenPassword, $user->password)) {
-            return new Result([
-                'success' => false,
-                'reason'  => lang('Auth.invalidPassword'),
-            ]);
-        }
-
-        // Check to see if the password needs to be rehashed.
-        // This would be due to the hash algorithm or hash
-        // cost changing since the last time that a user
-        // logged in.
-        if ($passwords->needsRehash($user->password)) {
-            $user->password = $passwords->hash($givenPassword);
-            $this->provider->save($user);
-        }
-
-        return new Result([
-            'success'   => true,
-            'extraInfo' => $user,
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function loggedIn(): bool
-    {
-        if ($this->user instanceof AuthenticatorInterface) {
             return true;
         }
 
-        if ($userId = session($this->config->sessionConfig['field'])) {
-            $this->user = $this->provider->findById($userId);
+        Events::trigger('fireFailedEvent', $user, $credentials);
 
-            return $this->user instanceof AuthenticatorInterface;
+        return false;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function validate(array $credentials): bool
+    {
+        $this->lastAttempted = $user = $this->provider->findByCredentials($credentials);
+
+        return $this->hasValidCredentials($user, $credentials);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function login(AuthenticatorInterface $user, bool $remember = false): void
+    {
+        $this->updateSession($user->getAuthId());
+
+        if ($remember) {
+            $this->ensureRememberTokenIsSet($user);
+            $this->rememberUser($user);
+        }
+
+        Events::trigger('fireLoginEvent', $user, $remember);
+
+        $this->setUser($user);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function loginById(int $userId, bool $remember = false)
+    {
+        if (! is_null($user = $this->provider->findById($userId))) {
+            $this->login($user, $remember);
+
+            return $user;
         }
 
         return false;
@@ -162,143 +76,148 @@ class SessionAdapter implements AuthenticationInterface
     /**
      * {@inheritdoc}
      */
-    public function login(AuthenticatorInterface $user, bool $remember = false): bool
-    {
-        $this->user = $user;
-
-        // Always record a login attempt
-        $ipAddress = $this->request->getIPAddress();
-        $this->recordLoginAttempt($user->getAuthEmail(), true, $ipAddress, $user->getAuthId() ?? null);
-
-        // Regenerate the session ID to help protect against session fixation
-        if (ENVIRONMENT !== 'testing') {
-            session()->regenerate();
-        }
-
-        // Let the session know we're logged in
-        session()->set($this->config->sessionConfig['field'], $this->user->id);
-
-        // When logged in, ensure cache control headers are in place
-        $this->response->noCache();
-
-        if ($remember && $this->config->sessionConfig['allowRemembering']) {
-            $this->rememberUser($this->user->id);
-        }
-
-        // We'll give a 20% chance to need to do a purge since we
-        // don't need to purge THAT often, it's just a maintenance issue.
-        // to keep the table from getting out of control.
-        if (mt_rand(1, 100) <= 20) {
-            $this->rememberModel->purgeOldRememberTokens();
-        }
-
-        // trigger login event, in case anyone cares
-        Events::trigger('login', $user);
-
-        return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function loginById(int $userId, bool $remember = false)
-    {
-        $user = $this->provider->findById($userId);
-
-        if (is_null($user)) {
-            throw AuthenticationException::forInvalidUser();
-        }
-
-        return $this->login($user, $remember);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function logout()
     {
-        // Destroy the session data - but ensure a session is still
-        // available for flash messages, etc.
-        session()->remove($this->config->sessionConfig['field']);
+        $user = $this->user();
 
-        // Regenerate the session ID for a touch of added safety.
-        session()->regenerate(true);
+        $this->clearUserDataFromStorage();
 
-        // Take care of any remember me functionality
-        $this->rememberModel->purgeRememberTokens($this->user->id ?? null);
-
-        // trigger logout event
-        Events::trigger('logout', $this->user);
-
-        $this->user = null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function forget(?int $id)
-    {
-        if (empty($id)) {
-            if (! $this->loggedIn()) {
-                return;
-            }
-
-            $id = $this->user->id;
+        if (! is_null($this->user) && ! empty($user->getRememberToken())) {
+            $this->cycleRememberToken($user);
         }
 
-        $this->rememberModel->purgeRememberTokens($id);
+        Events::trigger('fireLogoutEvent', $user);
+
+        // Once we have fired the logout event we will clear the users out of memory
+        // so they are no longer available as the user is no longer considered as
+        // being signed into this application and should not be available here.
+        $this->user = null;
+
+        $this->loggedOut = true;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getUser()
+    public function user()
     {
+        if ($this->loggedOut) {
+            return;
+        }
+
+        // If we've already retrieved the user for the current request we can just
+        // return it back immediately. We do not want to fetch the user data on
+        // every call to this method because that would be tremendously slow.
+        if (! is_null($this->user)) {
+            return $this->user;
+        }
+
+        $id = $this->session->get($this->config->sessionConfig['field']);
+
+        // First we will try to load the user using the identifier in the session if
+        // one exists. Otherwise we will check for a "remember me" cookie in this
+        // request, and if one exists, attempt to retrieve the user using that.
+        if (! is_null($id) && $this->user = $this->provider->findById((int) $id)) {
+            Events::trigger('fireAuthenticatedEvent', $this->user);
+        }
+
+        // If the user is null, but we decrypt a "recaller" cookie we can attempt to
+        // pull the user data on that cookie which serves as a remember cookie on
+        // the application. Once we have a user we can return it to the caller.
+        if (is_null($this->user) && ! is_null($recaller = $this->request->getCookie($this->config->sessionConfig['rememberCookieName']))) {
+            $this->user = $this->provider->findByRememberToken((int) $id, $recaller);
+
+            if ($this->user) {
+                $this->updateSession($this->user->getAuthId());
+                Events::trigger('fireLoginEvent', $this->user, true);
+            }
+        }
+
         return $this->user;
     }
 
     /**
-     * Record a login attempt.
+     * Determine if the user matches the credentials.
      *
-     * @return boolean|integer|string
+     * @param  mixed  $user
+     * @param  array  $credentials
+     * @return bool
      */
-    protected function recordLoginAttempt(string $email, bool $success, ?string $ipAddress = null, ?int $userID = null)
+    protected function hasValidCredentials($user, $credentials)
     {
-        return $this->loginModel->insert([
-            'ip_address' => $ipAddress,
-            'email'      => $email,
-            'user_id'    => $userID,
-            'date'       => Time::now(),
-            'success'    => (int) $success,
-        ]);
+        $validated = ! is_null($user) && $this->provider->validateCredentials($user, $credentials);
+
+        if ($validated) {
+            Events::trigger('fireValidatedEvent', $user);
+        }
+
+        return $validated;
+    }
+
+    /**
+     * Update the session with the given ID.
+     *
+     * @param  string  $id
+     * @return void
+     */
+    protected function updateSession($id)
+    {
+        $this->session->set($this->config->sessionConfig['field'], $id);
+
+        $this->session->regenerate(true);
+    }
+
+    /**
+     * Create a new "remember me" token for the user if one doesn't already exist.
+     *
+     * @return void
+     */
+    protected function ensureRememberTokenIsSet(AuthenticatorInterface $user)
+    {
+        if (empty($user->getRememberToken())) {
+            $this->cycleRememberToken($user);
+        }
+    }
+
+    /**
+     * Refresh the "remember me" token for the user.
+     *
+     * @return void
+     */
+    protected function cycleRememberToken(AuthenticatorInterface $user)
+    {
+        $user->setRememberToken($token = bin2hex(random_bytes(20)));
+
+        $this->provider->updateRememberToken($user, $token);
+    }
+
+    /**
+     * Remove the user data from the session and cookies.
+     *
+     * @return void
+     */
+    protected function clearUserDataFromStorage()
+    {
+        $this->session->remove($this->config->sessionConfig['field']);
+
+        $this->response->deleteCookie($this->config->sessionConfig['rememberCookieName']);
     }
 
     /**
      * Generates a timing-attack safe remember me token
      * and stores the necessary info in the db and a cookie.
      *
-     * @see https://paragonie.com/blog/2015/04/secure-authentication-php-with-long-term-persistence
-     *
      * @throws Exception
      */
-    protected function rememberUser(int $userID)
+    protected function rememberUser(AuthenticatorInterface $user)
     {
-        $selector  = bin2hex(random_bytes(12));
-        $validator = bin2hex(random_bytes(20));
-        $expires   = Time::now()->addSeconds($this->config->sessionConfig['rememberLength']);
-
-        $token = $selector . ':' . $validator;
-
-        // Store it in the database
-        $this->rememberModel->rememberUser($userID, $selector, hash('sha256', $validator), $expires);
-
         // Save it to the user's browser in a cookie.
         $appConfig = new App();
 
         // Create the cookie
         $this->response->setCookie(
             $this->config->sessionConfig['rememberCookieName'],
-            $token, // Value
+            $user->getRememberToken(), // Value
             $this->config->sessionConfig['rememberLength'], // # Seconds until it expires
             $appConfig->cookieDomain,
             $appConfig->cookiePath,

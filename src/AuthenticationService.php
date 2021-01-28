@@ -2,16 +2,21 @@
 
 namespace Fluent\Auth;
 
+use Fluent\Auth\Config\Auth;
 use Fluent\Auth\Contracts\AuthenticationInterface;
-use Fluent\Auth\Contracts\AuthenticatorInterface;
-use Fluent\Auth\Contracts\HasAccessTokensInterface;
-use Fluent\Auth\Contracts\UserProviderInterface;
-use Fluent\Auth\Entities\User;
+use Fluent\Auth\Exceptions\AuthenticationException;
+
+use function array_key_exists;
 
 class AuthenticationService
 {
-    /** @var AuthenticationFactory|AuthenticationInterface */
-    protected $authenticate;
+    /**
+     * Instantiated adapter objects,
+     * stored by adapter alias.
+     *
+     * @var array
+     */
+    protected $instances = [];
 
     /**
      * The adapter to use for this request.
@@ -20,20 +25,12 @@ class AuthenticationService
      */
     protected $adapter = 'default';
 
-    /** @var User */
-    protected $user;
+    /** @var Auth */
+    protected $config;
 
-    /** @var UserProviderInterface */
-    protected $userProvider;
-
-    /**
-     * Authentication service constructor.
-     *
-     * @return void
-     */
-    public function __construct(AuthenticationFactory $authenticate)
+    public function __construct($config)
     {
-        $this->authenticate = $authenticate;
+        $this->config = $config;
     }
 
     /**
@@ -49,43 +46,53 @@ class AuthenticationService
     }
 
     /**
-     * Returns the currently logged in user.
+     * Returns an instance of the specified adapter.
      *
-     * @return AuthenticatorInterface|HasAccessTokensInterface|null
+     * You can pass 'default' as the adapter and it
+     * will return an instance of the first adapter specified
+     * in the Auth config file.
+     *
+     * @return AuthenticationInterface
+     * @throws AuthenticationException
      */
-    public function user()
+    public function factory(string $adapter = 'default')
     {
-        return $this->getUser();
+        // Determine actual adapter name
+        $adapter = $adapter === 'default'
+            ? $this->config->defaults['adapter']
+            : $adapter;
+
+        // Otherwise, try to create a new instance.
+        if (! array_key_exists($adapter, $this->config->adapters)) {
+            throw AuthenticationException::forUnknownAdapter($adapter);
+        }
+
+        // Return the cached instance if we have it
+        if (! empty($this->instances[$adapter])) {
+            return $this->instances[$adapter];
+        }
+
+        // Class adapter implement AuthenticationInterface
+        $classAdapter = $this->config->adapters[$adapter]['driver'];
+
+        // Class user provider implement UserProviderInterface
+        $userProvider = $this->config->adapters[$adapter]['provider'];
+
+        // Instance authentication adapter
+        $this->instances[$adapter] = new $classAdapter($this->config, new $userProvider());
+
+        return $this->instances[$adapter];
     }
 
     /**
-     * Returns the currently logged in user id.
-     *
-     * @return int|null
-     */
-    public function id()
-    {
-        return $this->getUser()->id ?? null;
-    }
-
-    /**
-     * Get the nama of class that handles user persistance.
-     *
-     * @return UserProviderInterface
-     */
-    public function getProvider()
-    {
-        return $this->authenticate->userProvider();
-    }
-
-    /**
-     * Dynamically call the default adapter instance.
+     * Dynamically call the adapter instance.
      *
      * @param string $method
      * @param array $arguments
+     * @return AuthenticationInterface
      */
     public function __call($method, $arguments)
     {
-        return $this->authenticate->factory($this->adapter)->{$method}(...$arguments);
+        return $this->factory($this->adapter)->{$method}(...$arguments);
     }
 }

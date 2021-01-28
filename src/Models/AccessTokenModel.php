@@ -10,12 +10,27 @@ use function hash;
 
 class AccessTokenModel extends Model
 {
-    protected $table      = 'auth_access_tokens';
-    protected $primaryKey = 'id';
+    /**
+     * Name of database table
+     *
+     * @var string
+     */
+    protected $table = 'auth_access_tokens';
 
-    protected $returnType     = AccessToken::class;
-    protected $useSoftDeletes = false;
+    /**
+     * The format that the results should be returned as.
+     * Will be overridden if the as* methods are used.
+     *
+     * @var AccessToken
+     */
+    protected $returnType = AccessToken::class;
 
+    /**
+     * An array of field names that are allowed
+     * to be set by the user in inserts/updates.
+     *
+     * @var array
+     */
     protected $allowedFields = [
         'user_id',
         'name',
@@ -24,8 +39,19 @@ class AccessTokenModel extends Model
         'scopes',
     ];
 
+    /**
+     * If true, will set created_at, and updated_at
+     * values during insert and update routines.
+     *
+     * @var boolean
+     */
     protected $useTimestamps = true;
 
+    /**
+     * Generate fake data.
+     *
+     * @return array
+     */
     public function fake(Generator &$faker)
     {
         helper('text');

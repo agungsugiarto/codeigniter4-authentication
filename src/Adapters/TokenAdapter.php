@@ -2,139 +2,67 @@
 
 namespace Fluent\Auth\Adapters;
 
-use CodeIgniter\Config\Services;
 use CodeIgniter\Events\Events;
-use CodeIgniter\HTTP\IncomingRequest;
-use Fluent\Auth\Config\Auth;
-use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
-use Fluent\Auth\Contracts\UserProviderInterface;
-use Fluent\Auth\Entities\User;
-use Fluent\Auth\Exceptions\AuthenticationException;
+use Fluent\Auth\Contracts\HasAccessTokensInterface;
 use Fluent\Auth\Models\AccessTokenModel;
-use Fluent\Auth\Models\LoginModel;
-use Fluent\Auth\Result;
 
-use function array_key_exists;
 use function hash;
 use function is_null;
-use function strpos;
-use function substr;
+use function preg_replace;
 use function trim;
 
-class TokenAdapter implements AuthenticationInterface
+class TokenAdapter extends AbstractAdapter
 {
-    /** @var Auth */
-    protected $config;
-
-    /** @var UserProviderInterface */
-    protected $provider;
-
-    /** @var AuthenticatorInterface|User */
-    protected $user;
-
-    /** @var LoginModel */
-    protected $loginModel;
-
-    /** @var IncomingRequest */
-    protected $request;
-
     /**
-     * Token adapter constructor.
+     * {@inheritdoc}
      */
-    public function __construct($config, UserProviderInterface $provider)
+    public function attempt(array $credentials, bool $remember = false)
     {
-        $this->config     = $config;
-        $this->provider   = $provider;
-        $this->loginModel = new LoginModel();
-        $this->request    = Services::request();
+        Events::trigger('fireAttemptEvent', $credentials, $remember);
+
+        if ($user = $this->hasValidCredentials($credentials)) {
+            $this->login($user, false);
+
+            return true;
+        }
+
+        Events::trigger('fireFailedEvent', $user, $credentials);
+
+        return false;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function attempt(array $credentials, bool $remember = false): Result
+    public function validate(array $credentials): bool
     {
-        $ipAddress = $this->request->getIPAddress();
-        $result    = $this->check($credentials);
-
-        if (! $result->isOK()) {
-            // Always record a login attempt, whether success or not.
-            $this->loginModel->recordLoginAttempt('token: ' . ($credentials['token'] ?? ''), false, $ipAddress, null);
-
-            $this->user = null;
-
-            // Fire an event on failure so devs have the chance to
-            // let them know someone attempted to login to their account
-            Events::trigger('failed_login_attempt', $credentials);
-
-            return $result;
+        if (empty($credentials['token'])) {
+            return false;
         }
 
-        $user = $result->extraInfo();
+        $credentials = ['token' => hash('sha256', $credentials['token'])];
 
-        $user = $user->withAccessToken(
-            $user->getAccessToken($this->getBearerToken())
+        if ($this->accessToken()->where($credentials)->first()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function login(AuthenticatorInterface $user, bool $remember = false): void
+    {
+        $this->setUser($user);
+
+        Events::trigger('fireLoginEvent', $user, false);
+
+        /** @var HasAccessTokensInterface $user */
+        $user->withAccessToken(
+            $user->getAccessToken($this->getTokenForRequest())
         );
-
-        $this->login($user);
-
-        $this->loginModel->recordLoginAttempt('token: ' . ($credentials['token'] ?? ''), true, $ipAddress, $this->user->id);
-
-        return $result;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function check(array $credentials): Result
-    {
-        if (! array_key_exists('token', $credentials) || empty($credentials['token'])) {
-            return new Result([
-                'success' => false,
-                'reason'  => lang('Auth.noToken'),
-            ]);
-        }
-
-        if (strpos($credentials['token'], 'Bearer') === 0) {
-            $credentials['token'] = trim(substr($credentials['token'], 6));
-        }
-
-        $tokens = new AccessTokenModel();
-        $token  = $tokens->where('token', hash('sha256', $credentials['token']))->first();
-
-        if (is_null($token)) {
-            return new Result([
-                'success' => false,
-                'reason'  => lang('Auth.badToken'),
-            ]);
-        }
-
-        return new Result([
-            'success'   => true,
-            'extraInfo' => $token->user(),
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function loggedIn(): bool
-    {
-        return $this->user instanceof AuthenticatorInterface;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function login(AuthenticatorInterface $user, bool $remember = false): bool
-    {
-        $this->user = $user;
-
-        // trigger login event, in case anyone cares
-        Events::trigger('login', $user);
-
-        return true;
     }
 
     /**
@@ -142,17 +70,13 @@ class TokenAdapter implements AuthenticationInterface
      */
     public function loginById(int $userId, bool $remember = false)
     {
-        $user = $this->provider->findById($userId);
+        if (! is_null($user = $this->provider->findById($userId))) {
+            $this->login($user, $remember);
 
-        if (is_null($user)) {
-            throw AuthenticationException::forInvalidUser();
+            return $user;
         }
 
-        $user->withAccessToken(
-            $user->getAccessToken($this->getBearerToken())
-        );
-
-        return $this->login($user, $remember);
+        return false;
     }
 
     /**
@@ -160,34 +84,108 @@ class TokenAdapter implements AuthenticationInterface
      */
     public function logout()
     {
-        // trigger logout event
-        Events::trigger('logout', $this->user);
+        $user = $this->user();
 
+        Events::trigger('fireLogoutEvent', $user);
+
+        // Once we have fired the logout event we will clear the users out of memory
+        // so they are no longer available as the user is no longer considered as
+        // being signed into this application and should not be available here.
         $this->user = null;
+
+        $this->loggedOut = true;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function forget(?int $id)
+    public function user()
     {
-        // Nothing to do here...
-    }
+        if ($this->loggedOut) {
+            return;
+        }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getUser()
-    {
+        // If we've already retrieved the user for the current request we can just
+        // return it back immediately. We do not want to fetch the user data on
+        // every call to this method because that would be tremendously slow.
+        if (! is_null($this->user)) {
+            return $this->user;
+        }
+
+        $token = $this->getTokenForRequest();
+
+        if (! is_null($token)) {
+            $credentials = ['token' => hash('sha256', $token)];
+            Events::trigger('fireAuthenticatedEvent', $this->user);
+
+            if ($user = $this->hasValidCredentials($credentials)) {
+                $this->login($user);
+                Events::trigger('fireLoginEvent', $user, true);
+            }
+        }
+
         return $this->user;
     }
 
-    public function getBearerToken()
+    /**
+     * Get the token for the current request.
+     *
+     * @return string
+     */
+    protected function getTokenForRequest()
+    {
+        $token = $this->request->getVar('token');
+
+        if (empty($token)) {
+            $token = $this->bearerToken();
+        }
+
+        return $token;
+    }
+
+    /**
+     * Get the bearer token from the request headers.
+     *
+     * @return string|null
+     */
+    protected function bearerToken()
     {
         if (empty($header = $this->request->getHeaderLine('Authorization'))) {
             return null;
         }
 
-        return trim(substr($header, 6));
+        return trim((string) preg_replace('/^(?:\s+)?Token\s/', '', $header)) ?? null;
+    }
+
+    /**
+     * Intance access token model.
+     *
+     * @return AccessTokenModel
+     */
+    protected function accessToken()
+    {
+        return new AccessTokenModel();
+    }
+
+    /**
+     * Determine if the user matches the credentials.
+     *
+     * @param  array  $credentials
+     * @return AuthenticatorInterface|HasAccessTokensInterface|null
+     */
+    protected function hasValidCredentials(array $credentials)
+    {
+        if (empty($credentials['token'])) {
+            return false;
+        }
+
+        $credentials = ['token' => hash('sha256', $credentials['token'])];
+
+        if ($token = $this->accessToken()->where($credentials)->first()) {
+            Events::trigger('fireValidatedEvent', $token->user());
+            return $token->user();
+        }
+
+        return false;
     }
 }

@@ -8,45 +8,58 @@ use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Entities\User;
 use Fluent\Auth\Traits\UserProvider as UserProviderTrait;
 
-use function password_hash;
-
-use const PASSWORD_DEFAULT;
-
 class UserModel extends Model implements UserProviderInterface
 {
     use UserProviderTrait;
 
-    protected $table      = 'users';
-    protected $primaryKey = 'id';
+    /**
+     * Name of database table
+     *
+     * @var string
+     */
+    protected $table = 'users';
 
-    protected $returnType     = User::class;
-    protected $useSoftDeletes = true;
+    /**
+     * The format that the results should be returned as.
+     * Will be overridden if the as* methods are used.
+     *
+     * @var User
+     */
+    protected $returnType = User::class;
 
+    /**
+     * An array of field names that are allowed
+     * to be set by the user in inserts/updates.
+     *
+     * @var array
+     */
     protected $allowedFields = [
         'email',
         'username',
         'password',
-        'reset_hash',
-        'reset_at',
-        'reset_expires',
-        'activate_hash',
-        'status',
-        'status_message',
-        'active',
-        'force_pass_reset',
-        'deleted_at',
+        'email_verified_at',
+        'remember_token',
     ];
 
+    /**
+     * If true, will set created_at, and updated_at
+     * values during insert and update routines.
+     *
+     * @var boolean
+     */
     protected $useTimestamps = true;
 
+    /**
+     * Generate fake data.
+     *
+     * @return array
+     */
     public function fake(Generator &$faker)
     {
         return [
-            'email'                => $faker->email,
-            'username'             => $faker->userName,
-            'password'             => password_hash('secret', PASSWORD_DEFAULT),
-            'active'               => true,
-            'force_password_reset' => false,
+            'email'    => $faker->email,
+            'username' => $faker->userName,
+            'password' => 'secret',
         ];
     }
 }

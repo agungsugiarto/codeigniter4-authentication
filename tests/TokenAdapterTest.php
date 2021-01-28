@@ -2,19 +2,19 @@
 
 namespace Fluent\Auth\Tests;
 
-use CodeIgniter\Config\Services;
 use CodeIgniter\Events\Events;
 use CodeIgniter\Test\CIDatabaseTestCase;
-use CodeIgniter\Test\Mock\MockEvents;
+use Fluent\Auth\Adapters\TokenAdapter;
 use Fluent\Auth\AuthenticationService;
+use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\AuthenticationInterface;
+use Fluent\Auth\Contracts\AuthenticatorInterface;
+use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Entities\AccessToken;
-use Fluent\Auth\Entities\User;
-use Fluent\Auth\Facades\Auth;
+use Fluent\Auth\Exceptions\AuthenticationException;
 use Fluent\Auth\Models\UserModel;
-use Fluent\Auth\Result;
 
-class TokenAdapterTest extends CIDatabaseTestCase
+class TokenAdapterTest extends CIDatabaseTestCase implements AuthenticationTestInterface
 {
     /** @var AuthenticationService|AuthenticationInterface */
     protected $auth;
@@ -24,16 +24,144 @@ class TokenAdapterTest extends CIDatabaseTestCase
     /** @var Events */
     protected $events;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
-        helper('auth');
+        $this->auth = Services::auth(false)->adapter('token');
+    }
 
-        $this->auth = auth('token');
+    protected function tearDown(): void
+    {
+        parent::tearDown();
 
-        $this->events = new MockEvents();
-        Services::injectMock('events', $this->events);
+        $this->auth->logout();
+    }
+
+    protected function setRequestHeader(string $token)
+    {
+        $request = service('request');
+        $request->setHeader('Authorization', 'Token ' . $token);
+    }
+
+    public function testAuthenticate()
+    {
+        $this->expectException(AuthenticationException::class);
+        $this->expectExceptionMessage(lang('Auth.invalidUser'));
+
+        $this->auth->authenticate();
+
+        $user = fake(UserModel::class);
+
+        $this->auth->login($user);
+
+        $this->assertNotNull($this->auth->authenticate());
+        $this->assertEquals($user, $this->auth->authenticate());
+    }
+
+    public function testAttempt()
+    {
+        $user  = fake(UserModel::class);
+        $token = $user->generateAccessToken('post', [
+            'post:create',
+            'post:read',
+            'post:update',
+            'post:delete',
+        ]);
+
+        $this->setRequestHeader($token->raw_token);
+
+        $result = $this->auth->attempt([
+            'token' => $token->raw_token,
+        ]);
+
+        $this->assertTrue($result);
+        $this->assertNotNull($this->auth->user());
+        $this->assertInstanceOf(AccessToken::class, $this->auth->user()->currentAccessToken());
+        $this->assertEquals($token->token, $this->auth->user()->currentAccessToken()->token);
+
+        $this->assertTrue($this->auth->user()->tokenCan('post:create'));
+        $this->assertTrue($this->auth->user()->tokenCan('post:read'));
+        $this->assertTrue($this->auth->user()->tokenCan('post:update'));
+        $this->assertTrue($this->auth->user()->tokenCan('post:delete'));
+        $this->assertFalse($this->auth->user()->tokenCant('post:create'));
+        $this->assertFalse($this->auth->user()->tokenCant('post:read'));
+        $this->assertFalse($this->auth->user()->tokenCant('post:update'));
+        $this->assertFalse($this->auth->user()->tokenCant('post:delete'));
+    }
+
+    public function testAttemptWithUsername()
+    {
+        // not implemented
+        $this->assertTrue(true);
+    }
+
+    public function testRememberAttempt()
+    {
+        // not implemented
+        $this->assertTrue(true);
+    }
+
+    public function testNotRememberAttempt()
+    {
+        // not implemented
+        $this->assertTrue(true);
+    }
+
+    public function testFailedAttempt()
+    {
+        $this->setRequestHeader('not-found-token');
+
+        $result = $this->auth->attempt([
+            'token' => 'not-found-token',
+        ]);
+
+        $this->assertFalse($result);
+        $this->assertNull($this->auth->user());
+    }
+
+    public function testFailedUserAttempt()
+    {
+        // not implemented
+        $this->assertTrue(true);
+    }
+
+    public function testValidate()
+    {
+        $user  = fake(UserModel::class);
+        $token = $user->generateAccessToken('foo');
+
+        $result1 = $this->auth->validate([
+            'token' => $token->raw_token,
+        ]);
+
+        $this->assertTrue($result1);
+    }
+
+    public function testFailedValidate()
+    {
+        $result2 = $this->auth->validate([
+            'token' => 'not-found-token',
+        ]);
+
+        $this->assertFalse($result2);
+    }
+
+    public function testFailedUserValidate()
+    {
+        // not implemented
+        $this->assertTrue(true);
+    }
+
+    public function testCheck()
+    {
+        $user = fake(UserModel::class);
+
+        $this->assertFalse($this->auth->check());
+
+        $this->auth->login($user);
+
+        $this->assertTrue($this->auth->check());
     }
 
     public function testLogin()
@@ -42,148 +170,92 @@ class TokenAdapterTest extends CIDatabaseTestCase
 
         $this->auth->login($user);
 
-        // Stores the user
-        $this->assertInstanceOf(User::class, $this->auth->getUser());
-        $this->assertEquals($user->id, $this->auth->getUser()->id);
+        $this->assertEquals($user->id, $this->auth->id());
+    }
+
+    public function testLoginById()
+    {
+        $user = fake(UserModel::class);
+
+        $result = $this->auth->loginById($user->id);
+
+        $this->assertNotNull($result);
+        $this->assertEquals($user->id, $this->auth->id());
+    }
+
+    public function testFailedLoginById()
+    {
+        $result = $this->auth->loginById(123);
+
+        $this->assertFalse($result);
     }
 
     public function testLogout()
     {
-        // this one's a little odd since it's stateless, but roll with it...
         $user = fake(UserModel::class);
-
         $this->auth->login($user);
-        $this->assertNotNull($this->auth->getUser());
+
+        $this->assertTrue($this->auth->check());
 
         $this->auth->logout();
-        $this->assertNull($this->auth->getUser());
+
+        $this->assertFalse($this->auth->check());
     }
 
-    public function testLoginByidNoToken()
+    public function testUser()
     {
         $user = fake(UserModel::class);
 
-        $this->assertFalse($this->auth->loggedIn());
+        $this->assertNull($this->auth->user());
 
-        $this->auth->loginById($user->id);
+        $this->auth->login($user);
 
-        $this->assertTrue($this->auth->loggedIn());
-        $this->assertNull($this->auth->getUser()->currentAccessToken());
+        $this->assertNotNull($this->auth->user());
     }
 
-    public function testLoginByIdWithToken()
+    public function testId()
     {
-        $user  = fake(UserModel::class);
-        $token = $user->generateAccessToken('foo');
+        $user = fake(UserModel::class);
 
-        $this->setRequestHeader($token->raw_token);
+        $this->assertNull($this->auth->id());
 
-        $this->auth->loginById($user->id);
+        $this->auth->login($user);
 
-        $this->assertTrue($this->auth->loggedIn());
-        $this->assertInstanceOf(AccessToken::class, $this->auth->getUser()->currentAccessToken());
-        $this->assertEquals($token->id, $this->auth->getUser()->currentAccessToken()->id);
+        $this->assertNotNull($this->auth->id());
     }
 
-    public function testCheckNoToken()
+    public function testHasUser()
     {
-        $result = $this->auth->check([]);
+        $user = fake(UserModel::class);
 
-        $this->assertFalse($result->isOK());
-        $this->assertEquals(lang('Auth.noToken'), $result->reason());
+        $this->assertFalse($this->auth->hasUser());
+
+        $this->auth->login($user);
+
+        $this->assertTrue($this->auth->hasUser());
     }
 
-    public function testCheckBadToken()
+    public function testSetUser()
     {
-        $result = $this->auth->check(['token' => 'abc123']);
+        $user = fake(UserModel::class);
 
-        $this->assertFalse($result->isOK());
-        $this->assertEquals(lang('Auth.badToken'), $result->reason());
+        $result = $this->auth->loginById($user->id);
+
+        $setUser = $this->auth->setUser($result);
+
+        $this->assertInstanceOf(TokenAdapter::class, $setUser);
+        $this->assertInstanceOf(AuthenticatorInterface::class, $this->auth->user());
     }
 
-    public function testCheckSuccess()
+    public function testGetProvider()
     {
-        $user   = fake(UserModel::class);
-        $token  = $user->generateAccessToken('foo');
-        $result = $this->auth->check(['token' => $token->raw_token]);
-
-        $this->assertTrue($result->isOK());
-        $this->assertInstanceOf(User::class, $result->extraInfo());
-        $this->assertEquals($user->id, $result->extraInfo()->id);
+        $this->assertInstanceOf(UserProviderInterface::class, $this->auth->getProvider());
     }
 
-    public function testAttemptCannotFindUser()
+    public function testSetProvider()
     {
-        $result = $this->auth->attempt([
-            'token' => 'abc123',
-        ]);
+        $setProvider = $this->auth->setProvider($this->auth->getProvider());
 
-        $this->assertInstanceOf(Result::class, $result);
-        $this->assertFalse($result->isOK());
-        $this->assertEquals(lang('Auth.badToken'), $result->reason());
-
-        // A login attempt should have always been recorded
-        $this->seeInDatabase('auth_logins', [
-            'email'   => 'token: abc123',
-            'success' => 0,
-        ]);
-    }
-
-    public function testAttemptSuccess()
-    {
-        $user  = fake(UserModel::class);
-        $token = $user->generateAccessToken('foo');
-        $this->setRequestHeader($token->raw_token);
-
-        $result = $this->auth->attempt([
-            'token' => $token->raw_token,
-        ]);
-
-        $this->assertInstanceOf(Result::class, $result);
-        $this->assertTrue($result->isOK());
-
-        $foundUser = $result->extraInfo();
-        $this->assertInstanceOf(User::class, $foundUser);
-        $this->assertEquals($user->id, $foundUser->id);
-        $this->assertInstanceOf(AccessToken::class, $foundUser->currentAccessToken());
-        $this->assertEquals($token->token, $foundUser->currentAccessToken()->token);
-
-        // A login attempt should have been recorded
-        $this->seeInDatabase('auth_logins', [
-            'email'   => 'token: ' . $token->raw_token,
-            'success' => 1,
-        ]);
-    }
-
-    public function testAuthTokenFacade()
-    {
-        $user  = fake(UserModel::class);
-        $token = $user->generateAccessToken('foo');
-        $this->setRequestHeader($token->raw_token);
-
-        $result = Auth::adapter('token')->attempt([
-            'token' => $token->raw_token,
-        ]);
-
-        $this->assertInstanceOf(Result::class, $result);
-        $this->assertTrue($result->isOK());
-
-        $foundUser = $result->extraInfo();
-        $this->assertInstanceOf(User::class, $foundUser);
-        $this->assertEquals($user->id, $foundUser->id);
-        $this->assertInstanceOf(AccessToken::class, $foundUser->currentAccessToken());
-        $this->assertEquals($token->token, $foundUser->currentAccessToken()->token);
-
-        // A login attempt should have been recorded
-        $this->seeInDatabase('auth_logins', [
-            'email'   => 'token: ' . $token->raw_token,
-            'success' => 1,
-        ]);
-    }
-
-    protected function setRequestHeader(string $token)
-    {
-        $request = service('request');
-        $request->setHeader('Authorization', 'Bearer ' . $token);
+        $this->assertInstanceOf(TokenAdapter::class, $setProvider);
     }
 }
