@@ -3,8 +3,6 @@
 namespace Fluent\Auth\Config;
 
 use CodeIgniter\Config\BaseConfig;
-use Fluent\Auth\Adapters\SessionAdapter;
-use Fluent\Auth\Adapters\TokenAdapter;
 use Fluent\Auth\Models\UserModel;
 
 use const PASSWORD_DEFAULT;
@@ -21,7 +19,8 @@ class Auth extends BaseConfig
      * most applications.
      */
     public $defaults = [
-        'adapter' => 'session',
+        'guard'    => 'web',
+        'provider' => 'users',
     ];
 
     /**
@@ -38,16 +37,43 @@ class Auth extends BaseConfig
      *
      * Supported: "session", "token"
      */
-    public $adapters = [
-        'session' => [
-            'driver'   => SessionAdapter::class,
-            'provider' => UserModel::class,
+    public $gurads = [
+        'web'   => [
+            'driver'   => 'session',
+            'provider' => 'users',
         ],
-        'token'   => [
-            'driver'   => TokenAdapter::class,
-            'provider' => UserModel::class,
+        'token' => [
+            'driver'   => 'token',
+            'provider' => 'users',
         ],
         // etc your implementation
+    ];
+
+    /**
+     * --------------------------------------------------------------------------
+     * User Providers
+     * --------------------------------------------------------------------------
+     *
+     * All authentication drivers have a user provider. This defines how the
+     * users are actually retrieved out of your database or other storage
+     * mechanisms used by this application to persist your user's data.
+     *
+     * If you have multiple user tables or models you may configure multiple
+     * sources which represent each model / table. These sources may then
+     * be assigned to any extra authentication guards you have defined.
+     *
+     * Supported: "model", "database"
+     */
+
+    public $providers = [
+        'users'    => [
+            'driver' => 'model',
+            'table'  => UserModel::class,
+        ],
+        'database' => [
+            'driver' => 'connection',
+            'table'  => 'users',
+        ],
     ];
 
     /**
