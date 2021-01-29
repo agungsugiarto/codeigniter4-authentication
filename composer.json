@@ -14,7 +14,8 @@
     "require": {
         "codeigniter4/framework": "^4.0",
         "php": "^7.2",
-        "fakerphp/faker": "^1.13"
+        "fakerphp/faker": "^1.13",
+        "agungsugiarto/codeigniter4-hashing": "9.x-dev"
     },
     "autoload": {
         "psr-4": {

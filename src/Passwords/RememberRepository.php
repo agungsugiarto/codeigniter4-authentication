@@ -4,10 +4,10 @@ namespace Fluent\Auth\Passwords;
 
 use CodeIgniter\I18n\Time;
 use CodeIgniter\Model;
-use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\CanResetPasswordInterface;
 use Fluent\Auth\Contracts\RememberRepositoryInterface;
 use Illuminate\Contracts\Auth\CanResetPassword;
+use Illuminate\Hashing\Supports\Hash;
 
 use function bin2hex;
 use function hash_hmac;
@@ -79,7 +79,7 @@ class RememberRepository extends Model implements RememberRepositoryInterface
     {
         $record = $this->where('email', $user->getEmailForPasswordReset())->first();
 
-        return $record && ! $this->tokenExpired($record->created_at) && Services::passwords()->verify($token, $record->token);
+        return $record && ! $this->tokenExpired($record->created_at) && Hash::check($token, $record->token);
     }
 
     /**
@@ -130,7 +130,7 @@ class RememberRepository extends Model implements RememberRepositoryInterface
      */
     protected function getPayload($email, $token)
     {
-        return ['email' => $email, 'token' => Services::passwords()->hash($token), 'created_at' => Time::now()];
+        return ['email' => $email, 'token' => Hash::make($token), 'created_at' => Time::now()];
     }
 
     /**

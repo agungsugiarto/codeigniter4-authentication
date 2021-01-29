@@ -4,6 +4,7 @@ namespace Fluent\Auth\Entities;
 
 use CodeIgniter\Entity;
 
+use function auth;
 use function in_array;
 
 class AccessToken extends Entity

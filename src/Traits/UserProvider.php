@@ -3,8 +3,8 @@
 namespace Fluent\Auth\Traits;
 
 use CodeIgniter\Model;
-use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
+use Illuminate\Hashing\Supports\Hash;
 
 use function array_key_exists;
 use function count;
@@ -87,9 +87,7 @@ trait UserProvider
      */
     public function validateCredentials(AuthenticatorInterface $user, array $credentials)
     {
-        $plain = $credentials['password'];
-
-        return Services::passwords()->verify($plain, $user->getAuthPassword());
+        return Hash::check($credentials['password'], $user->getAuthPassword());
     }
 
     /**
