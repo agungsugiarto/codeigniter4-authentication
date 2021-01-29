@@ -18,7 +18,7 @@ class TokenFilter implements FilterInterface
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        $result = Auth::adapter('token')->attempt([
+        $result = Auth::guard('token')->attempt([
             'token' => $this->getTokenForRequest($request),
         ]);
 

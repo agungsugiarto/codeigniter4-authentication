@@ -1,15 +1,15 @@
 <?php
 
-use Fluent\Auth\AuthenticationService;
+use Fluent\Auth\AuthManager;
 use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Passwords;
 
 if (! defined('auth')) {
     /**
-     * Provides convenient access to the main AuthenticationService class.
+     * Provides convenient access to the main authentication class.
      *
-     * @return AuthenticationService|AuthenticationInterface
+     * @return AuthManager|AuthenticationInterface
      */
     function auth($name = null)
     {
