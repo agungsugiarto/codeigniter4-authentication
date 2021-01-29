@@ -11,9 +11,9 @@ if (! defined('auth')) {
      *
      * @return AuthenticationService|AuthenticationInterface
      */
-    function auth(?string $authenticator = 'default')
+    function auth($name = null)
     {
-        return Services::auth()->adapter($authenticator);
+        return Services::auth()->guard($name);
     }
 }
 

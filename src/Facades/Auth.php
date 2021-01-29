@@ -11,9 +11,9 @@ use Fluent\Auth\Contracts\UserProviderInterface;
 
 /**
  * @see \Fluent\Auth\Contracts\AuthenticationInterface
- * @see \Fluent\Auth\AuthenticationService
+ * @see \Fluent\Auth\AuthManager
  *
- * @method static $this adapter(?string $adapter = 'default')
+ * @method static $this guard($name = null)
  * @method static AuthenticationInterface factory(?string $adapter = 'default')
  * @method static AuthenticatorInterface authenticate()
  * @method static bool hasUser()

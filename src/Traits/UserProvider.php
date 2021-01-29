@@ -6,6 +6,7 @@ use CodeIgniter\Model;
 use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
 
+use function array_key_exists;
 use function count;
 use function is_array;
 use function mb_strpos;
@@ -34,7 +35,7 @@ trait UserProvider
         if (
             empty($credentials) ||
             (count($credentials) === 1 &&
-            static::contains(static::firstCredentialKey($credentials), 'password'))
+            array_key_exists('password', $credentials))
         ) {
             return;
         }
@@ -89,19 +90,6 @@ trait UserProvider
         $plain = $credentials['password'];
 
         return Services::passwords()->verify($plain, $user->getAuthPassword());
-    }
-
-    /**
-     * Get the first key from the credential array.
-     *
-     * @param  array  $credentials
-     * @return string|null
-     */
-    protected static function firstCredentialKey(array $credentials)
-    {
-        foreach ($credentials as $key => $value) {
-            return $key;
-        }
     }
 
     /**
