@@ -5,7 +5,6 @@ namespace Fluent\Auth\Config;
 use CodeIgniter\Config\Services as BaseService;
 use Fluent\Auth\AuthManager;
 use Fluent\Auth\Contracts\AuthenticationInterface;
-use Fluent\Auth\Passwords;
 
 class Services extends BaseService
 {
@@ -21,19 +20,5 @@ class Services extends BaseService
         }
 
         return new AuthManager(config('Auth'));
-    }
-
-    /**
-     * Password utilities.
-     *
-     * @return Passwords
-     */
-    public static function passwords(bool $getShared = true)
-    {
-        if ($getShared) {
-            return self::getSharedInstance('passwords');
-        }
-
-        return new Passwords(config('Auth'));
     }
 }

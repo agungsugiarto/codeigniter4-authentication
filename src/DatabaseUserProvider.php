@@ -4,10 +4,10 @@ namespace Fluent\Auth;
 
 use CodeIgniter\Database\ConnectionInterface;
 use Config\Database;
-use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Entities\User;
+use Illuminate\Hashing\Supports\Hash;
 
 use function array_key_exists;
 use function count;
@@ -114,9 +114,7 @@ class DatabaseUserProvider implements UserProviderInterface
      */
     public function validateCredentials(AuthenticatorInterface $user, array $credentials)
     {
-        $plain = $credentials['password'];
-
-        return Services::passwords()->verify($plain, $user->getAuthPassword());
+        return Hash::check($credentials['password'], $user->getAuthPassword());
     }
 
     /**
