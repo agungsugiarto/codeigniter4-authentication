@@ -106,13 +106,4 @@ class Auth extends BaseConfig
      * confirmation screen. By default, the timeout lasts for three hours.
      */
     public $password_timeout = 3 * HOUR;
-
-    /**
-     * Session config.
-     */
-    public $sessionConfig = [
-        'field'              => 'logged_in',
-        'rememberCookieName' => 'remember',
-        'rememberLength'     => 30 * DAY,
-    ];
 }

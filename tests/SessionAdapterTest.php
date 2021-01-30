@@ -104,7 +104,7 @@ class SessionAdapterTest extends CIDatabaseTestCase implements AuthenticationTes
             'remember_token' => $this->auth->user()->getRememberToken(),
         ]);
 
-        $this->assertNotNull($this->auth->getResponse()->getCookie('remember'));
+        $this->assertNotNull($this->auth->getResponse()->getCookie($this->auth->getCookieName()));
         $this->assertNotNull($this->auth->user()->getRememberToken());
     }
 
@@ -183,8 +183,8 @@ class SessionAdapterTest extends CIDatabaseTestCase implements AuthenticationTes
 
         $this->auth->login($user);
 
-        $this->assertTrue(session()->has('logged_in'));
-        $this->assertEquals(session('logged_in'), $this->auth->id());
+        $this->assertTrue(session()->has($this->auth->getSessionName()));
+        $this->assertEquals(session($this->auth->getSessionName()), $this->auth->id());
         $this->assertEquals($user->id, $this->auth->id());
     }
 
@@ -196,8 +196,8 @@ class SessionAdapterTest extends CIDatabaseTestCase implements AuthenticationTes
 
         $this->assertNotNull($result);
         $this->assertEquals($user, $result);
-        $this->assertTrue(session()->has('logged_in'));
-        $this->assertEquals(session('logged_in'), $this->auth->id());
+        $this->assertTrue(session()->has($this->auth->getSessionName()));
+        $this->assertEquals(session($this->auth->getSessionName()), $this->auth->id());
         $this->assertEquals($user->id, $this->auth->id());
     }
 
@@ -206,8 +206,8 @@ class SessionAdapterTest extends CIDatabaseTestCase implements AuthenticationTes
         $result = $this->auth->loginById(123);
 
         $this->assertFalse($result);
-        $this->assertNull(session('logged_in'));
-        $this->assertEquals(session('logged_in'), $this->auth->id());
+        $this->assertNull(session($this->auth->getSessionName()));
+        $this->assertEquals(session($this->auth->getSessionName()), $this->auth->id());
     }
 
     public function testLogout()
@@ -215,13 +215,13 @@ class SessionAdapterTest extends CIDatabaseTestCase implements AuthenticationTes
         $user = fake(UserModel::class);
         $this->auth->login($user, true);
 
-        $this->assertTrue(session()->has('logged_in'));
+        $this->assertTrue(session()->has($this->auth->getSessionName()));
 
         $this->seeInDatabase('users', ['remember_token' => $this->auth->user()->getRememberToken()]);
 
         $this->auth->logout();
 
-        $this->assertFalse(session()->has('logged_in'));
+        $this->assertFalse(session()->has($this->auth->getSessionName()));
     }
 
     public function testUser()

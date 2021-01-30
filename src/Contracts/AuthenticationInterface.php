@@ -23,6 +23,13 @@ interface AuthenticationInterface
     public function attempt(array $credentials, bool $remember = false);
 
     /**
+     * Determine if the user was authenticated via "remember me" cookie.
+     *
+     * @return bool
+     */
+    public function viaRemember();
+
+    /**
      * Validate a user's credentials.
      *
      * @param  array  $credentials
@@ -78,6 +85,20 @@ interface AuthenticationInterface
      * @return $this
      */
     public function setUser(AuthenticatorInterface $user);
+
+    /**
+     * Get a unique identifier for the auth session value.
+     *
+     * @return string
+     */
+    public function getSessionName();
+
+    /**
+     * Get the name of the cookie used to store the "recaller".
+     *
+     * @return string
+     */
+    public function getCookieName();
 
     /**
      * Get the user provider used by the adapter.

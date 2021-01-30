@@ -7,14 +7,13 @@ use Config\Database;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Entities\User;
+use Fluent\Auth\Helpers\Str;
 use Illuminate\Hashing\Supports\Hash;
 
 use function array_key_exists;
 use function count;
 use function hash_equals;
 use function is_array;
-use function mb_strpos;
-use function trim;
 
 class UserDatabase implements UserProviderInterface
 {
@@ -55,10 +54,12 @@ class UserDatabase implements UserProviderInterface
      */
     public function findByRememberToken(int $id, $token)
     {
-        $user = $this->connection->table($this->table)->where(['id' => $id, 'token' => trim($token)])->get()->getFirstRow(User::class);
+        $retriveDatabase = $this->connection->table($this->table)->where('id', $id)->get()->getFirstRow(User::class);
 
-        return $user && $user->getRememberToken() && hash_equals($user->getRememberToken(), $token)
-            ? $user
+        $rememberToken = $retriveDatabase->getRememberToken();
+
+        return $rememberToken && hash_equals($rememberToken, $token)
+            ? $retriveDatabase
             : null;
     }
 
@@ -92,7 +93,7 @@ class UserDatabase implements UserProviderInterface
         $query = $this->connection->table($this->table);
 
         foreach ($credentials as $key => $value) {
-            if (static::contains($key, 'password')) {
+            if (Str::contains($key, 'password')) {
                 continue;
             }
 
@@ -115,23 +116,5 @@ class UserDatabase implements UserProviderInterface
     public function validateCredentials(AuthenticatorInterface $user, array $credentials)
     {
         return Hash::check($credentials['password'], $user->getAuthPassword());
-    }
-
-    /**
-     * Determine if a given string contains a given substring.
-     *
-     * @param  string  $haystack
-     * @param  string|string[]  $needles
-     * @return bool
-     */
-    protected static function contains($haystack, $needles)
-    {
-        foreach ((array) $needles as $needle) {
-            if ($needle !== '' && mb_strpos($haystack, $needle) !== false) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

@@ -34,6 +34,18 @@ abstract class AbstractAdapter implements AuthenticationInterface
     /** @var boolean */
     protected $loggedOut = false;
 
+    /** @var boolean */
+    protected $viaRember = false;
+
+    /** @var boolean */
+    protected $recallAttempted = false;
+
+    /** @var string */
+    protected $sessionName = 'login_web';
+
+    /** @var string */
+    protected $cookieName = 'remember_web';
+
     /** @var IncomingRequest */
     protected $request;
 
@@ -65,6 +77,14 @@ abstract class AbstractAdapter implements AuthenticationInterface
         }
 
         throw AuthenticationException::forInvalidUser();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function viaRemember()
+    {
+        return $this->viaRember;
     }
 
     /**
@@ -107,6 +127,22 @@ abstract class AbstractAdapter implements AuthenticationInterface
         Events::trigger('fireAuthenticatedEvent', $user);
 
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getSessionName()
+    {
+        return $this->sessionName;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getCookieName()
+    {
+        return $this->cookieName;
     }
 
     /**
