@@ -2,13 +2,12 @@
 
 namespace Fluent\Auth\Tests;
 
-use CodeIgniter\Events\Events;
 use CodeIgniter\Test\CIDatabaseTestCase;
 use Fluent\Auth\Adapters\TokenAdapter;
-use Fluent\Auth\AuthenticationService;
 use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
+use Fluent\Auth\Contracts\AuthFactoryInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Entities\AccessToken;
 use Fluent\Auth\Exceptions\AuthenticationException;
@@ -16,19 +15,16 @@ use Fluent\Auth\Models\UserModel;
 
 class TokenAdapterTest extends CIDatabaseTestCase implements AuthenticationTestInterface
 {
-    /** @var AuthenticationService|AuthenticationInterface */
+    /** @var AuthFactoryInterface|AuthenticationInterface */
     protected $auth;
 
     protected $namespace = '\Fluent\Auth';
-
-    /** @var Events */
-    protected $events;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->auth = Services::auth(false)->guard('token');
+        $this->auth = Services::auth()->guard('token');
     }
 
     protected function tearDown(): void

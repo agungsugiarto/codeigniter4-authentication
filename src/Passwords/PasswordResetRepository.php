@@ -5,14 +5,14 @@ namespace Fluent\Auth\Passwords;
 use CodeIgniter\I18n\Time;
 use CodeIgniter\Model;
 use Fluent\Auth\Contracts\CanResetPasswordInterface;
-use Fluent\Auth\Contracts\RememberRepositoryInterface;
+use Fluent\Auth\Contracts\PasswordResetInterface;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Hashing\Supports\Hash;
 
 use function bin2hex;
 use function hash_hmac;
 
-class RememberRepository extends Model implements RememberRepositoryInterface
+class PasswordResetRepository extends Model implements PasswordResetInterface
 {
     /**
      * Name of database table
@@ -103,7 +103,7 @@ class RememberRepository extends Model implements RememberRepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function destoryExpired()
+    public function destroyExpired()
     {
         $expiredAt = Time::now()->subSeconds(config('Auth')->password['expire']);
 

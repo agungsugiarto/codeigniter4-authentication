@@ -3,7 +3,10 @@
 namespace Fluent\Auth\Config;
 
 use CodeIgniter\Config\BaseConfig;
+use Fluent\Auth\Adapters\SessionAdapter;
+use Fluent\Auth\Adapters\TokenAdapter;
 use Fluent\Auth\Models\UserModel;
+use Fluent\Auth\UserDatabase;
 
 class Auth extends BaseConfig
 {
@@ -35,13 +38,13 @@ class Auth extends BaseConfig
      *
      * Supported: "session", "token"
      */
-    public $gurads = [
+    public $guards = [
         'web'   => [
-            'driver'   => 'session',
+            'driver'   => SessionAdapter::class,
             'provider' => 'users',
         ],
         'token' => [
-            'driver'   => 'token',
+            'driver'   => TokenAdapter::class,
             'provider' => 'users',
         ],
         // etc your implementation
@@ -70,7 +73,7 @@ class Auth extends BaseConfig
         ],
         'database' => [
             'driver' => 'connection',
-            'table'  => 'users',
+            'table'  => UserDatabase::class,
         ],
     ];
 

@@ -2,33 +2,29 @@
 
 namespace Fluent\Auth\Tests;
 
-use CodeIgniter\Config\Services;
-use CodeIgniter\Events\Events;
 use CodeIgniter\Test\CIDatabaseTestCase;
 use Fluent\Auth\Adapters\SessionAdapter;
-use Fluent\Auth\AuthenticationService;
+use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
+use Fluent\Auth\Contracts\AuthFactoryInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Exceptions\AuthenticationException;
 use Fluent\Auth\Models\UserModel;
 
 class SessionAdapterTest extends CIDatabaseTestCase implements AuthenticationTestInterface
 {
-    /** @var AuthenticationService|AuthenticationInterface */
+    /** @var AuthFactoryInterface|AuthenticationInterface */
     protected $auth;
 
     protected $namespace = '\Fluent\Auth';
-
-    /** @var Events */
-    protected $events;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         helper('auth');
-        $this->auth = Services::auth();
+        $this->auth = Services::auth()->guard('web');
     }
 
     protected function tearDown(): void

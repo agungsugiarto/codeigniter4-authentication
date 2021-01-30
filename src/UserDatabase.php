@@ -14,8 +14,9 @@ use function count;
 use function hash_equals;
 use function is_array;
 use function mb_strpos;
+use function trim;
 
-class DatabaseUserProvider implements UserProviderInterface
+class UserDatabase implements UserProviderInterface
 {
     /**
      * The active database connection.
@@ -29,17 +30,16 @@ class DatabaseUserProvider implements UserProviderInterface
      *
      * @var string
      */
-    protected $table;
+    protected $table = 'users';
 
     /**
      * Create a new database user provider.
      *
      * @return void
      */
-    public function __construct(string $table)
+    public function __construct()
     {
         $this->connection = Database::connect();
-        $this->table      = $table;
     }
 
     /**
@@ -55,7 +55,7 @@ class DatabaseUserProvider implements UserProviderInterface
      */
     public function findByRememberToken(int $id, $token)
     {
-        $user = $this->connection->table($this->table)->where('id', $id)->get()->getFirstRow(User::class);
+        $user = $this->connection->table($this->table)->where(['id' => $id, 'token' => trim($token)])->get()->getFirstRow(User::class);
 
         return $user && $user->getRememberToken() && hash_equals($user->getRememberToken(), $token)
             ? $user

@@ -5,13 +5,14 @@ namespace Fluent\Auth\Config;
 use CodeIgniter\Config\Services as BaseService;
 use Fluent\Auth\AuthManager;
 use Fluent\Auth\Contracts\AuthenticationInterface;
+use Fluent\Auth\Contracts\AuthFactoryInterface;
 
 class Services extends BaseService
 {
     /**
      * The base auth class.
      *
-     * @return AuthManager|AuthenticationInterface
+     * @return AuthFactoryInterface|AuthenticationInterface
      */
     public static function auth(bool $getShared = true)
     {

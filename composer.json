@@ -1,7 +1,11 @@
 {
     "name": "agungsugiarto/codeigniter4-authentication",
-    "description": "provides an API for authentication and includes concrete authentication adapters for common use case scenarios",
-    "keywords": ["codeigniter4", "authentication", "auth"],
+    "description": "Provides an API for authentication and includes concrete authentication adapters for common use case scenarios",
+    "keywords": [
+        "codeigniter4",
+        "authentication",
+        "auth"
+    ],
     "license": "MIT",
     "authors": [
         {
@@ -14,8 +18,12 @@
     "require": {
         "codeigniter4/framework": "^4.0",
         "php": "^7.2",
-        "fakerphp/faker": "^1.13",
         "agungsugiarto/codeigniter4-hashing": "9.x-dev"
+    },
+    "require-dev": {
+        "fakerphp/faker": "^1.13",
+        "phpunit/phpunit": "^8.5",
+        "laminas/laminas-coding-standard": "^2.1"
     },
     "autoload": {
         "psr-4": {
@@ -24,10 +32,6 @@
         "files": [
             "src/Helpers/auth_helper.php"
         ]
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^8.5",
-        "laminas/laminas-coding-standard": "^2.1"
     },
     "autoload-dev": {
         "psr-4": {
@@ -39,6 +43,8 @@
             "dev-master": "1.x-dev"
         }
     },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "scripts": {
         "cs-check": "phpcs",
         "cs-fix": "phpcbf",

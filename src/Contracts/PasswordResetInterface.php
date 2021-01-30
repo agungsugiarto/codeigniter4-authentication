@@ -4,7 +4,7 @@ namespace Fluent\Auth\Contracts;
 
 use Fluent\Auth\Contracts\CanResetPasswordInterface;
 
-interface RememberRepositoryInterface
+interface PasswordResetInterface
 {
     /**
      * Create a new token.
@@ -47,5 +47,5 @@ interface RememberRepositoryInterface
      *
      * @return void
      */
-    public function destoryExpired();
+    public function destroyExpired();
 }

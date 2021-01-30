@@ -8,6 +8,7 @@ use Illuminate\Hashing\Supports\Hash;
 
 use function array_key_exists;
 use function count;
+use function hash_equals;
 use function is_array;
 use function mb_strpos;
 use function trim;
@@ -65,7 +66,11 @@ trait UserProvider
      */
     public function findByRememberToken(int $id, $token)
     {
-        return $this->where(['id' => $id, 'remember_token' => trim($token)])->first();
+        $user = $this->where(['id' => $id, 'remember_token' => trim($token)])->first();
+
+        return $user && $user->getRememberToken() && hash_equals($user->getRememberToken(), $token)
+            ? $user
+            : null;
     }
 
     /**
@@ -76,7 +81,7 @@ trait UserProvider
      */
     public function updateRememberToken(AuthenticatorInterface $user, $token = null)
     {
-        return $this->where('id', $user->getAuthId())->set('remember_token', $token)->update();
+        return $this->where($user->getAuthIdColumn(), $user->getAuthId())->set($user->getRememberColumn(), $token)->update();
     }
 
     /**

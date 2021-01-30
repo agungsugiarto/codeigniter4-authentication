@@ -3,23 +3,19 @@
 namespace Fluent\Auth;
 
 use Closure;
-use Fluent\Auth\Adapters\SessionAdapter;
-use Fluent\Auth\Adapters\TokenAdapter;
 use Fluent\Auth\Config\Auth;
 use Fluent\Auth\Contracts\AuthenticationInterface;
-use Illuminate\Auth\SessionGuard;
-use Illuminate\Auth\TokenGuard;
+use Fluent\Auth\Contracts\AuthFactoryInterface;
+use Fluent\Auth\Models\UserModel;
+use FLuent\Auth\UserDatabase;
 use InvalidArgumentException;
 
+use function call_user_func;
 use function count;
 use function is_null;
-use function method_exists;
-use function ucfirst;
 
-class AuthManager
+class AuthManager implements AuthFactoryInterface
 {
-    use CreatesUserProviders;
-
     /**
      * The config instance.
      *
@@ -33,6 +29,13 @@ class AuthManager
      * @var array
      */
     protected $customCreators = [];
+
+    /**
+     * The registered custom provider creators.
+     *
+     * @var array
+     */
+    protected $customProviderCreators = [];
 
     /**
      * The array of created "drivers".
@@ -64,16 +67,128 @@ class AuthManager
     }
 
     /**
-     * Attempt to get the guard from the local cache.
-     *
-     * @param  string|null  $name
-     * @return AuthenticationInterface
+     * {@inheritdoc}
      */
     public function guard($name = null)
     {
         $name = $name ?: $this->getDefaultDriver();
 
         return $this->guards[$name] ?? $this->guards[$name] = $this->resolve($name);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getDefaultDriver()
+    {
+        return $this->config->defaults['guard'];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function shouldUse($name)
+    {
+        $name = $name ?: $this->getDefaultDriver();
+
+        $this->setDefaultDriver($name);
+
+        $this->userResolver = function ($name = null) {
+            return $this->guard($name)->user();
+        };
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setDefaultDriver($name)
+    {
+        $this->config->defaults['guard'] = $name;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function userResolver()
+    {
+        return $this->userResolver;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function resolveUsersUsing(Closure $userResolver)
+    {
+        $this->userResolver = $userResolver;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function extend($driver, Closure $callback)
+    {
+        $this->customCreators[$driver] = $callback;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function createUserProvider($provider = null)
+    {
+        if (is_null($config = $this->getProviderConfiguration($provider))) {
+            return;
+        }
+
+        if (isset($this->customProviderCreators[$driver = $config['driver']])) {
+            return call_user_func(
+                $this->customProviderCreators[$driver],
+                $this->config,
+                $config
+            );
+        }
+
+        switch ($driver) {
+            case 'model':
+                return $this->createModelProvider($config);
+            case 'connection':
+                return $this->createDatabaseProvider($config);
+            default:
+                throw new InvalidArgumentException(
+                    "Authentication user provider [{$driver}] is not defined."
+                );
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function provider($name, Closure $callback)
+    {
+        $this->customProviderCreators[$name] = $callback;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getDefaultUserProvider()
+    {
+        return $this->config->defaults['provider'];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasResolvedGuards()
+    {
+        return count($this->guards) > 0;
     }
 
     /**
@@ -87,23 +202,34 @@ class AuthManager
     {
         $config = $this->getConfig($name);
 
-        if (is_null($config)) {
-            throw new InvalidArgumentException("Auth guard [{$name}] is not defined.");
-        }
-
         if (isset($this->customCreators[$config['driver']])) {
             return $this->callCustomCreator($name, $config);
         }
 
-        $driverMethod = 'create' . ucfirst($config['driver']) . 'Driver';
+        $driverMethod = new $config['driver']($this->config, $this->createUserProvider($config['provider']));
 
-        if (method_exists($this, $driverMethod)) {
-            return $this->{$driverMethod}($name, $config);
+        if ($driverMethod instanceof AuthenticationInterface) {
+            return $driverMethod;
         }
 
         throw new InvalidArgumentException(
-            "Auth driver [{$config['driver']}] for guard [{$name}] is not defined."
+            "Auth driver [{$config['driver']}] for guard [{$name}] must be instance of AuthenticationInterface."
         );
+    }
+
+    /**
+     * Get the guard configuration.
+     *
+     * @param  string  $name
+     * @return array
+     */
+    protected function getConfig($name)
+    {
+        if (isset($this->config->guards[$name])) {
+            return $this->config->guards[$name];
+        }
+
+        throw new InvalidArgumentException("Auth guard [{$name}] is not defined.");
     }
 
     /**
@@ -119,139 +245,38 @@ class AuthManager
     }
 
     /**
-     * Create a session based authentication guard.
+     * Get the user provider configuration.
      *
-     * @param  string  $name
+     * @param  string|null  $provider
+     * @return array|null
+     */
+    protected function getProviderConfiguration($provider)
+    {
+        if ($provider = $provider ?: $this->getDefaultUserProvider()) {
+            return $this->config->providers[$provider];
+        }
+    }
+
+    /**
+     * Create an instance of the database user provider.
+     *
      * @param  array  $config
-     * @return SessionGuard
+     * @return UserModel
      */
-    public function createSessionDriver($name, $config)
+    protected function createModelProvider($config)
     {
-        $provider = $this->createUserProvider($config['provider'] ?? null);
-
-        return new SessionAdapter($this->config, $provider);
+        return new $config['table']();
     }
 
     /**
-     * Create a token based authentication guard.
+     * Create an instance of the Eloquent user provider.
      *
-     * @param  string  $name
      * @param  array  $config
-     * @return TokenGuard
+     * @return UserDatabase
      */
-    public function createTokenDriver($name, $config)
+    protected function createDatabaseProvider($config)
     {
-        // The token guard implements a basic API token based guard implementation
-        // that takes an API token field from the request and matches it to the
-        // user in the database or another persistence layer where users are.
-        return new TokenAdapter($this->config, $this->createUserProvider($config['provider'] ?? null));
-    }
-
-    /**
-     * Get the guard configuration.
-     *
-     * @param  string  $name
-     * @return array
-     */
-    protected function getConfig($name)
-    {
-        return $this->config->gurads[$name];
-    }
-
-    /**
-     * Get the default authentication driver name.
-     *
-     * @return string
-     */
-    public function getDefaultDriver()
-    {
-        return $this->config->defaults['guard'];
-    }
-
-    /**
-     * Set the default guard driver the factory should serve.
-     *
-     * @param  string  $name
-     * @return void
-     */
-    public function shouldUse($name)
-    {
-        $name = $name ?: $this->getDefaultDriver();
-
-        $this->setDefaultDriver($name);
-
-        $this->userResolver = function ($name = null) {
-            return $this->guard($name)->user();
-        };
-    }
-
-    /**
-     * Set the default authentication driver name.
-     *
-     * @param  string  $name
-     * @return void
-     */
-    public function setDefaultDriver($name)
-    {
-        $this->config->defaults['guard'] = $name;
-    }
-
-    /**
-     * Get the user resolver callback.
-     *
-     * @return Closure
-     */
-    public function userResolver()
-    {
-        return $this->userResolver;
-    }
-
-    /**
-     * Set the callback to be used to resolve users.
-     *
-     * @return $this
-     */
-    public function resolveUsersUsing(Closure $userResolver)
-    {
-        $this->userResolver = $userResolver;
-
-        return $this;
-    }
-
-    /**
-     * Register a custom driver creator Closure.
-     *
-     * @param  string  $driver
-     * @return $this
-     */
-    public function extend($driver, Closure $callback)
-    {
-        $this->customCreators[$driver] = $callback;
-
-        return $this;
-    }
-
-    /**
-     * Register a custom provider creator Closure.
-     *
-     * @param  string  $name
-     * @return $this
-     */
-    public function provider($name, Closure $callback)
-    {
-        $this->customProviderCreators[$name] = $callback;
-
-        return $this;
-    }
-
-    /**
-     * Determines if any guards have already been resolved.
-     *
-     * @return bool
-     */
-    public function hasResolvedGuards()
-    {
-        return count($this->guards) > 0;
+        return new $config['table']();
     }
 
     /**
