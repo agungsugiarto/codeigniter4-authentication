@@ -3,6 +3,7 @@
 namespace Fluent\Auth\Passwords\Hash;
 
 use Fluent\Auth\Contracts\HasherInterface;
+use Fluent\Auth\Passwords\Hash\AbstractHasher;
 use RuntimeException;
 
 use function is_string;

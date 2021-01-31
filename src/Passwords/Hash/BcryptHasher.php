@@ -3,6 +3,7 @@
 namespace FLuent\Auth\Passwords\Hash;
 
 use Fluent\Auth\Contracts\HasherInterface;
+use Fluent\Auth\Passwords\Hash\AbstractHasher;
 use RuntimeException;
 
 use function password_hash;
