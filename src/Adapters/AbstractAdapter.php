@@ -10,10 +10,10 @@ use CodeIgniter\Session\SessionInterface;
 use Fluent\Auth\Config\Auth;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
-use Fluent\Auth\Contracts\CanResetPasswordInterface;
 use Fluent\Auth\Contracts\HasAccessTokensInterface;
-use Fluent\Auth\Contracts\MustVerifyEmailInterface;
+use Fluent\Auth\Contracts\ResetPasswordInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
+use Fluent\Auth\Contracts\VerifyEmailInterface;
 use Fluent\Auth\Exceptions\AuthenticationException;
 
 use function is_null;
@@ -26,7 +26,7 @@ abstract class AbstractAdapter implements AuthenticationInterface
     /** @var UserProviderInterface */
     protected $provider;
 
-    /** @var AuthenticatorInterface|CanResetPasswordInterface|MustVerifyEmailInterface|HasAccessTokensInterface */
+    /** @var AuthenticatorInterface|ResetPasswordInterface|VerifyEmailInterface|HasAccessTokensInterface */
     protected $user;
 
     /** @var AuthenticatorInterface */

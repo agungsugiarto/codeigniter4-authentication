@@ -19,6 +19,9 @@
 	<filter>
 		<whitelist addUncoveredFilesFromWhitelist="true" processUncoveredFilesFromWhitelist="true">
 			<directory suffix=".php">./src</directory>
+			<exclude>
+				<directory suffix=".php">./src/Views</directory>
+			</exclude>
 		</whitelist>
 	</filter>
 

@@ -2,7 +2,7 @@
 
 namespace Fluent\Auth\Contracts;
 
-interface CanResetPasswordInterface
+interface ResetPasswordInterface
 {
     /**
      * Get the e-mail address where password reset links are sent.
@@ -14,8 +14,7 @@ interface CanResetPasswordInterface
     /**
      * Send the password reset notification.
      *
-     * @param  string  $token
      * @return void
      */
-    public function sendPasswordResetNotification($token);
+    public function sendPasswordResetNotification();
 }

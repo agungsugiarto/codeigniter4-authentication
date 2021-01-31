@@ -5,13 +5,10 @@ namespace Fluent\Auth\Notifications;
 use CodeIgniter\Config\Services;
 use CodeIgniter\Email\Email;
 
-class EmailVerificationNotification
+class VerificationNotification
 {
     /** @var string */
     protected $email;
-
-    /** @var string */
-    protected $token;
 
     /** @var Email */
     protected $service;
@@ -19,10 +16,9 @@ class EmailVerificationNotification
     /**
      * Instance verification notification.
      */
-    public function __construct(string $email, string $token)
+    public function __construct(string $email)
     {
         $this->email   = $email;
-        $this->token   = $token;
         $this->service = Services::email();
     }
 
@@ -35,8 +31,8 @@ class EmailVerificationNotification
     {
         return $this->service
             ->setTo($this->email)
-            ->setSubject('Email verification')
-            ->setMessage('Email verification notification')
+            ->setSubject('Verify Email Address')
+            ->setMessage(view('Fluent\Auth\Views\Email\verify_email'))
             ->setMailType('html')
             ->send();
     }

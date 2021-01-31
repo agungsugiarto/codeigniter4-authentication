@@ -2,7 +2,7 @@
 
 namespace Fluent\Auth\Contracts;
 
-use Fluent\Auth\Contracts\CanResetPasswordInterface;
+use Fluent\Auth\Contracts\ResetPasswordInterface;
 
 interface PasswordResetInterface
 {
@@ -11,7 +11,7 @@ interface PasswordResetInterface
      *
      * @return string
      */
-    public function create(CanResetPasswordInterface $user);
+    public function create(ResetPasswordInterface $user);
 
     /**
      * Create a new token for the user.
@@ -26,21 +26,21 @@ interface PasswordResetInterface
      * @param string $token
      * @return bool
      */
-    public function exists(CanResetPasswordInterface $user, $token);
+    public function exists(ResetPasswordInterface $user, $token);
 
     /**
      * Determine if the given user recently created a password reset token.
      *
      * @return bool
      */
-    public function recentlyCreatedToken(CanResetPasswordInterface $user);
+    public function recentlyCreatedToken(ResetPasswordInterface $user);
 
     /**
      * Destroy a token record.
      *
      * @return void
      */
-    public function destroy(CanResetPasswordInterface $user);
+    public function destroy(ResetPasswordInterface $user);
 
     /**
      * Delete expired tokens.

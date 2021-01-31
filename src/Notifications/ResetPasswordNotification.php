@@ -5,7 +5,7 @@ namespace Fluent\Auth\Notifications;
 use CodeIgniter\Config\Services;
 use CodeIgniter\Email\Email;
 
-class EmailResetPasswordNotification
+class ResetPasswordNotification
 {
     /** @var string */
     protected $email;
@@ -31,8 +31,8 @@ class EmailResetPasswordNotification
     {
         return $this->service
             ->setTo($this->email)
-            ->setSubject('Email reset password verification')
-            ->setMessage('Email reset password verification notification')
+            ->setSubject('Reset Password Notification')
+            ->setMessage(view('Fluent\Auth\Views\Email\reset_email'))
             ->setMailType('html')
             ->send();
     }

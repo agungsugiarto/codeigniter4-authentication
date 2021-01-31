@@ -4,8 +4,8 @@ namespace Fluent\Auth\Passwords;
 
 use CodeIgniter\I18n\Time;
 use CodeIgniter\Model;
-use Fluent\Auth\Contracts\CanResetPasswordInterface;
 use Fluent\Auth\Contracts\PasswordResetInterface;
+use Fluent\Auth\Contracts\ResetPasswordInterface;
 use Fluent\Auth\Facades\Hash;
 
 use function bin2hex;
@@ -47,7 +47,7 @@ class PasswordResetRepository extends Model implements PasswordResetInterface
     /**
      * {@inheritdoc}
      */
-    public function create(CanResetPasswordInterface $user)
+    public function create(ResetPasswordInterface $user)
     {
         $email = $user->getEmailForPasswordReset();
 
@@ -74,7 +74,7 @@ class PasswordResetRepository extends Model implements PasswordResetInterface
     /**
      * {@inheritdoc}
      */
-    public function exists(CanResetPasswordInterface $user, $token)
+    public function exists(ResetPasswordInterface $user, $token)
     {
         $record = $this->where('email', $user->getEmailForPasswordReset())->first();
 
@@ -84,7 +84,7 @@ class PasswordResetRepository extends Model implements PasswordResetInterface
     /**
      * {@inheritdoc}
      */
-    public function recentlyCreatedToken(CanResetPasswordInterface $user)
+    public function recentlyCreatedToken(ResetPasswordInterface $user)
     {
         $record = $this->where('email', $user->getEmailForPasswordReset())->first();
 
@@ -94,7 +94,7 @@ class PasswordResetRepository extends Model implements PasswordResetInterface
     /**
      * {@inheritdoc}
      */
-    public function destroy(CanResetPasswordInterface $user)
+    public function destroy(ResetPasswordInterface $user)
     {
         return $this->deleteExisting($user);
     }
@@ -115,7 +115,7 @@ class PasswordResetRepository extends Model implements PasswordResetInterface
      * @param CanResetPassword $user
      * @return int
      */
-    protected function deleteExisting(CanResetPasswordInterface $user)
+    protected function deleteExisting(ResetPasswordInterface $user)
     {
         return $this->where('email', $user->getEmailForPasswordReset())->delete();
     }

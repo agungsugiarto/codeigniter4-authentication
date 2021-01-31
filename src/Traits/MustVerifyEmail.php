@@ -5,7 +5,7 @@ namespace Fluent\Auth\Traits;
 use CodeIgniter\Events\Events;
 use CodeIgniter\I18n\Time;
 use CodeIgniter\Model;
-use Fluent\Auth\Contracts\MustVerifyEmailInterface;
+use Fluent\Auth\Contracts\VerifyEmailInterface;
 
 use function is_null;
 
@@ -41,7 +41,7 @@ trait MustVerifyEmail
      */
     public function sendEmailVerificationNotification()
     {
-        Events::trigger(MustVerifyEmailInterface::class, $this->getEmailForVerification());
+        Events::trigger(VerifyEmailInterface::class, $this->getEmailForVerification());
     }
 
     /**

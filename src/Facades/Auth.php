@@ -6,10 +6,10 @@ use Closure;
 use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
-use Fluent\Auth\Contracts\CanResetPasswordInterface;
 use Fluent\Auth\Contracts\HasAccessTokensInterface;
-use Fluent\Auth\Contracts\MustVerifyEmailInterface;
+use Fluent\Auth\Contracts\ResetPasswordInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
+use Fluent\Auth\Contracts\VerifyEmailInterface;
 
 /**
  * @see \Fluent\Auth\Contracts\AuthenticationInterface
@@ -25,7 +25,7 @@ use Fluent\Auth\Contracts\UserProviderInterface;
  * @method ststic $this extend($driver, Closure $callback)
  * @method ststic $this provider($name, Closure $callback)
  * @method ststic bool hasResolvedGuards()
- * @method static AuthenticatorInterface|CanResetPasswordInterface|MustVerifyEmailInterface|HasAccessTokensInterface authenticate()
+ * @method static AuthenticatorInterface|ResetPasswordInterface|VerifyEmailInterface|HasAccessTokensInterface authenticate()
  * @method static bool attempt(array $credentials, bool $remember = false)
  * @method static bool viaRemember()
  * @method static bool validate(array $credentials)
@@ -33,7 +33,7 @@ use Fluent\Auth\Contracts\UserProviderInterface;
  * @method static void login(AuthenticatorInterface $user, bool $remember = false)
  * @method static AuthenticatorInterface|bool loginById(int $userId, bool $remember = false)
  * @method static void logout()
- * @method static AuthenticatorInterface|CanResetPasswordInterface|MustVerifyEmailInterface|HasAccessTokensInterface|null user()
+ * @method static AuthenticatorInterface|ResetPasswordInterface|VerifyEmailInterface|HasAccessTokensInterface|null user()
  * @method static int|null id()
  * @method static bool hasUser
  * @method static $this setUser(AuthenticatorInterface $user)

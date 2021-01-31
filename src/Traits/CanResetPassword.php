@@ -3,7 +3,7 @@
 namespace Fluent\Auth\Traits;
 
 use CodeIgniter\Events\Events;
-use Fluent\Auth\Contracts\CanResetPasswordInterface;
+use Fluent\Auth\Contracts\ResetPasswordInterface;
 
 trait CanResetPassword
 {
@@ -23,8 +23,8 @@ trait CanResetPassword
      * @param  string  $token
      * @return void
      */
-    public function sendPasswordResetNotification($token)
+    public function sendPasswordResetNotification()
     {
-        Events::trigger(CanResetPasswordInterface::class, $this->getEmailForPasswordReset(), $token);
+        Events::trigger(ResetPasswordInterface::class, $this->getEmailForPasswordReset());
     }
 }
