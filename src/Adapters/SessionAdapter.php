@@ -4,11 +4,15 @@ namespace Fluent\Auth\Adapters;
 
 use CodeIgniter\Events\Events;
 use Config\App;
+use Config\Services;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
+use Fluent\Auth\CookieRecaller;
+use Illuminate\Auth\Recaller;
 
 use function bin2hex;
 use function is_null;
 use function random_bytes;
+use function time;
 
 class SessionAdapter extends AbstractAdapter
 {
@@ -51,7 +55,7 @@ class SessionAdapter extends AbstractAdapter
 
         if ($remember) {
             $this->ensureRememberTokenIsSet($user);
-            $this->rememberUser($user);
+            $this->recallerCookie($user);
         }
 
         Events::trigger('fireLoginEvent', $user, $remember);
@@ -112,7 +116,7 @@ class SessionAdapter extends AbstractAdapter
             return $this->user;
         }
 
-        $id = $this->session->get($this->config->sessionConfig['field']);
+        $id = $this->session->get($this->getSessionName());
 
         // First we will try to load the user using the identifier in the session if
         // one exists. Otherwise we will check for a "remember me" cookie in this
@@ -124,8 +128,8 @@ class SessionAdapter extends AbstractAdapter
         // If the user is null, but we decrypt a "recaller" cookie we can attempt to
         // pull the user data on that cookie which serves as a remember cookie on
         // the application. Once we have a user we can return it to the caller.
-        if (is_null($this->user) && ! is_null($recaller = $this->request->getCookie($this->config->sessionConfig['rememberCookieName']))) {
-            $this->user = $this->provider->findByRememberToken((int) $id, $recaller);
+        if (is_null($this->user) && ! is_null($recaller = $this->recaller())) {
+            $this->user = $this->userFromRecaller($recaller);
 
             if ($this->user) {
                 $this->updateSession($this->user->getAuthId());
@@ -135,6 +139,71 @@ class SessionAdapter extends AbstractAdapter
 
         return $this->user;
     }
+
+    //-----------------------------------
+
+    /**
+     * Queue the recaller cookie into the cookie jar.
+     *
+     * @return void
+     */
+    protected function recallerCookie(AuthenticatorInterface $user)
+    {
+        $app       = new App();
+        $encrypter = Services::encrypter();
+
+        // TODO: fix me the cookie cannot be send.
+        $this->response()->setCookie(
+            $this->getCookieName(),
+            $encrypter->encrypt($user->getAuthId() . '|' . $user->getRememberToken() . '|' . $user->getAuthPassword()),
+            time() + MONTH,
+            $app->cookieDomain,
+            $app->cookiePath,
+            $app->cookiePrefix,
+            $app->cookieSecure,
+            $app->cookieHTTPOnly
+        );
+    }
+
+    /**
+     * Get the decrypted recaller cookie for the request.
+     *
+     * @return Recaller|null
+     */
+    protected function recaller()
+    {
+        if ($recaller = $this->request()->getCookie($this->getCookieName())) {
+            $encrypter = Services::encrypter();
+            return new CookieRecaller($encrypter->decrypt($recaller));
+        }
+    }
+
+    /**
+     * Pull a user from the repository by its "remember me" cookie token.
+     *
+     * @param CookieRecaller $recaller
+     * @return mixed
+     */
+    protected function userFromRecaller($recaller)
+    {
+        if (! $recaller->valid() || $this->recallAttempted) {
+            return;
+        }
+
+        // If the user is null, but we decrypt a "recaller" cookie we can attempt to
+        // pull the user data on that cookie which serves as a remember cookie on
+        // the application. Once we have a user we can return it to the caller.
+        $this->recallAttempted = true;
+
+        $this->viaRemember = ! is_null($user = $this->provider->findByRememberToken(
+            $recaller->id(),
+            $recaller->token()
+        ));
+
+        return $user;
+    }
+
+    //-----------------------------------
 
     /**
      * Determine if the user matches the credentials.
@@ -162,7 +231,7 @@ class SessionAdapter extends AbstractAdapter
      */
     protected function updateSession($id)
     {
-        $this->session->set($this->config->sessionConfig['field'], $id);
+        $this->session->set($this->getSessionName(), $id);
 
         $this->session->regenerate(true);
     }
@@ -198,32 +267,17 @@ class SessionAdapter extends AbstractAdapter
      */
     protected function clearUserDataFromStorage()
     {
-        $this->session->remove($this->config->sessionConfig['field']);
+        $app = new App();
+        $this->session->remove($this->getSessionName());
 
-        $this->response->deleteCookie($this->config->sessionConfig['rememberCookieName']);
-    }
-
-    /**
-     * Generates a timing-attack safe remember me token
-     * and stores the necessary info in the db and a cookie.
-     *
-     * @throws Exception
-     */
-    protected function rememberUser(AuthenticatorInterface $user)
-    {
-        // Save it to the user's browser in a cookie.
-        $appConfig = new App();
-
-        // Create the cookie
-        $this->response->setCookie(
-            $this->config->sessionConfig['rememberCookieName'],
-            $user->getRememberToken(), // Value
-            $this->config->sessionConfig['rememberLength'], // # Seconds until it expires
-            $appConfig->cookieDomain,
-            $appConfig->cookiePath,
-            $appConfig->cookiePrefix,
-            false, // Only send over HTTPS?
-            true // Hide from Javascript?
-        );
+        if (! is_null($this->recaller())) {
+            // TODO: fix me the cookie cannot be send.
+            $this->response()->deleteCookie(
+                $this->getCookieName(),
+                $app->cookieDomain,
+                $app->cookiePath,
+                $app->cookiePrefix
+            );
+        }
     }
 }

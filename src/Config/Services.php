@@ -6,6 +6,9 @@ use CodeIgniter\Config\Services as BaseService;
 use Fluent\Auth\AuthManager;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthFactoryInterface;
+use Fluent\Auth\Contracts\HasherInterface;
+use Fluent\Auth\Passwords\Hash\HashManager;
+use Fluent\Auth\Passwords\Hash\Manager;
 
 class Services extends BaseService
 {
@@ -21,5 +24,19 @@ class Services extends BaseService
         }
 
         return new AuthManager(config('Auth'));
+    }
+
+    /**
+     * Create HashManager instance.
+     *
+     * @return Manager|HashManager|HasherInterface
+     */
+    public static function hash(bool $getshared = true)
+    {
+        if ($getshared) {
+            return self::getSharedInstance('hash');
+        }
+
+        return new HashManager(config('Hashing'));
     }
 }

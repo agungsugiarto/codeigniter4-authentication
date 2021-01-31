@@ -39,5 +39,7 @@
 		<const name="PUBLICPATH" value="./vendor/codeigniter4/framework/public/"/>
 		<env name="database.tests.database" value=":memory:"/>
 		<env name="database.tests.DBDriver" value="SQLite3"/>
+		<env name="encryption.key" value="E7OL80fhak9MsDHYc+/LzxtnYV5gn8UAfxQQ5tQ492Q="/>
+		<env name="encryption.driver" value="OpenSSL"/>
 	</php>
 </phpunit>

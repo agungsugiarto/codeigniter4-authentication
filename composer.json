@@ -17,8 +17,7 @@
     ],
     "require": {
         "codeigniter4/framework": "^4.0",
-        "php": "^7.2",
-        "agungsugiarto/codeigniter4-hashing": "9.x-dev"
+        "php": "^7.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.13",

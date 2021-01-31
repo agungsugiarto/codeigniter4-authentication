@@ -44,6 +44,7 @@ trait Authenticatable
     public function getAuthEmail()
     {
         $column = $this->getAuthEmailColumn();
+
         return $this->{$column} ?? null;
     }
 
@@ -66,7 +67,8 @@ trait Authenticatable
     {
         $column = $this->getRememberColumn();
 
-        return $this->$column ?? null;
+        // fix me sometime getter is not retrived.
+        return $this->attributes[$column] ?? $this->{$column} ?? null;
     }
 
     /**

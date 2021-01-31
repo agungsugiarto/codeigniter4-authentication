@@ -4,14 +4,13 @@ namespace Fluent\Auth\Traits;
 
 use CodeIgniter\Model;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
-use Illuminate\Hashing\Supports\Hash;
+use Fluent\Auth\Facades\Hash;
+use Fluent\Auth\Helpers\Str;
 
 use function array_key_exists;
 use function count;
 use function hash_equals;
 use function is_array;
-use function mb_strpos;
-use function trim;
 
 trait UserProvider
 {
@@ -45,7 +44,7 @@ trait UserProvider
         $query = clone $this;
 
         foreach ($credentials as $key => $value) {
-            if (static::contains($key, 'password')) {
+            if (Str::contains($key, 'password')) {
                 continue;
             }
 
@@ -66,10 +65,16 @@ trait UserProvider
      */
     public function findByRememberToken(int $id, $token)
     {
-        $user = $this->where(['id' => $id, 'remember_token' => trim($token)])->first();
+        $retrievedModel = $this->where('id', $id)->first();
 
-        return $user && $user->getRememberToken() && hash_equals($user->getRememberToken(), $token)
-            ? $user
+        if (! $retrievedModel) {
+            return;
+        }
+
+        $rememberToken = $retrievedModel->getRememberToken();
+
+        return $rememberToken && hash_equals($rememberToken, $token)
+            ? $retrievedModel
             : null;
     }
 
@@ -93,23 +98,5 @@ trait UserProvider
     public function validateCredentials(AuthenticatorInterface $user, array $credentials)
     {
         return Hash::check($credentials['password'], $user->getAuthPassword());
-    }
-
-    /**
-     * Determine if a given string contains a given substring.
-     *
-     * @param  string  $haystack
-     * @param  string|string[]  $needles
-     * @return bool
-     */
-    protected static function contains($haystack, $needles)
-    {
-        foreach ((array) $needles as $needle) {
-            if ($needle !== '' && mb_strpos($haystack, $needle) !== false) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

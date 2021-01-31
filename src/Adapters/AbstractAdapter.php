@@ -5,7 +5,6 @@ namespace Fluent\Auth\Adapters;
 use CodeIgniter\Config\Services;
 use CodeIgniter\Events\Events;
 use CodeIgniter\HTTP\IncomingRequest;
-use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\Response;
 use CodeIgniter\Session\SessionInterface;
 use Fluent\Auth\Config\Auth;
@@ -33,6 +32,18 @@ abstract class AbstractAdapter implements AuthenticationInterface
 
     /** @var boolean */
     protected $loggedOut = false;
+
+    /** @var boolean */
+    protected $viaRember = false;
+
+    /** @var boolean */
+    protected $recallAttempted = false;
+
+    /** @var string */
+    protected $sessionName = 'login_web';
+
+    /** @var string */
+    protected $cookieName = 'remember_web';
 
     /** @var IncomingRequest */
     protected $request;
@@ -65,6 +76,14 @@ abstract class AbstractAdapter implements AuthenticationInterface
         }
 
         throw AuthenticationException::forInvalidUser();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function viaRemember()
+    {
+        return $this->viaRember;
     }
 
     /**
@@ -112,6 +131,22 @@ abstract class AbstractAdapter implements AuthenticationInterface
     /**
      * {@inheritdoc}
      */
+    public function getSessionName()
+    {
+        return $this->sessionName;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getCookieName()
+    {
+        return $this->cookieName;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getProvider()
     {
         return $this->provider;
@@ -128,23 +163,21 @@ abstract class AbstractAdapter implements AuthenticationInterface
     }
 
     /**
-     * Set the request for authentication.
+     * Get the request for authentication.
      *
-     * @return $this
+     * @return IncomingRequest
      */
-    public function setRequest(RequestInterface $request)
+    public function request()
     {
-        $this->request = $request;
-
-        return $this;
+        return $this->request;
     }
 
     /**
-     * Get the response from authentication
+     * Get the response from authentication.
      *
      * @return Response
      */
-    public function getResponse()
+    public function response()
     {
         return $this->response;
     }
