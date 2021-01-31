@@ -3,7 +3,6 @@
 namespace Fluent\Auth\Adapters;
 
 use CodeIgniter\Events\Events;
-use CodeIgniter\HTTP\Response;
 use Config\App;
 use Config\Services;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
@@ -150,7 +149,7 @@ class SessionAdapter extends AbstractAdapter
      */
     protected function recallerCookie(AuthenticatorInterface $user)
     {
-        $app = new App();
+        $app       = new App();
         $encrypter = Services::encrypter();
 
         // TODO: fix me the cookie cannot be send.
@@ -277,7 +276,7 @@ class SessionAdapter extends AbstractAdapter
                 $this->getCookieName(),
                 $app->cookieDomain,
                 $app->cookiePath,
-                $app->cookiePrefix,
+                $app->cookiePrefix
             );
         }
     }

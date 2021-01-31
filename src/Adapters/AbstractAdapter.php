@@ -5,7 +5,6 @@ namespace Fluent\Auth\Adapters;
 use CodeIgniter\Config\Services;
 use CodeIgniter\Events\Events;
 use CodeIgniter\HTTP\IncomingRequest;
-use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\Response;
 use CodeIgniter\Session\SessionInterface;
 use Fluent\Auth\Config\Auth;
