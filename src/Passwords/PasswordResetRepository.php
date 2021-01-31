@@ -6,8 +6,7 @@ use CodeIgniter\I18n\Time;
 use CodeIgniter\Model;
 use Fluent\Auth\Contracts\CanResetPasswordInterface;
 use Fluent\Auth\Contracts\PasswordResetInterface;
-use Illuminate\Contracts\Auth\CanResetPassword;
-use Illuminate\Hashing\Supports\Hash;
+use Fluent\Auth\Facades\Hash;
 
 use function bin2hex;
 use function hash_hmac;

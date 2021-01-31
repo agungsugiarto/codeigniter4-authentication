@@ -3,6 +3,8 @@
 namespace Fluent\Auth\Adapters;
 
 use CodeIgniter\Events\Events;
+use CodeIgniter\HTTP\Response;
+use Config\App;
 use Config\Services;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\CookieRecaller;
@@ -148,12 +150,19 @@ class SessionAdapter extends AbstractAdapter
      */
     protected function recallerCookie(AuthenticatorInterface $user)
     {
+        $app = new App();
         $encrypter = Services::encrypter();
 
-        $this->response->setCookie(
+        // TODO: fix me the cookie cannot be send.
+        $this->response()->setCookie(
             $this->getCookieName(),
             $encrypter->encrypt($user->getAuthId() . '|' . $user->getRememberToken() . '|' . $user->getAuthPassword()),
-            time() + MONTH
+            time() + MONTH,
+            $app->cookieDomain,
+            $app->cookiePath,
+            $app->cookiePrefix,
+            $app->cookieSecure,
+            $app->cookieHTTPOnly
         );
     }
 
@@ -164,11 +173,7 @@ class SessionAdapter extends AbstractAdapter
      */
     protected function recaller()
     {
-        if (is_null($this->request)) {
-            return;
-        }
-
-        if ($recaller = $this->request->getCookie($this->getCookieName())) {
+        if ($recaller = $this->request()->getCookie($this->getCookieName())) {
             $encrypter = Services::encrypter();
             return new CookieRecaller($encrypter->decrypt($recaller));
         }
@@ -263,10 +268,17 @@ class SessionAdapter extends AbstractAdapter
      */
     protected function clearUserDataFromStorage()
     {
+        $app = new App();
         $this->session->remove($this->getSessionName());
 
         if (! is_null($this->recaller())) {
-            $this->response->deleteCookie($this->getCookieName());
+            // TODO: fix me the cookie cannot be send.
+            $this->response()->deleteCookie(
+                $this->getCookieName(),
+                $app->cookieDomain,
+                $app->cookiePath,
+                $app->cookiePrefix,
+            );
         }
     }
 }

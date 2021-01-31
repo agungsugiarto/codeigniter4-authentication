@@ -164,23 +164,21 @@ abstract class AbstractAdapter implements AuthenticationInterface
     }
 
     /**
-     * Set the request for authentication.
+     * Get the request for authentication.
      *
-     * @return $this
+     * @return IncomingRequest
      */
-    public function setRequest(RequestInterface $request)
+    public function request()
     {
-        $this->request = $request;
-
-        return $this;
+        return $this->request;
     }
 
     /**
-     * Get the response from authentication
+     * Get the response from authentication.
      *
      * @return Response
      */
-    public function getResponse()
+    public function response()
     {
         return $this->response;
     }

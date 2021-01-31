@@ -4,8 +4,8 @@ namespace Fluent\Auth\Traits;
 
 use CodeIgniter\Model;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
+use Fluent\Auth\Facades\Hash;
 use Fluent\Auth\Helpers\Str;
-use Illuminate\Hashing\Supports\Hash;
 
 use function array_key_exists;
 use function count;

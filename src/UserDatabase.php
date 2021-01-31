@@ -7,8 +7,8 @@ use Config\Database;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Entities\User;
+use Fluent\Auth\Facades\Hash;
 use Fluent\Auth\Helpers\Str;
-use Illuminate\Hashing\Supports\Hash;
 
 use function array_key_exists;
 use function count;
