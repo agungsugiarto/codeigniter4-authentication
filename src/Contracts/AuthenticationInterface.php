@@ -9,7 +9,7 @@ interface AuthenticationInterface
     /**
      * Determine if current user is authenticated. If not, throw an exception.
      *
-     * @return AuthenticatorInterface
+     * @return AuthenticatorInterface|CanResetPasswordInterface|HasAccessTokensInterface|MustVerifyEmailInterface
      * @throws AuthenticationException
      */
     public function authenticate();
@@ -63,7 +63,7 @@ interface AuthenticationInterface
     /**
      * Returns the currently logged in user.
      *
-     * @return AuthenticatorInterface|HasAccessTokensInterface|null
+     * @return AuthenticatorInterface|CanResetPasswordInterface|HasAccessTokensInterface|MustVerifyEmailInterface|null
      */
     public function user();
 

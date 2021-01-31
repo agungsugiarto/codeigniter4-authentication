@@ -10,7 +10,7 @@ interface AuthFactoryInterface
      * Create the user provider implementation for the driver.
      *
      * @param  string|null  $provider
-     * @return UserProviderInterface|null
+     * @return UserProviderInterface
      * @throws InvalidArgumentException
      */
     public function createUserProvider($provider = null);

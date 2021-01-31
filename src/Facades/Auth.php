@@ -2,33 +2,45 @@
 
 namespace Fluent\Auth\Facades;
 
-use CodeIgniter\HTTP\Response;
+use Closure;
 use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
+use Fluent\Auth\Contracts\CanResetPasswordInterface;
 use Fluent\Auth\Contracts\HasAccessTokensInterface;
+use Fluent\Auth\Contracts\MustVerifyEmailInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
 
 /**
  * @see \Fluent\Auth\Contracts\AuthenticationInterface
- * @see \Fluent\Auth\AuthManager
+ * @see \Fluent\Auth\Contracts\AuthFactoryInterface
  *
- * @method static $this guard($name = null)
- * @method static AuthenticationInterface factory(?string $adapter = 'default')
- * @method static AuthenticatorInterface authenticate()
- * @method static bool hasUser()
- * @method static bool check()
- * @method static int|null id()
- * @method static $this setUser(AuthenticatorInterface $user)
- * @method static UserProviderInterface getProvider()
- * @method static $this setRequest(RequestInterface $request)
- * @method static Response getResponse()
+ * @method static UserProviderInterface createUserProvider($provider = null)
+ * @method static string getDefaultUserProvider()
+ * @method static AuthenticationInterface guard($name = null)
+ * @method static string getDefaultDriver()
+ * @method static $this setDefaultDriver($name)
+ * @method ststic Closure userResolver()
+ * @method static $this resolveUsersUsing(Closure $userResolver)
+ * @method ststic $this extend($driver, Closure $callback)
+ * @method ststic $this provider($name, Closure $callback)
+ * @method ststic bool hasResolvedGuards()
+ * @method static AuthenticatorInterface|CanResetPasswordInterface|MustVerifyEmailInterface|HasAccessTokensInterface authenticate()
  * @method static bool attempt(array $credentials, bool $remember = false)
+ * @method static bool viaRemember()
  * @method static bool validate(array $credentials)
+ * @method static bool check()
  * @method static void login(AuthenticatorInterface $user, bool $remember = false)
  * @method static AuthenticatorInterface|bool loginById(int $userId, bool $remember = false)
  * @method static void logout()
- * @method static AuthenticatorInterface|HasAccessTokensInterface user()
+ * @method static AuthenticatorInterface|CanResetPasswordInterface|MustVerifyEmailInterface|HasAccessTokensInterface|null user()
+ * @method static int|null id()
+ * @method static bool hasUser
+ * @method static $this setUser(AuthenticatorInterface $user)
+ * @method static string getSessionName()
+ * @method static string getCookieName()
+ * @method static UserProviderInterface getProvider()
+ * @method static $this setProvider(UserProviderInterface $provider)
  */
 class Auth
 {

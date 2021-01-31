@@ -140,8 +140,6 @@ class SessionAdapter extends AbstractAdapter
         return $this->user;
     }
 
-    //-----------------------------------
-
     /**
      * Queue the recaller cookie into the cookie jar.
      *
@@ -202,8 +200,6 @@ class SessionAdapter extends AbstractAdapter
 
         return $user;
     }
-
-    //-----------------------------------
 
     /**
      * Determine if the user matches the credentials.
