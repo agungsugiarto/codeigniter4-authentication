@@ -150,11 +150,11 @@ class SessionAdapter extends AbstractAdapter
         $app       = new App();
         $encrypter = Services::encrypter();
 
-        // TODO: fix me the cookie cannot be send.
+        // If using login with remember, make sure to send cookie with redirect()->withCookies()
         $this->response()->setCookie(
             $this->getCookieName(),
             $encrypter->encrypt($user->getAuthId() . '|' . $user->getRememberToken() . '|' . $user->getAuthPassword()),
-            time() + MONTH,
+            1 * MONTH,
             $app->cookieDomain,
             $app->cookiePath,
             $app->cookiePrefix,
@@ -172,7 +172,7 @@ class SessionAdapter extends AbstractAdapter
     {
         if ($recaller = $this->request()->getCookie($this->getCookieName())) {
             $encrypter = Services::encrypter();
-            return new CookieRecaller($encrypter->decrypt($recaller));
+            return new CookieRecaller($encrypter->decrypt($recaller) ?? null);
         }
     }
 
@@ -267,7 +267,7 @@ class SessionAdapter extends AbstractAdapter
         $this->session->remove($this->getSessionName());
 
         if (! is_null($this->recaller())) {
-            // TODO: fix me the cookie cannot be send.
+            // If using login with remember, make sure to send cookie with redirect()->withCookies()
             $this->response()->deleteCookie(
                 $this->getCookieName(),
                 $app->cookieDomain,
