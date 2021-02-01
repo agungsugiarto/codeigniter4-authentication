@@ -7,6 +7,7 @@ use Fluent\Auth\Models\AccessTokenModel;
 
 class AccessTokenTest extends CIDatabaseTestCase
 {
+    /** @var string */
     protected $namespace = 'Fluent\Auth';
 
     public function testCanNoScopes()

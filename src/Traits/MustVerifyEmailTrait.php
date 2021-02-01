@@ -9,7 +9,7 @@ use Fluent\Auth\Contracts\VerifyEmailInterface;
 
 use function is_null;
 
-trait MustVerifyEmail
+trait MustVerifyEmailTrait
 {
     /**
      * Determine if the user has verified their email address.
@@ -31,7 +31,8 @@ trait MustVerifyEmail
         /** @var Model $config */
         $config = config('Auth')->password['provider'];
 
-        return (new $config())->where('email', $this->getEmailForVerification())->set('email_verified_at', Time::now())->update();
+        return (new $config())->where('email', $this->getEmailForVerification())
+            ->set('email_verified_at', Time::now())->update();
     }
 
     /**

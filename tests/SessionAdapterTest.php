@@ -17,6 +17,7 @@ class SessionAdapterTest extends CIDatabaseTestCase implements AuthenticationTes
     /** @var AuthFactoryInterface|AuthenticationInterface */
     protected $auth;
 
+    /** @var string */
     protected $namespace = '\Fluent\Auth';
 
     protected function setUp(): void

@@ -12,7 +12,6 @@ use Illuminate\Auth\Recaller;
 use function bin2hex;
 use function is_null;
 use function random_bytes;
-use function time;
 
 class SessionAdapter extends AbstractAdapter
 {

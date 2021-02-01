@@ -8,6 +8,7 @@ if (! defined('auth')) {
     /**
      * Provides convenient access to the main authentication class.
      *
+     * @param string|null $name
      * @return AuthFactoryInterface|AuthenticationInterface
      */
     function auth($name = null)

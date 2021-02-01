@@ -8,10 +8,10 @@ use Fluent\Auth\Contracts\HasAccessTokensInterface;
 use Fluent\Auth\Contracts\ResetPasswordInterface;
 use Fluent\Auth\Contracts\VerifyEmailInterface;
 use Fluent\Auth\Facades\Hash;
-use Fluent\Auth\Traits\Authenticatable;
-use Fluent\Auth\Traits\CanResetPassword;
-use Fluent\Auth\Traits\HasAccessTokens;
-use Fluent\Auth\Traits\MustVerifyEmail;
+use Fluent\Auth\Traits\AuthenticatableTrait;
+use Fluent\Auth\Traits\CanResetPasswordTrait;
+use Fluent\Auth\Traits\HasAccessTokensTrait;
+use Fluent\Auth\Traits\MustVerifyEmailTrait;
 
 class User extends Entity implements
     AuthenticatorInterface,
@@ -19,14 +19,16 @@ class User extends Entity implements
     ResetPasswordInterface,
     VerifyEmailInterface
 {
-    use Authenticatable;
-    use CanResetPassword;
-    use HasAccessTokens;
-    use MustVerifyEmail;
+    use AuthenticatableTrait;
+    use CanResetPasswordTrait;
+    use HasAccessTokensTrait;
+    use MustVerifyEmailTrait;
 
     /**
      * Array of field names and the type of value to cast them as
      * when they are accessed.
+     *
+     * @var array
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
