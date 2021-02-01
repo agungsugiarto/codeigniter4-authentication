@@ -49,6 +49,7 @@ class Auth
      *
      * @param string $method
      * @param array $arguments
+     * @return AuthFactoryInterface|AuthenticationInterface
      */
     public static function __callStatic($method, $arguments)
     {

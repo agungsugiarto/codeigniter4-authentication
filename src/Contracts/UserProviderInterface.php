@@ -22,6 +22,7 @@ interface UserProviderInterface
     /**
      * Find a user by their ID and "remember-me" token.
      *
+     * @param string $token
      * @return AuthenticatorInterface|HasAccessTokensInterface|null
      */
     public function findByRememberToken(int $id, $token);
@@ -30,7 +31,7 @@ interface UserProviderInterface
      * Update the "remember me" token for the given user in storage.
      *
      * @param string $token
-     * @return void
+     * @return mixed
      */
     public function updateRememberToken(AuthenticatorInterface $user, $token);
 

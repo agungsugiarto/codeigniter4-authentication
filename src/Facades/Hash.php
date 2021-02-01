@@ -24,6 +24,7 @@ class Hash
      *
      * @param string $method
      * @param array $arguments
+     * @return HasherInterface
      */
     public static function __callStatic($method, $arguments)
     {

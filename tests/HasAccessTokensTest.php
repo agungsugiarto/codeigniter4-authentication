@@ -10,6 +10,7 @@ use function hash;
 
 class HasAccessTokensTest extends CIDatabaseTestCase
 {
+    /** @var string */
     protected $namespace = 'Fluent\Auth';
 
     /** @var User */

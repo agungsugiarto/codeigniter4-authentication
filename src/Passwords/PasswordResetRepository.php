@@ -112,7 +112,6 @@ class PasswordResetRepository extends Model implements PasswordResetInterface
     /**
      * Delete all existing reset tokens from the database.
      *
-     * @param CanResetPassword $user
      * @return int
      */
     protected function deleteExisting(ResetPasswordInterface $user)

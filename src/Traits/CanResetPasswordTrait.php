@@ -5,7 +5,7 @@ namespace Fluent\Auth\Traits;
 use CodeIgniter\Events\Events;
 use Fluent\Auth\Contracts\ResetPasswordInterface;
 
-trait CanResetPassword
+trait CanResetPasswordTrait
 {
     /**
      * Get the e-mail address where password reset links are sent.
@@ -20,7 +20,6 @@ trait CanResetPassword
     /**
      * Send the password reset notification.
      *
-     * @param  string  $token
      * @return void
      */
     public function sendPasswordResetNotification()

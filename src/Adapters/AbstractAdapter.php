@@ -58,6 +58,8 @@ abstract class AbstractAdapter implements AuthenticationInterface
 
     /**
      * Abstract adapter class.
+     *
+     * @param Auth $config
      */
     public function __construct($config, UserProviderInterface $provider)
     {

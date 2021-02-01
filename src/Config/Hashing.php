@@ -16,6 +16,8 @@ class Hashing extends BaseConfig
      * used; however, you remain free to modify this option if you wish.
      *
      * Supported: "bcrypt", "argon", "argon2id"
+     *
+     * @var string
      */
     public $driver = 'bcrypt';
 
@@ -27,6 +29,8 @@ class Hashing extends BaseConfig
      * Here you may specify the configuration options that should be used when
      * passwords are hashed using the Bcrypt algorithm. This will allow you
      * to control the amount of time it takes to hash the given password.
+     *
+     * @var array
      */
     public $bcrypt = [
         'rounds' => 10,
@@ -40,6 +44,8 @@ class Hashing extends BaseConfig
      * Here you may specify the configuration options that should be used when
      * passwords are hashed using the Argon algorithm. These will allow you
      * to control the amount of time it takes to hash the given password.
+     *
+     * @var array
      */
     public $argon = [
         'memory'  => 1024,

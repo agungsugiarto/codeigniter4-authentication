@@ -16,12 +16,12 @@
         }
     ],
     "require": {
-        "codeigniter4/framework": "^4.0",
-        "php": "^7.2"
+        "codeigniter4/framework": "^4.1",
+        "php": "^7.3 || ^8.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.13",
-        "phpunit/phpunit": "^8.5",
+        "phpunit/phpunit": "^9.1",
         "laminas/laminas-coding-standard": "^2.1"
     },
     "autoload": {
@@ -47,6 +47,6 @@
     "scripts": {
         "cs-check": "phpcs",
         "cs-fix": "phpcbf",
-        "test": "phpunit --testdox --colors=always"
+        "test": "phpunit"
     }
 }

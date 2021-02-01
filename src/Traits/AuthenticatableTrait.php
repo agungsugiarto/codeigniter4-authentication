@@ -2,7 +2,7 @@
 
 namespace Fluent\Auth\Traits;
 
-trait Authenticatable
+trait AuthenticatableTrait
 {
     /**
      * Returns the name of the column used to

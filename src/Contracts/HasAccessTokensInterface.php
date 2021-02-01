@@ -75,7 +75,6 @@ interface HasAccessTokensInterface
     /**
      * Sets the current active token for this user.
      *
-     * @param AccessToken|null
      * @return $this
      */
     public function withAccessToken(?AccessToken $accessToken);

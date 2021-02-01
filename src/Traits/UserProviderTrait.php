@@ -12,7 +12,7 @@ use function count;
 use function hash_equals;
 use function is_array;
 
-trait UserProvider
+trait UserProviderTrait
 {
     /**
      * Locates an identity object by ID.
@@ -61,6 +61,7 @@ trait UserProvider
     /**
      * Find a user by their ID and "remember-me" token.
      *
+     * @param string $token
      * @return AuthenticatorInterface|HasAccessTokensInterface|null
      */
     public function findByRememberToken(int $id, $token)
@@ -82,11 +83,12 @@ trait UserProvider
      * Update the "remember me" token for the given user in storage.
      *
      * @param string $token
-     * @return void
+     * @return mixed
      */
     public function updateRememberToken(AuthenticatorInterface $user, $token = null)
     {
-        return $this->where($user->getAuthIdColumn(), $user->getAuthId())->set($user->getRememberColumn(), $token)->update();
+        return $this->where($user->getAuthIdColumn(), $user->getAuthId())
+            ->set($user->getRememberColumn(), $token)->update();
     }
 
     /**

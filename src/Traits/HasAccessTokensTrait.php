@@ -8,14 +8,14 @@ use Fluent\Auth\Models\AccessTokenModel;
 use function hash;
 
 /**
- * Trait HasAccessTokens
+ * Trait HasAccessTokensTrait
  *
  * Provides functionality needed to generate, revoke,
  * and retrieve Personal Access Tokens.
  *
  * Intended to be used with User entities.
  */
-trait HasAccessTokens
+trait HasAccessTokensTrait
 {
     /**
      * Generates a new personal access token for this user.
@@ -157,7 +157,6 @@ trait HasAccessTokens
     /**
      * Sets the current active token for this user.
      *
-     * @param AccessToken|null
      * @return $this
      */
     public function withAccessToken(?AccessToken $accessToken)

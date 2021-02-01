@@ -18,6 +18,7 @@ class TokenAdapterTest extends CIDatabaseTestCase implements AuthenticationTestI
     /** @var AuthFactoryInterface|AuthenticationInterface */
     protected $auth;
 
+    /** @var string */
     protected $namespace = '\Fluent\Auth';
 
     protected function setUp(): void
