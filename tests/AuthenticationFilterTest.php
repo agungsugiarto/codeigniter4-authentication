@@ -3,13 +3,12 @@
 namespace Fluent\Auth\Tests;
 
 use CodeIgniter\Config\Factories;
-use CodeIgniter\Test\CIDatabaseTestCase;
 use CodeIgniter\Router\RouteCollection;
+use CodeIgniter\Test\CIDatabaseTestCase;
 use CodeIgniter\Test\FeatureTestTrait;
-use Config\Filters;
 use Fluent\Auth\Config\Services;
-use Fluent\Auth\Contracts\AuthFactoryInterface;
 use Fluent\Auth\Contracts\AuthenticationInterface;
+use Fluent\Auth\Contracts\AuthFactoryInterface;
 use Fluent\Auth\Exceptions\AuthenticationException;
 use Fluent\Auth\Filters\AuthenticationFilter;
 use Fluent\Auth\Models\UserModel;
@@ -36,12 +35,12 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
 
         $this->auth = Services::auth(false);
 
-        $filters = config('Filters');
+        $filters                  = config('Filters');
         $filters->aliases['auth'] = AuthenticationFilter::class;
         Factories::injectMock('filters', 'filters', $filters);
-        
+
         $routes = Services::routes();
-        $routes->group('secret', ['filter' => "auth:{$this->guard}"], function($routes) {
+        $routes->group('secret', ['filter' => "auth:{$this->guard}"], function ($routes) {
             $routes->get('treasure', function () {
                 return 'you found gems';
             });
@@ -66,8 +65,8 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
         $user = fake(UserModel::class);
 
         $login = $this->auth->attempt([
-            'email' => $user->email,
-            'password' => 'secret'
+            'email'    => $user->email,
+            'password' => 'secret',
         ]);
 
         $this->assertTrue($login);
@@ -91,8 +90,8 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
         $user = fake(UserModel::class);
 
         $login = $this->auth->attempt([
-            'email' => $user->email,
-            'password' => 'secret'
+            'email'    => $user->email,
+            'password' => 'secret',
         ]);
 
         $this->assertTrue($login);
@@ -113,7 +112,7 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
 
         $this->call('get', 'secret/treasure');
 
-        $user = fake(UserModel::class);
+        $user  = fake(UserModel::class);
         $token = $user->generateAccessToken('foo');
 
         $login = $this->auth->guard('token')->attempt([
@@ -137,7 +136,7 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
 
         $this->call('get', 'secret/treasure');
 
-        $user = fake(UserModel::class);
+        $user  = fake(UserModel::class);
         $token = $user->generateAccessToken('foo');
         $this->setRequestHeader($token->raw_token);
 
@@ -156,7 +155,7 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
 
         $this->call('get', 'secret/treasure');
 
-        $user = fake(UserModel::class);
+        $user  = fake(UserModel::class);
         $token = $user->generateAccessToken('foo');
 
         $result = $this->call('get', "secret/treasure?{$token->raw_token}");

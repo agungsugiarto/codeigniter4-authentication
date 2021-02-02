@@ -2,20 +2,17 @@
 
 namespace Fluent\Auth\Filters;
 
-use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Fluent\Auth\Config\Services;
-use Fluent\Auth\Contracts\AuthFactoryInterface;
 use Fluent\Auth\Contracts\AuthenticationInterface;
+use Fluent\Auth\Contracts\AuthFactoryInterface;
 use Fluent\Auth\Exceptions\AuthenticationException;
 
 class AuthenticationFilter implements FilterInterface
 {
-    /**
-     * @var AuthFactoryInterface|AuthenticationInterface
-     */
+    /** @var AuthFactoryInterface|AuthenticationInterface */
     protected $auth;
 
     public function __construct()
