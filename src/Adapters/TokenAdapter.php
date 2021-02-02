@@ -115,7 +115,7 @@ class TokenAdapter extends AbstractAdapter
         $token = $this->getTokenForRequest();
 
         if (! is_null($token)) {
-            $credentials = ['token' => hash('sha256', $token)];
+            $credentials = ['token' => $token];
             Events::trigger('fireAuthenticatedEvent', $this->user);
 
             if ($user = $this->hasValidCredentials($credentials)) {
