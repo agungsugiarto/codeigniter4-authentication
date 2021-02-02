@@ -7,8 +7,11 @@ use Fluent\Auth\AuthManager;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthFactoryInterface;
 use Fluent\Auth\Contracts\HasherInterface;
+use Fluent\Auth\Contracts\PasswordBrokerFactoryInterface;
+use Fluent\Auth\Contracts\PasswordBrokerInterface;
 use Fluent\Auth\Passwords\Hash\HashManager;
 use Fluent\Auth\Passwords\Hash\Manager;
+use Fluent\Auth\Passwords\PasswordBrokerManager;
 
 class Services extends BaseService
 {
@@ -24,6 +27,20 @@ class Services extends BaseService
         }
 
         return new AuthManager(config('Auth'));
+    }
+
+    /**
+     * Passwords broker services.
+     *
+     * @return PasswordBrokerFactoryInterface|PasswordBrokerInterface
+     */
+    public static function passwords(bool $getShared = true)
+    {
+        if ($getShared) {
+            return self::getSharedInstance('passwords');
+        }
+
+        return new PasswordBrokerManager(config('Auth'));
     }
 
     /**
