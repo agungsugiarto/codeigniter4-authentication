@@ -25,7 +25,7 @@ class TokenAdapterTest extends CIDatabaseTestCase implements AuthenticationTestI
     {
         parent::setUp();
 
-        $this->auth = Services::auth()->guard('token');
+        $this->auth = Services::auth(false)->guard('token');
     }
 
     protected function tearDown(): void

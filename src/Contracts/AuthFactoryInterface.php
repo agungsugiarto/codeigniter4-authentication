@@ -31,6 +31,14 @@ interface AuthFactoryInterface
     public function guard($name = null);
 
     /**
+     * Set the default guard the factory should serve.
+     *
+     * @param  string  $name
+     * @return void
+     */
+    public function shouldUse($name);
+
+    /**
      * Get the default authentication driver name.
      *
      * @return string
