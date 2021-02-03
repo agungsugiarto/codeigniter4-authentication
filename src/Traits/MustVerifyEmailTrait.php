@@ -4,8 +4,8 @@ namespace Fluent\Auth\Traits;
 
 use CodeIgniter\Events\Events;
 use CodeIgniter\I18n\Time;
+use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\VerifyEmailInterface;
-use Fluent\Auth\Models\UserModel;
 
 use function is_null;
 
@@ -28,7 +28,8 @@ trait MustVerifyEmailTrait
      */
     public function markEmailAsVerified()
     {
-        return (new UserModel())->where('email', $this->getEmailForVerification())
+        return Services::auth()->createUserProvider()
+            ->where('email', $this->getEmailForVerification())
             ->set('email_verified_at', Time::now())->update();
     }
 

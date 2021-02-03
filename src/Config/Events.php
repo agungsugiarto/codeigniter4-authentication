@@ -10,6 +10,6 @@ Events::on(VerifyEmailInterface::class, function ($email) {
     (new VerificationNotification($email))->send();
 });
 
-Events::on(ResetPasswordInterface::class, function ($email) {
-    (new ResetPasswordNotification($email))->send();
+Events::on(ResetPasswordInterface::class, function ($email, $token) {
+    (new ResetPasswordNotification($email, $token))->send();
 });

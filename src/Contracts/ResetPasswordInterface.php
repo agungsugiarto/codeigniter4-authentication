@@ -16,5 +16,5 @@ interface ResetPasswordInterface
      *
      * @return void
      */
-    public function sendPasswordResetNotification();
+    public function sendPasswordResetNotification(string $token);
 }

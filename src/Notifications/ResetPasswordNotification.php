@@ -10,15 +10,19 @@ class ResetPasswordNotification
     /** @var string */
     protected $email;
 
+    /** @var string */
+    protected $token;
+
     /** @var Email */
     protected $service;
 
     /**
      * Instance verification notification.
      */
-    public function __construct(string $email)
+    public function __construct(string $email, string $token)
     {
         $this->email   = $email;
+        $this->token   = $token;
         $this->service = Services::email();
     }
 
@@ -31,8 +35,12 @@ class ResetPasswordNotification
     {
         return $this->service
             ->setTo($this->email)
-            ->setSubject('Reset Password Notification')
-            ->setMessage(view('Fluent\Auth\Views\Email\reset_email'))
+            ->setSubject("Reset Password Notification")
+            ->setMessage(view('Fluent\Auth\Views\Email\reset_email', [
+                'token'  => $this->token,
+                'email'  => $this->email,
+                'expire' => config('Auth')->passwords['users']['expire'],
+            ]))
             ->setMailType('html')
             ->send();
     }

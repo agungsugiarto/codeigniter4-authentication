@@ -1,13 +1,19 @@
 <?php
 
 return [
-    'unknownAdapter'      => '{0} is not a valid auth adapter.',
-    'unknownUserProvider' => 'Unable to determine the User Provider to use.',
-    'invalidUser'         => 'Unable to locate the specified user.',
-    'badAttempt'          => 'Unable to log you in. Please check your credentials.',
-    'noPassword'          => 'Cannot validate a user without a password.',
-    'invalidPassword'     => 'Unable to log you in. Please check your password.',
-    'noToken'             => 'Every request must have a bearer token in the Authorization header.',
-    'badToken'            => 'The access token is invalid.',
-    'throttler'           => 'You submitted over {0} requests within a minute.',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Authentication Language Lines
+    |--------------------------------------------------------------------------
+    |
+    | The following language lines are used during authentication for various
+    | messages that we need to display to the user. You are free to modify
+    | these language lines according to your application's requirements.
+    |
+    */
+    'unknownAdapter' => '{0} is not a valid auth adapter.',
+    'failed'         => 'Unable to log you in. Please check your credentials.',
+    'password'       => 'Unable to log you in. Please check your password.',
+    'throttler'      => 'You submitted over {0} requests within a minute.',
 ];
