@@ -4,14 +4,15 @@ namespace Fluent\Auth\Passwords;
 
 use CodeIgniter\I18n\Time;
 use CodeIgniter\Model;
-use Fluent\Auth\Contracts\PasswordResetInterface;
+use Fluent\Auth\Contracts\PasswordResetRepositoryInterface;
 use Fluent\Auth\Contracts\ResetPasswordInterface;
 use Fluent\Auth\Facades\Hash;
 
 use function bin2hex;
 use function hash_hmac;
+use function random_bytes;
 
-class PasswordResetRepository extends Model implements PasswordResetInterface
+class PasswordResetRepository extends Model implements PasswordResetRepositoryInterface
 {
     /**
      * Name of database table
@@ -45,6 +46,31 @@ class PasswordResetRepository extends Model implements PasswordResetInterface
     protected $allowedFields = ['email', 'token'];
 
     /**
+     * The number of seconds a token should last.
+     *
+     * @var int
+     */
+    protected $expires;
+
+    /**
+     * Minimum number of seconds before re-redefining the token.
+     *
+     * @var int
+     */
+    protected $throttle;
+
+    /**
+     * Create new token repository instance.
+     */
+    public function __construct(int $expires = 60, int $throttle = 60)
+    {
+        parent::__construct();
+
+        $this->expires  = $expires * 60;
+        $this->throttle = $throttle;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function create(ResetPasswordInterface $user)
@@ -68,7 +94,7 @@ class PasswordResetRepository extends Model implements PasswordResetInterface
      */
     public function createNewToken()
     {
-        return hash_hmac('sha256', bin2hex(random_string(20)), config('Encryption')->key);
+        return hash_hmac('sha256', bin2hex(random_bytes(20)), config('Encryption')->key);
     }
 
     /**
@@ -78,7 +104,9 @@ class PasswordResetRepository extends Model implements PasswordResetInterface
     {
         $record = $this->where('email', $user->getEmailForPasswordReset())->first();
 
-        return $record && ! $this->tokenExpired($record->created_at) && Hash::check($token, $record->token);
+        $expiredAt = Time::now()->subSeconds($this->expires);
+
+        return $record && ! $record->created_at < $expiredAt && Hash::check($token, $record->token);
     }
 
     /**
@@ -86,9 +114,15 @@ class PasswordResetRepository extends Model implements PasswordResetInterface
      */
     public function recentlyCreatedToken(ResetPasswordInterface $user)
     {
+        if ($this->throttle <= 0) {
+            return false;
+        }
+
         $record = $this->where('email', $user->getEmailForPasswordReset())->first();
 
-        return $record && $this->tokenRecentlyCreated($record->created_at);
+        $expiredAt = Time::now()->subSeconds($this->throttle);
+
+        return $record && $record->created_at > $expiredAt;
     }
 
     /**
@@ -104,9 +138,9 @@ class PasswordResetRepository extends Model implements PasswordResetInterface
      */
     public function destroyExpired()
     {
-        $expiredAt = Time::now()->subSeconds(config('Auth')->password['expire']);
+        $expiredAt = Time::now()->subSeconds($this->expires);
 
-        $this->where('created_at <', $expiredAt)->delete();
+        return $this->where('created_at <', $expiredAt)->delete();
     }
 
     /**
@@ -129,35 +163,5 @@ class PasswordResetRepository extends Model implements PasswordResetInterface
     protected function getPayload($email, $token)
     {
         return ['email' => $email, 'token' => Hash::make($token), 'created_at' => Time::now()];
-    }
-
-    /**
-     * Determine if the token has expired.
-     *
-     * @param  string  $createdAt
-     * @return bool
-     */
-    protected function tokenExpired($createdAt)
-    {
-        $past = Time::parse($createdAt)->addSeconds(config('Auth')->password['expire']);
-
-        return $past->isBefore($past);
-    }
-
-    /**
-     * Determine if the token was recently created.
-     *
-     * @param  string  $createdAt
-     * @return bool
-     */
-    protected function tokenRecentlyCreated($createdAt)
-    {
-        if (config('Auth')->passwords['throttle'] <= 0) {
-            return false;
-        }
-
-        $after = Time::parse($createdAt)->addSeconds(config('Auth')->passwords['throttle']);
-
-        return $after->isAfter($after);
     }
 }

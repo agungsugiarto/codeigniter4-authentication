@@ -4,7 +4,7 @@ namespace Fluent\Auth\Contracts;
 
 use Fluent\Auth\Contracts\ResetPasswordInterface;
 
-interface PasswordResetInterface
+interface PasswordResetRepositoryInterface
 {
     /**
      * Create a new token.
