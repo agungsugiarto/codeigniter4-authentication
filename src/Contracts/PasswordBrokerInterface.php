@@ -3,7 +3,7 @@
 namespace Fluent\Auth\Contracts;
 
 use Closure;
-use Fluent\Auth\Contracts\PasswordResetInterface;
+use Fluent\Auth\Contracts\PasswordResetRepositoryInterface;
 use Fluent\Auth\Contracts\ResetPasswordInterface;
 
 interface PasswordBrokerInterface
@@ -93,7 +93,7 @@ interface PasswordBrokerInterface
     /**
      * Get the password reset token repository implementation.
      *
-     * @return PasswordResetInterface
+     * @return PasswordResetRepositoryInterface
      */
     public function getRepository();
 }

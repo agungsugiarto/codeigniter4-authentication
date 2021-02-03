@@ -4,7 +4,7 @@ namespace Fluent\Auth\Passwords;
 
 use Closure;
 use Fluent\Auth\Contracts\PasswordBrokerInterface;
-use Fluent\Auth\Contracts\PasswordResetInterface;
+use Fluent\Auth\Contracts\PasswordResetRepositoryInterface;
 use Fluent\Auth\Contracts\ResetPasswordInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Helpers\Arr;
@@ -14,13 +14,13 @@ use function is_null;
 
 class PasswordBroker implements PasswordBrokerInterface
 {
-    /** @var PasswordResetInterface */
+    /** @var PasswordResetRepositoryInterface */
     protected $tokens;
 
     /** @var UserProviderInterface */
     protected $users;
 
-    public function __construct(PasswordResetInterface $tokens, UserProviderInterface $users)
+    public function __construct(PasswordResetRepositoryInterface $tokens, UserProviderInterface $users)
     {
         $this->tokens = $tokens;
         $this->users  = $users;

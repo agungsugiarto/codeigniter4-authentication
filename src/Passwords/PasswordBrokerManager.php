@@ -6,11 +6,9 @@ use Fluent\Auth\Config\Auth;
 use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\PasswordBrokerFactoryInterface;
 use Fluent\Auth\Contracts\PasswordBrokerInterface;
-use Fluent\Auth\Contracts\PasswordResetInterface;
+use Fluent\Auth\Contracts\PasswordResetRepositoryInterface;
 use Fluent\Auth\Passwords\PasswordBroker;
 use InvalidArgumentException;
-
-use function is_null;
 
 class PasswordBrokerManager implements PasswordBrokerFactoryInterface
 {
@@ -52,10 +50,6 @@ class PasswordBrokerManager implements PasswordBrokerFactoryInterface
     {
         $config = $this->getConfig($name);
 
-        if (is_null($config)) {
-            throw new InvalidArgumentException("Password resetter [{$name}] is not defined.");
-        }
-
         // The password broker uses a token repository to validate tokens and send user
         // password e-mails, as well as validating that password reset process as an
         // aggregate service of sorts providing a convenient interface for resets.
@@ -69,7 +63,7 @@ class PasswordBrokerManager implements PasswordBrokerFactoryInterface
      * Create a token repository instance based on the given configuration.
      *
      * @param  array  $config
-     * @return PasswordResetInterface
+     * @return PasswordResetRepositoryInterface
      */
     protected function createTokenRepository(array $config)
     {
@@ -84,7 +78,11 @@ class PasswordBrokerManager implements PasswordBrokerFactoryInterface
      */
     protected function getConfig($name)
     {
-        return $this->config->passwords[$name];
+        if (isset($this->config->passwords[$name])) {
+            return $this->config->passwords[$name];
+        }
+
+        throw new InvalidArgumentException("Password resetter [{$name}] is not defined.");
     }
 
     /**
