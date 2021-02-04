@@ -39,7 +39,7 @@ class ThrottleFilter implements FilterInterface
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        if ($this->throttler->check($this->key($request), $this->config->passwords['throttle'], MINUTE) === false) {
+        if ($this->throttler->check($this->key($request), $this->config->passwords['users']['throttle'], MINUTE) === false) {
             if ($request->isAJAX()) {
                 return $this->fail(lang('Auth.throttler', [$this->config->passwords['throttle']]));
             }

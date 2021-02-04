@@ -7,6 +7,7 @@ use Fluent\Auth\Contracts\PasswordBrokerInterface;
 use Fluent\Auth\Contracts\PasswordResetRepositoryInterface;
 use Fluent\Auth\Contracts\ResetPasswordInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
+use Fluent\Auth\Contracts\VerifyEmailInterface;
 use Fluent\Auth\Helpers\Arr;
 use UnexpectedValueException;
 
@@ -56,6 +57,32 @@ class PasswordBroker implements PasswordBrokerInterface
         }
 
         return static::RESET_LINK_SENT;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function sendVerifyLink(array $credentials, ?Closure $callback = null)
+    {
+        // First we will check to see if we found a user at the given credentials and
+        // if we did not we will redirect back to this current URI with a piece of
+        // "flash" data in the session to indicate to the developers the errors.
+        $user = $this->getUser($credentials);
+
+        if (is_null($user)) {
+            return static::INVALID_USER;
+        }
+
+        if ($callback) {
+            $callback($user);
+        } else {
+            // We are ready to send verify the message out to this user with a link
+            // to their email. We will then redirect back to the current URI
+            // having nothing set in the session to indicate errors.
+            $user->sendEmailVerificationNotification();
+        }
+
+        return static::VERIFY_LINK_SENT;
     }
 
     /**
@@ -114,6 +141,10 @@ class PasswordBroker implements PasswordBrokerInterface
 
         if ($user && ! $user instanceof ResetPasswordInterface) {
             throw new UnexpectedValueException('User must implement ResetPasswordInterface.');
+        }
+
+        if ($user && ! $user instanceof VerifyEmailInterface) {
+            throw new UnexpectedValueException('User must implement VerifyEmailInterface.');
         }
 
         return $user;

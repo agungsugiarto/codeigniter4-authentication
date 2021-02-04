@@ -3,6 +3,7 @@
 namespace Fluent\Auth\Contracts;
 
 use Closure;
+use CodeIgniter\Router\RouteCollection;
 
 interface AuthFactoryInterface
 {
@@ -89,4 +90,11 @@ interface AuthFactoryInterface
      * @return bool
      */
     public function hasResolvedGuards();
+
+    /**
+     * Auth routes for authentication users.
+     *
+     * @return RouteCollection
+     */
+    public function routes(array $options = []);
 }

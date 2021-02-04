@@ -3,6 +3,7 @@
 namespace Fluent\Auth;
 
 use Closure;
+use CodeIgniter\Config\Services;
 use Fluent\Auth\Config\Auth;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthFactoryInterface;
@@ -189,6 +190,46 @@ class AuthManager implements AuthFactoryInterface
     public function hasResolvedGuards()
     {
         return count($this->guards) > 0;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function routes(array $options = [])
+    {
+        $routes = Services::routes();
+
+        if ($options['register'] ?? true) {
+            $routes->get('register', 'RegisteredUserController::new', ['namespace' => 'App\Controllers\Auth']);
+            $routes->post('register', 'RegisteredUserController::create', ['namespace' => 'App\Controllers\Auth']);
+        }
+
+        if ($options['reset'] ?? true) {
+            $routes->get('forgot-password', 'PasswordResetLinkController::new', ['as' => 'password.request', 'namespace' => 'App\Controllers\Auth']);
+            $routes->post('forgot-password', 'PasswordResetLinkController::create', ['as' => 'password.email', 'namespace' => 'App\Controllers\Auth']);
+            $routes->get('reset-password/(:any)', 'NewPasswordController::new', ['as' => 'password.reset', 'namespace' => 'App\Controllers\Auth']);
+            $routes->post('reset-password', 'NewPasswordController::create', ['as' => 'password.update', 'namespace' => 'App\Controllers\Auth']);
+        }
+
+        if ($options['confirm'] ?? true) {
+            $routes->get('confirm-password', 'ConfirmablePasswordController::show', ['filter' => 'auth', 'as' => 'password.confirm', 'namespace' => 'App\Controllers\Auth']);
+            $routes->post('confirm-password', 'ConfirmablePasswordController::create', ['filter' => 'auth', 'namespace' => 'App\Controllers\Auth']);
+        }
+
+        if ($options['verify'] ?? true) {
+            $routes->group('verify-email', ['filter' => 'auth', 'namespace' => 'App\Controllers\Auth'], function ($routes) {
+                $routes->get('/', 'EmailVerificationPromptController::new', ['as' => 'verification.notice', 'namespace' => 'App\Controllers\Auth']);
+                $routes->get('/(:any)', 'VerifyEmailController::index/$1', ['filter' => 'throttle', 'as' => 'verification.verify', 'namespace' => 'App\Controllers\Auth']);
+            });
+
+            $routes->group('email', ['filter' => 'auth', 'namespace' => 'App\Controllers\Auth'], function ($routes) {
+                $routes->post('verification-notification', 'EmailVerificationNotificationController::create', ['filter' => 'throttle', 'as' => 'verification.send']);
+            });
+        }
+
+        $routes->get('login', 'AuthenticatedSessionController::new', ['namespace' => 'App\Controllers\Auth']);
+        $routes->post('login', 'AuthenticatedSessionController::create', ['namespace' => 'App\Controllers\Auth']);
+        $routes->post('logout', 'AuthenticatedSessionController::delete', ['filter' => 'auth', 'as' => 'logout', 'namespace' => 'App\Controllers\Auth']);
     }
 
     /**

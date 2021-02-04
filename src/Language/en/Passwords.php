@@ -12,6 +12,7 @@ return [
     | has failed, such as for an invalid token or invalid new password.
     |
     */
+    'verify'    => 'Your email has been successfully verified.',
     'reset'     => 'Your password has been reset!',
     'sent'      => 'We have emailed your password reset link!',
     'throttled' => 'Please wait before retrying.',

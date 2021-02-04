@@ -24,7 +24,11 @@ class EmailVerifiedFilter implements FilterInterface
             ($user instanceof VerifyEmailInterface &&
             ! $user->hasVerifiedEmail())
         ) {
-            throw new AuthenticationException('Your email address is not verified', ResponseInterface::HTTP_FORBIDDEN);
+            if ($request->isAjax()) {
+                throw new AuthenticationException('Your email address is not verified', ResponseInterface::HTTP_FORBIDDEN);
+            }
+
+            return redirect()->route($arguments[0] ?: 'verification.notice')->with('error', 'Your email address is not verified');
         }
     }
 

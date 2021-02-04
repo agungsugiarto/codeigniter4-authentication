@@ -3,6 +3,7 @@
 namespace Fluent\Auth\Facades;
 
 use Closure;
+use CodeIgniter\Router\RouteCollection;
 use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
@@ -25,6 +26,7 @@ use Fluent\Auth\Contracts\VerifyEmailInterface;
  * @method ststic $this extend($driver, Closure $callback)
  * @method ststic $this provider($name, Closure $callback)
  * @method ststic bool hasResolvedGuards()
+ * @method static RouteCollection routes(array $options = [])
  * @method static AuthenticatorInterface|ResetPasswordInterface|VerifyEmailInterface|HasAccessTokensInterface authenticate()
  * @method static bool attempt(array $credentials, bool $remember = false)
  * @method static bool viaRemember()

@@ -5,6 +5,7 @@ namespace Fluent\Auth\Contracts;
 use Closure;
 use Fluent\Auth\Contracts\PasswordResetRepositoryInterface;
 use Fluent\Auth\Contracts\ResetPasswordInterface;
+use Fluent\Auth\Contracts\VerifyEmailInterface;
 
 interface PasswordBrokerInterface
 {
@@ -13,35 +14,42 @@ interface PasswordBrokerInterface
      *
      * @var string
      */
-    const RESET_LINK_SENT = 'passwords.sent';
+    const RESET_LINK_SENT = 'Passwords.sent';
+
+    /**
+     * Constant representing a successfully sent verify.
+     *
+     * @var string
+     */
+    const VERIFY_LINK_SENT = 'Passwords.verify';
 
     /**
      * Constant representing a successfully reset password.
      *
      * @var string
      */
-    const PASSWORD_RESET = 'passwords.reset';
+    const PASSWORD_RESET = 'Passwords.reset';
 
     /**
      * Constant representing the user not found response.
      *
      * @var string
      */
-    const INVALID_USER = 'passwords.user';
+    const INVALID_USER = 'Passwords.user';
 
     /**
      * Constant representing an invalid token.
      *
      * @var string
      */
-    const INVALID_TOKEN = 'passwords.token';
+    const INVALID_TOKEN = 'Passwords.token';
 
     /**
      * Constant representing a throttled reset attempt.
      *
      * @var string
      */
-    const RESET_THROTTLED = 'passwords.throttled';
+    const RESET_THROTTLED = 'Passwords.throttled';
 
     /**
      * Send a password reset link to a user.
@@ -50,6 +58,14 @@ interface PasswordBrokerInterface
      * @return string
      */
     public function sendResetLink(array $credentials, ?Closure $callback = null);
+
+    /**
+     * Send a password reset link to a user.
+     *
+     * @param  array  $credentials
+     * @return string
+     */
+    public function sendVerifyLink(array $credentials, ?Closure $callback = null);
 
     /**
      * Reset the password for the given token.
@@ -63,7 +79,7 @@ interface PasswordBrokerInterface
      * Get the user for the given credentials.
      *
      * @param  array  $credentials
-     * @return ResetPasswordInterface|null
+     * @return ResetPasswordInterface|VerifyEmailInterface|null
      * @throws UnexpectedValueException
      */
     public function getUser(array $credentials);

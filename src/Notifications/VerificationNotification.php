@@ -32,7 +32,7 @@ class VerificationNotification
     {
         return $this->service
             ->setTo($this->email)
-            ->setSubject('Verify Email Address')
+            ->setSubject('Verify Email Notification')
             ->setMessage(view('Fluent\Auth\Views\Email\verify_email', [
                 'hash'   => sha1($this->email),
                 'expire' => Time::now()->addMinutes(config('Auth')->passwords['users']['expire'])->getTimestamp(),
