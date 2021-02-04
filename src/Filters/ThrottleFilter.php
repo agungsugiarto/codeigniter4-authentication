@@ -9,7 +9,10 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\Response;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\Throttle\Throttler;
-use Fluent\Auth\Config\Auth;
+use Fluent\Auth\Config\Auth as Config;
+use Fluent\Auth\Facades\Auth;
+
+use function sha1;
 
 class ThrottleFilter implements FilterInterface
 {
@@ -21,7 +24,7 @@ class ThrottleFilter implements FilterInterface
     /** @var Response */
     protected $response;
 
-    /** @var Auth */
+    /** @var Config */
     protected $config;
 
     public function __construct()
@@ -36,7 +39,7 @@ class ThrottleFilter implements FilterInterface
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        if ($this->throttler->check($request->getIPAddress(), $this->config->passwords['throttle'], MINUTE) === false) {
+        if ($this->throttler->check($this->key($request), $this->config->passwords['throttle'], MINUTE) === false) {
             if ($request->isAJAX()) {
                 return $this->fail(lang('Auth.throttler', [$this->config->passwords['throttle']]));
             }
@@ -50,5 +53,15 @@ class ThrottleFilter implements FilterInterface
      */
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
+    }
+
+    /**
+     * Generate signature key for throttle.
+     *
+     * @return mixed
+     */
+    protected function key(RequestInterface $request)
+    {
+        return sha1($request->getIPAddress() . '|' . Auth::user()->getAuthId());
     }
 }

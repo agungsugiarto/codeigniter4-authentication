@@ -2,12 +2,12 @@
 
 namespace Fluent\Auth\Adapters;
 
+use Codeigniter\Config\Services;
+use Codeigniter\Encryption\EncrypterInterface;
 use CodeIgniter\Events\Events;
-use Config\App;
-use Config\Services;
+use Exception;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\CookieRecaller;
-use Illuminate\Auth\Recaller;
 
 use function bin2hex;
 use function is_null;
@@ -146,13 +146,12 @@ class SessionAdapter extends AbstractAdapter
      */
     protected function recallerCookie(AuthenticatorInterface $user)
     {
-        $app       = new App();
-        $encrypter = Services::encrypter();
+        $app = config('App');
 
         // If using login with remember, make sure to send cookie with redirect()->withCookies()
         $this->response()->setCookie(
             $this->getCookieName(),
-            $encrypter->encrypt($user->getAuthId() . '|' . $user->getRememberToken() . '|' . $user->getAuthPassword()),
+            $this->encrypter()->encrypt($user->getAuthId() . '|' . $user->getRememberToken() . '|' . $user->getAuthPassword()),
             1 * MONTH,
             $app->cookieDomain,
             $app->cookiePath,
@@ -165,14 +164,32 @@ class SessionAdapter extends AbstractAdapter
     /**
      * Get the decrypted recaller cookie for the request.
      *
-     * @return Recaller|null
+     * @return CookieRecaller|null
      */
     protected function recaller()
     {
         if ($recaller = $this->request()->getCookie($this->getCookieName())) {
-            $encrypter = Services::encrypter();
-            return new CookieRecaller($encrypter->decrypt($recaller) ?? null);
+            try {
+                $decrypted = $this->encrypter()->decrypt($recaller);
+            } catch (Exception $e) {
+                log_message('error', $e->getMessage());
+                return null;
+            }
+
+            return new CookieRecaller($decrypted);
         }
+
+        return null;
+    }
+
+    /**
+     * Get service instance encrypter.
+     *
+     * @return EncrypterInterface
+     */
+    protected function encrypter()
+    {
+        return Services::encrypter();
     }
 
     /**
@@ -262,7 +279,7 @@ class SessionAdapter extends AbstractAdapter
      */
     protected function clearUserDataFromStorage()
     {
-        $app = new App();
+        $app = config('App');
         $this->session->remove($this->getSessionName());
 
         if (! is_null($this->recaller())) {
