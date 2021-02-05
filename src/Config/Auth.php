@@ -15,6 +15,7 @@ class Auth extends BaseConfig
      * --------------------------------------------------------------------------
      * Authentication Defaults
      * --------------------------------------------------------------------------
+     *
      * This option controls the default authentication "adapter".
      * You may change these defaults as required,
      * but they're a perfect start for
@@ -32,6 +33,7 @@ class Auth extends BaseConfig
      * --------------------------------------------------------------------------
      * Authentication Adapters
      * --------------------------------------------------------------------------
+     *
      * Next, you may define every authentication adapter for your application.
      * Of course, a great default configuration has been defined for you
      * here which uses session storage and the user provider.

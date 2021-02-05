@@ -11,9 +11,6 @@ use function time;
 
 class ConfirmPasswordFilter implements FilterInterface
 {
-    /** @var int */
-    protected $passwordTimeout = 10800;
-
     /**
      * {@inheritdoc}
      */
@@ -46,6 +43,6 @@ class ConfirmPasswordFilter implements FilterInterface
     {
         $confirmedAt = time() - session('password_confirmed_at');
 
-        return $confirmedAt > $this->passwordTimeout;
+        return $confirmedAt > config('Auth')->passwordTimeout;
     }
 }
