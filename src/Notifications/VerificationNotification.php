@@ -34,8 +34,9 @@ class VerificationNotification
             ->setTo($this->email)
             ->setSubject('Verify Email Notification')
             ->setMessage(view('Fluent\Auth\Views\Email\verify_email', [
-                'hash'   => sha1($this->email),
-                'expire' => Time::now()->addMinutes(config('Auth')->passwords['users']['expire'])->getTimestamp(),
+                'hash'      => sha1($this->email),
+                'expire'    => Time::now()->addMinutes(config('Auth')->passwords['users']['expire'])->getTimestamp(),
+                'signature' => hash_hmac('sha256', $this->email, sha1($this->email)),
             ]))
             ->setMailType('html')
             ->send();
