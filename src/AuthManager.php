@@ -207,7 +207,7 @@ class AuthManager implements AuthFactoryInterface
         if ($options['reset'] ?? true) {
             $routes->get('forgot-password', 'PasswordResetLinkController::new', ['as' => 'password.request', 'namespace' => 'App\Controllers\Auth']);
             $routes->post('forgot-password', 'PasswordResetLinkController::create', ['as' => 'password.email', 'namespace' => 'App\Controllers\Auth']);
-            $routes->get('reset-password/(:any)', 'NewPasswordController::new', ['as' => 'password.reset', 'namespace' => 'App\Controllers\Auth']);
+            $routes->get('reset-password/(:any)', 'NewPasswordController::new/$1', ['as' => 'password.reset', 'namespace' => 'App\Controllers\Auth']);
             $routes->post('reset-password', 'NewPasswordController::create', ['as' => 'password.update', 'namespace' => 'App\Controllers\Auth']);
         }
 
@@ -219,7 +219,7 @@ class AuthManager implements AuthFactoryInterface
         if ($options['verify'] ?? true) {
             $routes->group('verify-email', ['filter' => 'auth', 'namespace' => 'App\Controllers\Auth'], function ($routes) {
                 $routes->get('/', 'EmailVerificationPromptController::new', ['as' => 'verification.notice', 'namespace' => 'App\Controllers\Auth']);
-                $routes->get('/(:any)', 'VerifyEmailController::index/$1', ['filter' => 'throttle', 'as' => 'verification.verify', 'namespace' => 'App\Controllers\Auth']);
+                $routes->get('(:any)', 'VerifyEmailController::index/$1', ['filter' => 'throttle', 'as' => 'verification.verify', 'namespace' => 'App\Controllers\Auth']);
             });
 
             $routes->group('email', ['filter' => 'auth', 'namespace' => 'App\Controllers\Auth'], function ($routes) {

@@ -16,4 +16,5 @@ return [
     'failed'         => 'Unable to log you in. Please check your credentials.',
     'password'       => 'Unable to log you in. Please check your password.',
     'throttler'      => 'You submitted over {0} requests within a minute.',
+    'throttle'       => 'Too many login attempts. Please try again in {0} seconds.',
 ];
