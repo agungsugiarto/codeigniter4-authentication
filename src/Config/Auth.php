@@ -75,7 +75,6 @@ class Auth extends BaseConfig
      *
      * @var array
      */
-
     public $providers = [
         'users'    => [
             'driver' => 'model',
