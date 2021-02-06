@@ -9,6 +9,12 @@ use function in_array;
 
 class AccessToken extends Entity
 {
+    /**
+     * Array of field names and the type of value to cast them as
+     * when they are accessed.
+     *
+     * @var array
+     */
     protected $casts = [
         'last_used_at' => 'datetime',
         'scopes'       => 'array',
