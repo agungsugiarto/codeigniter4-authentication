@@ -73,6 +73,10 @@ class PasswordBroker implements PasswordBrokerInterface
             return static::INVALID_USER;
         }
 
+        if (! $user instanceof VerifyEmailInterface) {
+            return static::RESET_THROTTLED;
+        }
+
         if ($callback) {
             $callback($user);
         } else {
@@ -141,10 +145,6 @@ class PasswordBroker implements PasswordBrokerInterface
 
         if ($user && ! $user instanceof ResetPasswordInterface) {
             throw new UnexpectedValueException('User must implement ResetPasswordInterface.');
-        }
-
-        if ($user && ! $user instanceof VerifyEmailInterface) {
-            throw new UnexpectedValueException('User must implement VerifyEmailInterface.');
         }
 
         return $user;

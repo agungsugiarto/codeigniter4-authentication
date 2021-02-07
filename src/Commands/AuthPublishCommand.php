@@ -67,6 +67,7 @@ class AuthPublishCommand extends BaseCommand
 
         $this->publishMigration();
         $this->publishConfig();
+        $this->publishHashingConfig();
         $this->publishEntities();
         $this->publishModels();
         $this->publishLanguage();
@@ -146,6 +147,23 @@ class AuthPublishCommand extends BaseCommand
         $content   = str_replace('Fluent\Auth\Models', $namespace . '\Models', $content);
 
         $this->writeFile("Config/Auth.php", $content);
+    }
+
+    /**
+     * Publish config hashing.
+     *
+     * @return mixed
+     */
+    protected function publishHashingConfig()
+    {
+        $path = "{$this->sourcePath}/Config/Hashing.php";
+
+        $content = file_get_contents($path);
+        $content = str_replace('namespace Fluent\Auth\Config', "namespace Config", $content);
+        $content = str_replace("use CodeIgniter\Config\BaseConfig;\n\n", '', $content);
+        $content = str_replace('extends BaseConfig', "extends \Fluent\Auth\Config\Hashing", $content);
+
+        $this->writeFile("Config/Hashing.php", $content);
     }
 
     /**

@@ -45,6 +45,8 @@ class AuthCollector extends BaseCollector
             $html .= "<tr><td style='width:150px;'>User ID</td><td>#{$user->id}</td></tr>";
             $html .= "<tr><td>Username</td><td>{$user->username}</td></tr>";
             $html .= "<tr><td>Email</td><td>{$user->email}</td></tr>";
+            $html .= "<tr><td>User since</td><td>{$user->created_at->humanize()}</td></tr>";
+            $html .= "<tr><td>Verified at</td><td>{$user->email_verified_at}</td></tr>";
             $html .= '</tbody></table>';
         } else {
             $html = '<p>Not logged in.</p>';
