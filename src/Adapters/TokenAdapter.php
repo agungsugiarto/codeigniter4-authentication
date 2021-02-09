@@ -120,7 +120,6 @@ class TokenAdapter extends AbstractAdapter
 
             if ($user = $this->hasValidCredentials($credentials)) {
                 $this->login($user);
-                Events::trigger('fireLoginEvent', $user, true);
             }
         }
 

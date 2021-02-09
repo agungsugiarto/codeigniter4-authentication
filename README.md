@@ -6,10 +6,20 @@
 [![Latest Unstable Version](https://poser.pugx.org/agungsugiarto/codeigniter4-authentication/v/unstable)](https://packagist.org/packages/agungsugiarto/codeigniter4-authentication)
 [![License](https://poser.pugx.org/agungsugiarto/codeigniter4-authentication/license)](https://github.com/agungsugiarto/codeigniter4-authentication/blob/master/LICENSE.md)
 
+## About
 The `codeigniter4\authentication` component provides an API for authentication and
 includes concrete authentication adapters for common use case scenarios.
 
-- Based from https://github.com/lonnieezell/codigniter-shield
+- Inspired from https://github.com/lonnieezell/codigniter-shield
 - Most inspired from auth by laravel https://github.com/illuminate/auth
-- File issues at https://github.com/agungsugiarto/codeigniter4-authentication/issues
-- Documentation comming soon
+
+
+## Documentation
+- [en/authentication](docs/en/authentication.md)
+
+## Contributing
+Contributions are very welcome.
+
+## License
+
+Released under the MIT License, see [LICENSE](LICENSE.md).
