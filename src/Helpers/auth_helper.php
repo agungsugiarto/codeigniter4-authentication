@@ -8,15 +8,15 @@ if (! defined('auth')) {
     /**
      * Provides convenient access to the main authentication class.
      *
-     * @param string|null $name
+     * @param string|null $guard
      * @return AuthFactoryInterface|AuthenticationInterface
      */
-    function auth($name = null)
+    function auth($guard = null)
     {
-        if (is_null($name)) {
+        if (is_null($guard)) {
             return Services::auth();
         }
 
-        return Services::auth()->guard($name);
+        return Services::auth()->guard($guard);
     }
 }
