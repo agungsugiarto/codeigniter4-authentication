@@ -2,6 +2,7 @@
 
 namespace Fluent\Auth\Config;
 
+use CodeIgniter\Config\Factories;
 use CodeIgniter\Config\Services as BaseService;
 use Fluent\Auth\AuthManager;
 use Fluent\Auth\Contracts\AuthenticationInterface;
@@ -9,8 +10,8 @@ use Fluent\Auth\Contracts\AuthFactoryInterface;
 use Fluent\Auth\Contracts\HasherInterface;
 use Fluent\Auth\Contracts\PasswordBrokerFactoryInterface;
 use Fluent\Auth\Contracts\PasswordBrokerInterface;
+use Fluent\Auth\Passwords\Hash\AbstractManager;
 use Fluent\Auth\Passwords\Hash\HashManager;
-use Fluent\Auth\Passwords\Hash\Manager;
 use Fluent\Auth\Passwords\PasswordBrokerManager;
 
 class Services extends BaseService
@@ -26,7 +27,7 @@ class Services extends BaseService
             return self::getSharedInstance('auth');
         }
 
-        return new AuthManager(config('Auth'));
+        return new AuthManager(new Factories(), $getShared);
     }
 
     /**
@@ -40,13 +41,13 @@ class Services extends BaseService
             return self::getSharedInstance('passwords');
         }
 
-        return new PasswordBrokerManager(config('Auth'));
+        return new PasswordBrokerManager(new Factories(), $getShared);
     }
 
     /**
      * Create HashManager instance.
      *
-     * @return Manager|HashManager|HasherInterface
+     * @return AbstractManager|HashManager|HasherInterface
      */
     public static function hash(bool $getshared = true)
     {
@@ -54,6 +55,6 @@ class Services extends BaseService
             return self::getSharedInstance('hash');
         }
 
-        return new HashManager(config('Hashing'));
+        return new HashManager(new Factories(), $getshared);
     }
 }
