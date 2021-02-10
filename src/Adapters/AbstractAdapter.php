@@ -17,6 +17,7 @@ use Fluent\Auth\Contracts\VerifyEmailInterface;
 use Fluent\Auth\Exceptions\AuthenticationException;
 
 use function is_null;
+use function sha1;
 
 abstract class AbstractAdapter implements AuthenticationInterface
 {
@@ -42,10 +43,7 @@ abstract class AbstractAdapter implements AuthenticationInterface
     protected $recallAttempted = false;
 
     /** @var string */
-    protected $sessionName = 'login_web';
-
-    /** @var string */
-    protected $cookieName = 'remember_web';
+    protected $name;
 
     /** @var IncomingRequest */
     protected $request;
@@ -61,10 +59,11 @@ abstract class AbstractAdapter implements AuthenticationInterface
      *
      * @param Auth $config
      */
-    public function __construct($config, UserProviderInterface $provider)
+    public function __construct($config, string $name, UserProviderInterface $provider)
     {
         $this->config   = $config;
         $this->provider = $provider;
+        $this->name     = $name;
         $this->request  = Services::request();
         $this->response = Services::response();
         $this->session  = Services::session();
@@ -137,7 +136,7 @@ abstract class AbstractAdapter implements AuthenticationInterface
      */
     public function getSessionName()
     {
-        return $this->sessionName;
+        return 'login_' . "{$this->name}_" . sha1(static::class);
     }
 
     /**
@@ -145,7 +144,7 @@ abstract class AbstractAdapter implements AuthenticationInterface
      */
     public function getCookieName()
     {
-        return $this->cookieName;
+        return 'remember_' . "{$this->name}_" . sha1(static::class);
     }
 
     /**

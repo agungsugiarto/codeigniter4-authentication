@@ -248,7 +248,7 @@ class AuthManager implements AuthFactoryInterface
             return $this->callCustomCreator($name, $config);
         }
 
-        $driverMethod = new $config['driver']($this->config, $this->createUserProvider($config['provider']));
+        $driverMethod = new $config['driver']($this->config, $name, $this->createUserProvider($config['provider']));
 
         if ($driverMethod instanceof AuthenticationInterface) {
             return $driverMethod;
