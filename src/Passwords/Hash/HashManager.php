@@ -7,7 +7,7 @@ use Fluent\Auth\Passwords\Hash\Argon2IdHasher;
 use Fluent\Auth\Passwords\Hash\ArgonHasher;
 use Fluent\Auth\Passwords\Hash\BcryptHasher;
 
-class HashManager extends Manager implements HasherInterface
+class HashManager extends AbstractManager implements HasherInterface
 {
     /**
      * Create an instance of the Bcrypt hash Driver.

@@ -4,9 +4,13 @@ namespace Fluent\Auth\Facades;
 
 use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\HasherInterface;
+use Fluent\Auth\Passwords\Hash\AbstractManager;
+use Fluent\Auth\Passwords\Hash\HashManager;
 
 /**
- * @see \Illuminate\Hashing\HashManager
+ * @see \Fluent\Auth\Contracts\HasherInterface
+ * @see \Fluent\Auth\Passwords\Hash\AbstractManager
+ * @see \Fluent\Auth\Passwords\Hash\HashManager
  *
  * @method static HasherInterface driver($driver = null)
  * @method static $this extend($driver, Closure $callback)
@@ -24,7 +28,7 @@ class Hash
      *
      * @param string $method
      * @param array $arguments
-     * @return HasherInterface
+     * @return AbstractManager|HashManager|HasherInterface
      */
     public static function __callStatic($method, $arguments)
     {

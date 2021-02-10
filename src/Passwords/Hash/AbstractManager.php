@@ -3,6 +3,7 @@
 namespace Fluent\Auth\Passwords\Hash;
 
 use Closure;
+use CodeIgniter\Config\Factories;
 use Fluent\Auth\Config\Hashing;
 use InvalidArgumentException;
 
@@ -11,7 +12,7 @@ use function method_exists;
 use function sprintf;
 use function ucfirst;
 
-abstract class Manager
+abstract class AbstractManager
 {
     /**
      * The configuration repository instance.
@@ -37,11 +38,12 @@ abstract class Manager
     /**
      * Create a new manager instance.
      *
+     * @param bool getShared
      * @return void
      */
-    public function __construct(Hashing $config)
+    public function __construct(Factories $factory, bool $getShared = true)
     {
-        $this->config = $config;
+        $this->config = $factory::config('Hashing', ['getShared' => $getShared]);
     }
 
     /**
@@ -112,7 +114,7 @@ abstract class Manager
      */
     protected function callCustomCreator($driver)
     {
-        return $this->customCreators[$driver]($this->container);
+        return $this->customCreators[$driver]($this->config);
     }
 
     /**

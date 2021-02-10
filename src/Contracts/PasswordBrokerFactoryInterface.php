@@ -23,7 +23,7 @@ interface PasswordBrokerFactoryInterface
      * Set the default password broker name.
      *
      * @param  string  $name
-     * @return void
+     * @return $this
      */
     public function setDefaultDriver($name);
 }

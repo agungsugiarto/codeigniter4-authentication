@@ -2,6 +2,7 @@
 
 namespace Fluent\Auth\Passwords;
 
+use CodeIgniter\Config\Factories;
 use Fluent\Auth\Config\Auth;
 use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\PasswordBrokerFactoryInterface;
@@ -21,12 +22,12 @@ class PasswordBrokerManager implements PasswordBrokerFactoryInterface
     /**
      * Create a new PasswordBroker manager instance.
      *
-     * @param  Auth $config
+     * @param bool getShared
      * @return void
      */
-    public function __construct($config)
+    public function __construct(Factories $factory, bool $getShared = true)
     {
-        $this->config = $config;
+        $this->config = $factory::config('Auth', ['getShared' => $getShared]);
     }
 
     /**
@@ -98,7 +99,9 @@ class PasswordBrokerManager implements PasswordBrokerFactoryInterface
      */
     public function setDefaultDriver($name)
     {
-        return $this->config->defaults['passwords'] = $name;
+        $this->config->defaults['passwords'] = $name;
+
+        return $this;
     }
 
     /**

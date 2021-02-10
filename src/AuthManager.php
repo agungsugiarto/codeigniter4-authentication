@@ -3,6 +3,7 @@
 namespace Fluent\Auth;
 
 use Closure;
+use CodeIgniter\Config\Factories;
 use CodeIgniter\Config\Services;
 use Fluent\Auth\Config\Auth;
 use Fluent\Auth\Contracts\AuthenticationInterface;
@@ -55,12 +56,12 @@ class AuthManager implements AuthFactoryInterface
     /**
      * Create a new Auth manager instance.
      *
-     * @param Auth $config
+     * @param bool getShared
      * @return void
      */
-    public function __construct($config)
+    public function __construct(Factories $factory, bool $getShared = true)
     {
-        $this->config = $config;
+        $this->config = $factory::config('Auth', ['getShared' => $getShared]);
 
         $this->userResolver = function ($guard = null) {
             return $this->guard($guard)->user();
