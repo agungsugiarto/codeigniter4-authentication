@@ -65,11 +65,13 @@ class AuthPublishCommand extends BaseCommand
     {
         $this->determineSourcePath();
 
+        $this->publishModels();
+        $this->publishViews();
+        $this->publishControllers();
         $this->publishMigration();
         $this->publishConfig();
         $this->publishHashingConfig();
         $this->publishEntities();
-        $this->publishModels();
         $this->publishLanguage();
     }
 
@@ -90,6 +92,38 @@ class AuthPublishCommand extends BaseCommand
         }
 
         CLI::write('Remember to run `php spark migrate` to migrate the database.', 'yellow');
+    }
+
+    /**
+     * Publish controller.
+     *
+     * @return mixed
+     */
+    protected function publishControllers()
+    {
+        $map = directory_map($this->sourcePath . '/Controllers/Auth');
+
+        foreach ($map as $file) {
+            $content = file_get_contents("{$this->sourcePath}/Controllers/Auth/{$file}");
+
+            $this->writeFile("Controllers/Auth/{$file}", $content);
+        }
+    }
+
+    /**
+     * Publish views.
+     *
+     * @return mixed
+     */
+    protected function publishViews()
+    {
+        $map = directory_map($this->sourcePath . '/Views/Auth');
+
+        foreach ($map as $file) {
+            $content = file_get_contents("{$this->sourcePath}/Views/Auth/{$file}");
+
+            $this->writeFile("Views/Auth/{$file}", $content);
+        }
     }
 
     /**

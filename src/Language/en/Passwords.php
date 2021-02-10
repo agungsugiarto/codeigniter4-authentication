@@ -13,6 +13,7 @@ return [
     |
     */
     'verify'    => 'A new verification link has been sent to the email address you provided during registration.',
+    'confirm'   => 'The provided password is incorrect.',
     'reset'     => 'Your password has been reset!',
     'sent'      => 'We have emailed your password reset link!',
     'throttled' => 'Please wait before retrying.',
