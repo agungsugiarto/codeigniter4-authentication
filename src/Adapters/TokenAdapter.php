@@ -133,7 +133,7 @@ class TokenAdapter extends AbstractAdapter
      */
     protected function getTokenForRequest()
     {
-        $token = $this->request->getVar('token');
+        $token = $this->request->getGet('token');
 
         if (empty($token)) {
             $token = $this->bearerToken();
