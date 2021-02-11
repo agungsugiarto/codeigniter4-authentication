@@ -1,7 +1,7 @@
 <?= $this->extend('Auth\layout') ?>
 
 <?= $this->section('content') ?>
-<section class="d-flex align-items-center my-5 mt-lg-6 mb-lg-5">
+<section class="d-flex align-items-center my-5 mt-lg-4 mb-lg-5">
     <div class="container">
         <p class="text-center"><a href="/" class="text-gray-700"><i class="fas fa-angle-left me-2"></i> Back to homepage</a></p>
         <div class="row justify-content-center form-bg-image" data-background-lg="https://cdn.jsdelivr.net/npm/@themesberg/volt-bootstrap-5-dashboard@1.3.1/src/assets/img/illustrations/signin.svg">
@@ -15,7 +15,7 @@
                     <form method="post" action="<?= route_to('login') ?>" class="mt-4">
                         <!-- Form -->
                         <?= csrf_field() ?>
-                        <div class="form-group mb-4">
+                        <div class="form-group mb-2">
                             <label for="email">Email</label>
                             <div class="input-group">
                                 <span class="input-group-text" id="basic-addon1"><span class="fas fa-envelope"></span></span>
@@ -25,7 +25,7 @@
                         <!-- End of Form -->
                         <div class="form-group">
                             <!-- Form -->
-                            <div class="form-group mb-4">
+                            <div class="form-group mb-2">
                                 <label for="password">Password</label>
                                 <div class="input-group">
                                     <span class="input-group-text" id="basic-addon2"><span class="fas fa-unlock-alt"></span></span>
@@ -33,7 +33,7 @@
                                 </div>
                             </div>
                             <!-- End of Form -->
-                            <div class="d-flex justify-content-between align-items-top mb-4">
+                            <div class="d-flex justify-content-between align-items-top mb-2">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="remember" id="remember">
                                     <label class="form-check-label mb-0" for="remember">
