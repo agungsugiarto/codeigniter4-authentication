@@ -7,9 +7,9 @@ use CodeIgniter\Config\Factories;
 use CodeIgniter\Config\Services;
 use Fluent\Auth\Config\Auth;
 use Fluent\Auth\Contracts\AuthenticationInterface;
+use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\Contracts\AuthFactoryInterface;
-use Fluent\Auth\Models\UserModel;
-use FLuent\Auth\UserDatabase;
+use Fluent\Auth\UserDatabase;
 use InvalidArgumentException;
 
 use function call_user_func;
@@ -303,7 +303,7 @@ class AuthManager implements AuthFactoryInterface
      * Create an instance of the database user provider.
      *
      * @param  array  $config
-     * @return UserModel
+     * @return AuthenticatorInterface
      */
     protected function createModelProvider($config)
     {
@@ -318,7 +318,7 @@ class AuthManager implements AuthFactoryInterface
      */
     protected function createDatabaseProvider($config)
     {
-        return new $config['table']();
+        return new UserDatabase($config['table']);
     }
 
     /**

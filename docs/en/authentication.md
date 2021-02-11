@@ -59,22 +59,26 @@ codeigniter4-authentication includes built-in authentication and session service
 
 By default, codeigniter4-authentication includes an auth scaffolding is a minimal, simple implementation of all of codeigniter4-authentication features, including login, registration, password reset, email verification, and password confirmation.
 
-### Install package dependency
+### 1. Install package dependency
 ```sh
 composer require agungsugiarto/codeigniter4-authentication
 ```
 
-### Publish auth functionality
+### 2. Publish auth functionality
 ```sh
 php spark auth:publish
 ```
 
-### Migrate database
+### 3. Migrate database
 ```sh
 php spark migrate
 ```
+### 4. Generates a new encryption key and writes it in an `.env` file.
+```sh
+php spark key:generate
+```
 
-### Registering auth routes
+### 5. Registering auth routes
 Open your config routes located at `app/Config/Routes` add this line:
 ```php
 \Fluent\Auth\Facades\Auth::routes();
@@ -95,7 +99,7 @@ $routes->group('dashboard', ['filter' => 'auth:web'], function ($routes) {
 });
 ```
 
-### Registering filter
+### 6. Registering filter
 Open `app\Config\FIlters` see property with `aliases` and add this array to register filter:
 ```php
 public $aliases = [
@@ -112,9 +116,8 @@ Now you can try the codeigniter4-authentication, open the browser to see what ha
 php spark routes
 ```
 
-
 <a name="retrieving-the-authenticated-user"></a>
-### Retrieving The Authenticated User
+## Retrieving The Authenticated User
 
 After installing an authentication starter kit and allowing users to register and authenticate with your application, you will often need to interact with the currently authenticated user. While handling an incoming request, you may access the authenticated user via the `Auth` services `user` method:
 ```php

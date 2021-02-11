@@ -29,15 +29,16 @@ class UserDatabase implements UserProviderInterface
      *
      * @var string
      */
-    protected $table = 'users';
+    protected $table;
 
     /**
      * Create a new database user provider.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(string $table)
     {
+        $this->table      = $table;
         $this->connection = Database::connect();
     }
 

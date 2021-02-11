@@ -7,7 +7,6 @@ use Fluent\Auth\Adapters\SessionAdapter;
 use Fluent\Auth\Adapters\TokenAdapter;
 use Fluent\Auth\Models\UserModel;
 use Fluent\Auth\Passwords\PasswordResetRepository;
-use Fluent\Auth\UserDatabase;
 
 class Auth extends BaseConfig
 {
@@ -82,7 +81,7 @@ class Auth extends BaseConfig
         ],
         'database' => [
             'driver' => 'connection',
-            'table'  => UserDatabase::class,
+            'table'  => 'users',
         ],
     ];
 
