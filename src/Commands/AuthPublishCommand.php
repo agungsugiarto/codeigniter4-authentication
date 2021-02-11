@@ -108,6 +108,9 @@ class AuthPublishCommand extends BaseCommand
 
             $this->writeFile("Controllers/Auth/{$file}", $content);
         }
+
+        $content = file_get_contents("{$this->sourcePath}/Controllers/Home.php");
+        $this->writeFile("Controllers/Home.php", $content);
     }
 
     /**
@@ -123,6 +126,11 @@ class AuthPublishCommand extends BaseCommand
             $content = file_get_contents("{$this->sourcePath}/Views/Auth/{$file}");
 
             $this->writeFile("Views/Auth/{$file}", $content);
+        }
+
+        foreach (['dashboard', 'welcome_message'] as $view) {
+            $content = file_get_contents("{$this->sourcePath}/Views/{$view}.php");
+            $this->writeFile("Views/{$view}.php", $content);
         }
     }
 

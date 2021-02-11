@@ -57,7 +57,61 @@ codeigniter4-authentication includes built-in authentication and session service
 <a name="install-a-starter-kit"></a>
 ### Install A Starter Kit
 
-[codeigniter4-authentication-ui](https://github.com/agungsugiarto/codeigniter4-authentication-ui) is a minimal, simple implementation of all of codeigniter4-authentication features, including login, registration, password reset, email verification, and password confirmation.
+By default, codeigniter4-authentication includes an auth scaffolding is a minimal, simple implementation of all of codeigniter4-authentication features, including login, registration, password reset, email verification, and password confirmation.
+
+### Install package dependency
+```sh
+composer require agungsugiarto/codeigniter4-authentication
+```
+
+### Publish auth functionality
+```sh
+php spark auth:publish
+```
+
+### Migrate database
+```sh
+php spark migrate
+```
+
+### Registering auth routes
+Open your config routes located at `app/Config/Routes` add this line:
+```php
+\Fluent\Auth\Facades\Auth::routes();
+```
+
+The `routes` method accept an array, the full key for routes array `register`, `reset`, `confirm` and `verify` you can disable this specific route with key match from array, example key register:
+```php
+\Fluent\Auth\Facades\Auth::routes([
+    'register' => false,
+]);
+```
+
+We also added example routes dashboard, this route will be redirect to dashboard if login is successfully, in same file `Routes` add this line:
+```php
+$routes->group('dashboard', ['filter' => 'auth:web'], function ($routes) {
+    $routes->get('/', 'Home::dashboard', ['filter' => 'verified']);
+    $routes->get('confirm', 'Home::confirm', ['filter' => 'confirm']);
+});
+```
+
+### Registering filter
+Open `app\Config\FIlters` see property with `aliases` and add this array to register filter:
+```php
+public $aliases = [
+    // ...
+    'auth'     => \Fluent\Auth\Filters\AuthenticationFilter::class,
+    'confirm'  => \Fluent\Auth\Filters\ConfirmPasswordFilter::class,
+    'verified' => \Fluent\Auth\Filters\EmailVerifiedFilter::class,
+    'throttle' => \Fluent\Auth\Filters\ThrottleFilter::class,
+];
+```
+
+Now you can try the codeigniter4-authentication, open the browser to see what happen. See routes with command for detail:
+```sh
+php spark routes
+```
+
 
 <a name="retrieving-the-authenticated-user"></a>
 ### Retrieving The Authenticated User
