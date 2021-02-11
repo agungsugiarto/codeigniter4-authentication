@@ -35,7 +35,7 @@
                         </div>
                         <!-- End of Form -->
                         <!-- Form -->
-                        <div class="form-group mb-2">
+                        <div class="form-group mb-3">
                             <label for="password">Confirm Password</label>
                             <div class="input-group">
                                 <span class="input-group-text" id="basic-addon2"><span class="fas fa-unlock-alt"></span></span>
