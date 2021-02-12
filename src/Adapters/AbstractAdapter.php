@@ -37,7 +37,7 @@ abstract class AbstractAdapter implements AuthenticationInterface
     protected $loggedOut = false;
 
     /** @var boolean */
-    protected $viaRember = false;
+    protected $viaRemember = false;
 
     /** @var boolean */
     protected $recallAttempted = false;
@@ -86,7 +86,7 @@ abstract class AbstractAdapter implements AuthenticationInterface
      */
     public function viaRemember()
     {
-        return $this->viaRember;
+        return $this->viaRemember;
     }
 
     /**
