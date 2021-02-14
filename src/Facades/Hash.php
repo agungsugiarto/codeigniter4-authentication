@@ -2,7 +2,7 @@
 
 namespace Fluent\Auth\Facades;
 
-use Fluent\Auth\Config\Services;
+use CodeIgniter\Config\Services;
 use Fluent\Auth\Contracts\HasherInterface;
 use Fluent\Auth\Passwords\Hash\AbstractManager;
 use Fluent\Auth\Passwords\Hash\HashManager;
@@ -32,6 +32,6 @@ class Hash
      */
     public static function __callStatic($method, $arguments)
     {
-        return Services::hash()->$method(...$arguments);
+        return Services::getSharedInstance('hash')->{$method}(...$arguments);
     }
 }

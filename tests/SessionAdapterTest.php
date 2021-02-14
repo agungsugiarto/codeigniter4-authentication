@@ -2,14 +2,15 @@
 
 namespace Fluent\Auth\Tests;
 
+use CodeIgniter\Config\Services;
 use CodeIgniter\Test\CIDatabaseTestCase;
 use Fluent\Auth\Adapters\SessionAdapter;
-use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\Contracts\AuthFactoryInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Exceptions\AuthenticationException;
+use Fluent\Auth\Facades\Auth;
 use Fluent\Auth\Models\UserModel;
 
 class SessionAdapterTest extends CIDatabaseTestCase implements AuthenticationTestInterface
@@ -24,15 +25,13 @@ class SessionAdapterTest extends CIDatabaseTestCase implements AuthenticationTes
     {
         parent::setUp();
 
-        helper('auth');
-        $this->auth = Services::auth()->guard('web');
+        $this->auth = Auth::guard('web');
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
-
-        $this->auth->logout();
+        Services::reset();
     }
 
     public function testAuthenticate()

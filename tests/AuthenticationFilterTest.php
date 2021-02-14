@@ -33,7 +33,7 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
     {
         parent::setUp();
 
-        $this->auth = Services::auth(false);
+        $this->auth = Services::auth();
 
         $filters                  = config('Filters');
         $filters->aliases['auth'] = AuthenticationFilter::class;
@@ -47,6 +47,12 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
         });
 
         Services::injectMock('routes', $routes);
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        Services::reset();
     }
 
     protected function setRequestHeader(string $token)
