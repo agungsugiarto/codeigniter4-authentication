@@ -28,7 +28,9 @@ class EmailVerifiedFilter implements FilterInterface
                 throw new AuthenticationException('Your email address is not verified', ResponseInterface::HTTP_FORBIDDEN);
             }
 
-            return redirect()->route($arguments[0] ?: 'verification.notice')->with('error', 'Your email address is not verified');
+            session()->set('intended', current_url());
+
+            return redirect()->route('verification.notice')->with('error', 'Your email address is not verified');
         }
     }
 

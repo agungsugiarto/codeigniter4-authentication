@@ -105,9 +105,13 @@ Open `app\Config\FIlters` see property with `aliases` and add this array to regi
 public $aliases = [
     // ...
     'auth'     => \Fluent\Auth\Filters\AuthenticationFilter::class,
-    'confirm'  => \Fluent\Auth\Filters\ConfirmPasswordFilter::class,
-    'verified' => \Fluent\Auth\Filters\EmailVerifiedFilter::class,
+    'confirm'  => [
+        \Fluent\Auth\Filters\AuthenticationFilter::class,
+        \Fluent\Auth\Filters\ConfirmPasswordFilter::class,
+    ],
+    'guest'    => \Fluent\Auth\Filters\RedirectAuthenticatedFilter::class,
     'throttle' => \Fluent\Auth\Filters\ThrottleFilter::class,
+    'verified' => \Fluent\Auth\Filters\EmailVerifiedFilter::class,
 ];
 ```
 

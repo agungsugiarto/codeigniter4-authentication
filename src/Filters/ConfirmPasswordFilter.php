@@ -23,6 +23,8 @@ class ConfirmPasswordFilter implements FilterInterface
                 ])->setStatusCode(ResponseInterface::HTTP_LOCKED);
             }
 
+            session()->set('intended', current_url());
+
             return redirect()->route('password.confirm')->with('error', 'Password confirmation required.');
         }
     }

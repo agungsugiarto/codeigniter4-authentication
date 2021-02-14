@@ -16,7 +16,7 @@ class EmailVerificationPromptController extends BaseController
     public function new()
     {
         return auth()->user()->hasVerifiedEmail()
-            ? redirect()->route('dashboard')
+            ? redirect()->to(session('intended') ?? config('Auth')->home)
             : view('Auth/verify_email');
     }
 }

@@ -23,7 +23,7 @@ class VerifyEmailController extends BaseController
     {
         // Check first if user email already verified
         if (auth()->user()->hasVerifiedEmail()) {
-            return redirect()->route('dashboard');
+            return redirect()->to(session('intended') ?? config('Auth')->home);
         }
 
         // Check if hash equal with current user email.
@@ -47,6 +47,6 @@ class VerifyEmailController extends BaseController
 
         Events::trigger('fireVerifiedUser', auth()->user());
 
-        return redirect()->route('dashboard');
+        return redirect()->to(session('intended') ?? config('Auth')->home);
     }
 }

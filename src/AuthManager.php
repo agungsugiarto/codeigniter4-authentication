@@ -201,15 +201,15 @@ class AuthManager implements AuthFactoryInterface
         $routes = Services::routes();
 
         if ($options['register'] ?? true) {
-            $routes->get('register', 'RegisteredUserController::new', ['namespace' => 'App\Controllers\Auth']);
-            $routes->post('register', 'RegisteredUserController::create', ['namespace' => 'App\Controllers\Auth']);
+            $routes->get('register', 'RegisteredUserController::new', ['filter' => 'guest', 'namespace' => 'App\Controllers\Auth']);
+            $routes->post('register', 'RegisteredUserController::create', ['filter' => 'guest', 'namespace' => 'App\Controllers\Auth']);
         }
 
         if ($options['reset'] ?? true) {
-            $routes->get('forgot-password', 'PasswordResetLinkController::new', ['as' => 'password.request', 'namespace' => 'App\Controllers\Auth']);
-            $routes->post('forgot-password', 'PasswordResetLinkController::create', ['as' => 'password.email', 'namespace' => 'App\Controllers\Auth']);
-            $routes->get('reset-password/(:any)', 'NewPasswordController::new/$1', ['as' => 'password.reset', 'namespace' => 'App\Controllers\Auth']);
-            $routes->post('reset-password', 'NewPasswordController::create', ['as' => 'password.update', 'namespace' => 'App\Controllers\Auth']);
+            $routes->get('forgot-password', 'PasswordResetLinkController::new', ['filter' => 'guest', 'as' => 'password.request', 'namespace' => 'App\Controllers\Auth']);
+            $routes->post('forgot-password', 'PasswordResetLinkController::create', ['filter' => 'guest', 'as' => 'password.email', 'namespace' => 'App\Controllers\Auth']);
+            $routes->get('reset-password/(:any)', 'NewPasswordController::new/$1', ['filter' => 'guest', 'as' => 'password.reset', 'namespace' => 'App\Controllers\Auth']);
+            $routes->post('reset-password', 'NewPasswordController::create', ['filter' => 'guest', 'as' => 'password.update', 'namespace' => 'App\Controllers\Auth']);
         }
 
         if ($options['confirm'] ?? true) {
@@ -228,8 +228,8 @@ class AuthManager implements AuthFactoryInterface
             });
         }
 
-        $routes->get('login', 'AuthenticatedSessionController::new', ['namespace' => 'App\Controllers\Auth']);
-        $routes->post('login', 'AuthenticatedSessionController::create', ['namespace' => 'App\Controllers\Auth']);
+        $routes->get('login', 'AuthenticatedSessionController::new', ['filter' => 'guest', 'namespace' => 'App\Controllers\Auth']);
+        $routes->post('login', 'AuthenticatedSessionController::create', ['filter' => 'guest', 'namespace' => 'App\Controllers\Auth']);
         $routes->post('logout', 'AuthenticatedSessionController::delete', ['filter' => 'auth', 'as' => 'logout', 'namespace' => 'App\Controllers\Auth']);
     }
 

@@ -44,7 +44,7 @@ class AuthenticatedSessionController extends BaseController
             return redirect()->back()->withInput()->with('error', lang('Auth.failed'));
         }
 
-        return redirect('dashboard')->withCookies();
+        return redirect(config('Auth')->home)->withCookies();
     }
 
     /**

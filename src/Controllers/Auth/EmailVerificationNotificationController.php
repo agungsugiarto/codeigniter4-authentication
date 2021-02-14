@@ -21,7 +21,7 @@ class EmailVerificationNotificationController extends BaseController
         $user = auth()->user();
 
         if ($user->hasVerifiedEmail()) {
-            return redirect()->route('dashboard');
+            return redirect()->to(session('intended') ?? config('Auth')->home);
         }
 
         $status = Passwords::sendVerifyLink([

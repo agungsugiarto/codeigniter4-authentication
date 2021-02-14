@@ -41,6 +41,6 @@ class ConfirmablePasswordController extends BaseController
 
         session()->set('password_confirmed_at', time());
 
-        return redirect()->route('dashboard');
+        return redirect()->to(session('intended') ?? config('Auth')->home);
     }
 }

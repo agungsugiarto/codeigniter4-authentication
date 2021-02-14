@@ -47,7 +47,7 @@ class RegisteredUserController extends BaseController
             Events::trigger(VerifyEmailInterface::class, $user->email);
         }
 
-        return redirect('dashboard');
+        return redirect(config('Auth')->home);
     }
 
     /**

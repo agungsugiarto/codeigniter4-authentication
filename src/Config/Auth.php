@@ -121,4 +121,15 @@ class Auth extends BaseConfig
      * @var int
      */
     public $passwordTimeout = 3 * HOUR;
+
+    /**
+     * --------------------------------------------------------------------------
+     * Redirect Authenticated
+     * --------------------------------------------------------------------------
+     *
+     * Here you may define the redirect if authenticated success.
+     *
+     * @var string
+     */
+    public $home = 'dashboard';
 }
