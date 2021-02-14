@@ -2,7 +2,7 @@
 
 namespace Fluent\Auth\Facades;
 
-use Fluent\Auth\Config\Services;
+use CodeIgniter\Config\Services;
 use Fluent\Auth\Contracts\PasswordBrokerFactoryInterface;
 use Fluent\Auth\Contracts\PasswordBrokerInterface;
 use Fluent\Auth\Contracts\PasswordResetRepositoryInterface;
@@ -36,6 +36,6 @@ class Passwords
      */
     public static function __callStatic($method, $arguments)
     {
-        return Services::passwords()->$method(...$arguments);
+        return Services::getSharedInstance('passwords')->{$method}(...$arguments);
     }
 }

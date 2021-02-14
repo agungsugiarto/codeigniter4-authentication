@@ -3,8 +3,8 @@
 namespace Fluent\Auth\Facades;
 
 use Closure;
+use CodeIgniter\Config\Services;
 use CodeIgniter\Router\RouteCollection;
-use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\Contracts\HasAccessTokensInterface;
@@ -55,6 +55,6 @@ class Auth
      */
     public static function __callStatic($method, $arguments)
     {
-        return Services::auth()->$method(...$arguments);
+        return Services::getSharedInstance('auth')->{$method}(...$arguments);
     }
 }

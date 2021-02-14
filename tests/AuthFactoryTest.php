@@ -11,6 +11,8 @@ use Fluent\Auth\Contracts\AuthFactoryInterface;
 use Fluent\Auth\Models\UserModel;
 use Fluent\Auth\UserDatabase;
 
+use function auth;
+
 class AuthFactoryTest extends CIDatabaseTestCase
 {
     /** @var AuthFactoryInterface|AuthenticationInterface */
@@ -26,6 +28,12 @@ class AuthFactoryTest extends CIDatabaseTestCase
         $this->auth = Services::auth();
     }
 
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        Services::reset();
+    }
+
     public function testCreateUserProvider()
     {
         $provider1 = $this->auth->createUserProvider('users');
@@ -37,7 +45,7 @@ class AuthFactoryTest extends CIDatabaseTestCase
 
     public function testGetDefaultUserProvider()
     {
-        $this->assertNotInstanceOf(UserModel::class, $this->auth->getDefaultUserProvider());
+        $this->assertEquals('users', $this->auth->getDefaultUserProvider());
     }
 
     public function testGuard()
@@ -75,8 +83,8 @@ class AuthFactoryTest extends CIDatabaseTestCase
     {
         $config = config('Auth');
 
-        $extend = $this->auth->extend('token', function () use ($config) {
-            return new TokenAdapter($config, new UserModel());
+        $extend = $this->auth->extend('jwt', function () use ($config) {
+            return new TokenAdapter($config, 'jwt_name', $this->auth->createUserProvider('users'));
         });
 
         $this->assertInstanceOf(AuthFactoryInterface::class, $extend);
@@ -84,6 +92,8 @@ class AuthFactoryTest extends CIDatabaseTestCase
 
     public function testHasResolvedGuards()
     {
+        $this->assertFalse($this->auth->hasResolvedGuards());
+        auth()->guard('web');
         $this->assertTrue($this->auth->hasResolvedGuards());
     }
 }
