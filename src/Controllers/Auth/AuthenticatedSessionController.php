@@ -6,14 +6,30 @@ use App\Controllers\BaseController;
 use CodeIgniter\Http\RedirectResponse;
 use CodeIgniter\View\RendererInterface;
 use Fluent\Auth\Facades\Auth;
+use Fluent\Auth\Facades\RateLimiter;
 
 use function func_get_args;
 use function is_array;
 use function is_bool;
+use function strtolower;
 use function trim;
 
 class AuthenticatedSessionController extends BaseController
 {
+    /**
+     * Max attempt login throttle.
+     *
+     * @var int
+     */
+    const MAX_ATTEMPT = 5;
+
+    /**
+     * Decay in second if failed attempt.
+     * 
+     * @var int
+     */
+    const DECAY_SECOND = 60;
+
     /**
      * Display the login view.
      *
@@ -31,19 +47,39 @@ class AuthenticatedSessionController extends BaseController
      */
     public function create()
     {
+        // Populate request to object.
         $request = (object) $this->request->getPost();
 
+        // Credentials for attempt login.
         $credentials = ['email' => $request->email, 'password' => $request->password];
-        $remember    = $this->filled('remember');
 
+        // Credential if remember.
+        $remember = $this->filled('remember');
+
+        // Rate limiter how many can be attempt.
+        if (RateLimiter::tooManyAttempts($this->throttleKey(), static::MAX_ATTEMPT)) {
+            $seconds = RateLimiter::availableIn($this->throttleKey());
+
+            return redirect()->back()->withInput()->with('error', lang('Auth.throttle', [$seconds]));
+        }
+
+        // Validate this credentials request.
         if (! $this->validate(['email' => 'required|valid_email', 'password' => 'required'])) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
+        // Try to login this credentials.
         if (! Auth::attempt($credentials, $remember)) {
+            // Save throttle state.
+            RateLimiter::hit($this->throttleKey(), static::DECAY_SECOND);
+
             return redirect()->back()->withInput()->with('error', lang('Auth.failed'));
         }
 
+        // Clear the throttle key
+        RateLimiter::clear($this->throttleKey());
+
+        // Finnaly we're success login.
         return redirect(config('Auth')->home)->withCookies();
     }
 
@@ -89,5 +125,16 @@ class AuthenticatedSessionController extends BaseController
         $value = $this->request->getVar($key);
 
         return ! is_bool($value) && ! is_array($value) && trim((string) $value) === '';
+    }
+
+    /**
+     * Get the rate limiting throttle key for the request.
+     *
+     * @param object $request
+     * @return string
+     */
+    public function throttleKey()
+    {
+        return strtolower($this->request->getPost('email')) . '_' . $this->request->getIPAddress();
     }
 }

@@ -13,6 +13,7 @@ use Fluent\Auth\Contracts\PasswordBrokerInterface;
 use Fluent\Auth\Passwords\Hash\AbstractManager;
 use Fluent\Auth\Passwords\Hash\HashManager;
 use Fluent\Auth\Passwords\PasswordBrokerManager;
+use Fluent\Auth\Passwords\RateLimiter;
 
 class Services extends BaseService
 {
@@ -56,5 +57,19 @@ class Services extends BaseService
         }
 
         return new HashManager(new Factories(), $getshared);
+    }
+
+    /**
+     * Create a new rate limiter instance.
+     *
+     * @return RateLimiter
+     */
+    public static function limiter(bool $getshared = true)
+    {
+        if ($getshared) {
+            return self::getSharedInstance('limiter');
+        }
+
+        return new RateLimiter();
     }
 }
