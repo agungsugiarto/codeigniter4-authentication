@@ -220,11 +220,11 @@ class AuthManager implements AuthFactoryInterface
         if ($options['verify'] ?? true) {
             $routes->group('verify-email', ['filter' => 'auth', 'namespace' => 'App\Controllers\Auth'], function ($routes) {
                 $routes->get('/', 'EmailVerificationPromptController::new', ['as' => 'verification.notice', 'namespace' => 'App\Controllers\Auth']);
-                $routes->get('(:any)', 'VerifyEmailController::index/$1', ['filter' => 'throttle', 'as' => 'verification.verify', 'namespace' => 'App\Controllers\Auth']);
+                $routes->get('(:any)', 'VerifyEmailController::index/$1', ['filter' => 'throttle:60,5', 'as' => 'verification.verify', 'namespace' => 'App\Controllers\Auth']);
             });
 
             $routes->group('email', ['filter' => 'auth', 'namespace' => 'App\Controllers\Auth'], function ($routes) {
-                $routes->post('verification-notification', 'EmailVerificationNotificationController::create', ['filter' => 'throttle', 'as' => 'verification.send']);
+                $routes->post('verification-notification', 'EmailVerificationNotificationController::create', ['filter' => 'throttle:60,5', 'as' => 'verification.send']);
             });
         }
 

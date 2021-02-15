@@ -8,30 +8,21 @@ use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\Response;
 use CodeIgniter\HTTP\ResponseInterface;
-use CodeIgniter\Throttle\Throttler;
-use Fluent\Auth\Config\Auth as Config;
 use Fluent\Auth\Facades\Auth;
+use Fluent\Auth\Facades\RateLimiter;
 
-use function sha1;
+use function array_values;
 
 class ThrottleFilter implements FilterInterface
 {
     use ResponseTrait;
 
-    /** @var Throttler */
-    protected $throttler;
-
     /** @var Response */
     protected $response;
 
-    /** @var Config */
-    protected $config;
-
     public function __construct()
     {
-        $this->config    = config('Auth');
-        $this->throttler = Services::throttler();
-        $this->response  = Services::response();
+        $this->response = Services::response();
     }
 
     /**
@@ -39,13 +30,17 @@ class ThrottleFilter implements FilterInterface
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        if ($this->throttler->check($this->key($request), $this->config->passwords['users']['throttle'], MINUTE) === false) {
+        if ($this->tooManyAttempts($request, $arguments)) {
+            $seconds = RateLimiter::availableIn($this->throttleKey($request));
+
             if ($request->isAJAX()) {
-                return $this->fail(lang('Auth.throttler', [$this->config->passwords['throttle']]));
+                return $this->fail(lang('Auth.throttle', [$seconds]));
             }
 
-            return redirect()->back()->with('error', lang('Auth.throttler', [$this->config->passwords['throttle']]));
+            return redirect()->back()->with('error', lang('Auth.throttle', [$seconds]));
         }
+
+        RateLimiter::hit($this->throttleKey($request), $this->decaySecond($arguments));
     }
 
     /**
@@ -56,12 +51,42 @@ class ThrottleFilter implements FilterInterface
     }
 
     /**
-     * Generate signature key for throttle.
-     *
-     * @return mixed
+     * Determine if the given key has been "accessed" too many times.
+     * 
+     * @return bool
      */
-    protected function key(RequestInterface $request)
+    protected function tooManyAttempts(RequestInterface $request, array $arguments)
     {
-        return sha1($request->getIPAddress() . '|' . Auth::user()->getAuthId());
+        return RateLimiter::tooManyAttempts($this->throttleKey($request), $this->maxAttempt($arguments));
+    }
+
+    /**
+     * Get the number of attempts for the given key.
+     * 
+     * @return int
+     */
+    protected function maxAttempt(array $arguments)
+    {
+        return (int) array_values($arguments)[1];
+    }
+
+    /**
+     * Get the decay second for the given key.
+     * 
+     * @return int
+     */
+    protected function decaySecond(array $arguments)
+    {
+        return (int) array_values($arguments)[0];
+    }
+
+    /**
+     * Get the rate limiting throttle key for the request.
+     *
+     * @return string
+     */
+    public function throttleKey(RequestInterface $request)
+    {
+        return 'throttle_' . Auth::user()->email . '_' . $request->getIPAddress();
     }
 }

@@ -8,7 +8,7 @@ use DateTimeInterface;
 
 use function max;
 
-trait InteractsWithTime
+trait InteractsWithTimeTrait
 {
     /**
      * Get the number of seconds until the given DateTime.

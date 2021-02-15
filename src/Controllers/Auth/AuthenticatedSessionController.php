@@ -25,7 +25,7 @@ class AuthenticatedSessionController extends BaseController
 
     /**
      * Decay in second if failed attempt.
-     * 
+     *
      * @var int
      */
     const DECAY_SECOND = 60;

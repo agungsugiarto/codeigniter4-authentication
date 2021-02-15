@@ -5,11 +5,11 @@ namespace Fluent\Auth\Passwords;
 use Closure;
 use CodeIgniter\Cache\CacheInterface;
 use CodeIgniter\Config\Services;
-use Fluent\Auth\Traits\InteractsWithTime;
+use Fluent\Auth\Traits\InteractsWithTimeTrait;
 
 class RateLimiter
 {
-    use InteractsWithTime;
+    use InteractsWithTimeTrait;
 
     /**
      * The cache store implementation.
