@@ -58,7 +58,7 @@ class RegisteredUserController extends BaseController
     protected static function rules()
     {
         return [
-            'username'              => 'required|is_unique[users.username]',
+            'username'              => 'required|alpha_numeric_space|min_length[3]|is_unique[users.username]',
             'email'                 => 'required|valid_email|is_unique[users.email]',
             'password'              => 'required|min_length[8]',
             'password_confirmation' => 'matches[password]',
