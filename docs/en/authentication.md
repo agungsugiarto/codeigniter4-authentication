@@ -120,6 +120,15 @@ Now you can try the codeigniter4-authentication, open the browser to see what ha
 php spark routes
 ```
 
+### 7. Optional Registering auth garbage collector
+Open `app\Config\Toolbar` see property `collectors` add this collector
+```php
+public $collectors = [
+    // ...
+    \Fluent\Auth\Collectors\AuthCollector::class,
+];
+```
+
 <a name="retrieving-the-authenticated-user"></a>
 ## Retrieving The Authenticated User
 
