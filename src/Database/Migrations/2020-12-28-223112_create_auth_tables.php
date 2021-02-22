@@ -11,7 +11,7 @@ class CreateAuthTables extends Migration
      */
     public function up()
     {
-        /*
+        /**
          * Users table.
          */
         $this->forge->addField([
@@ -32,7 +32,7 @@ class CreateAuthTables extends Migration
 
         $this->forge->createTable('users', true);
 
-        /*
+        /**
          * Password reset table.
          */
         $this->forge->addField([
@@ -46,7 +46,7 @@ class CreateAuthTables extends Migration
         $this->forge->addPrimaryKey('id');
         $this->forge->createTable('auth_password_resets');
 
-        /*
+        /**
          * Access tokens table.
          */
         $this->forge->addField([

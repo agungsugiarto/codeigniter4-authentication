@@ -2,8 +2,8 @@
 
 namespace Fluent\Auth\Config;
 
+use CodeIgniter\Config\BaseService;
 use CodeIgniter\Config\Factories;
-use CodeIgniter\Config\Services as BaseService;
 use Fluent\Auth\AuthManager;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthFactoryInterface;

@@ -52,7 +52,7 @@ class ThrottleFilter implements FilterInterface
 
     /**
      * Determine if the given key has been "accessed" too many times.
-     * 
+     *
      * @return bool
      */
     protected function tooManyAttempts(RequestInterface $request, array $arguments)
@@ -62,7 +62,7 @@ class ThrottleFilter implements FilterInterface
 
     /**
      * Get the number of attempts for the given key.
-     * 
+     *
      * @return int
      */
     protected function maxAttempt(array $arguments)
@@ -72,7 +72,7 @@ class ThrottleFilter implements FilterInterface
 
     /**
      * Get the decay second for the given key.
-     * 
+     *
      * @return int
      */
     protected function decaySecond(array $arguments)

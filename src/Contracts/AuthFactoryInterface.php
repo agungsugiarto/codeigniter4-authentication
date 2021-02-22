@@ -66,7 +66,7 @@ interface AuthFactoryInterface
      *
      * @return $this
      */
-    public function resolveUsersUsing(Closure $userResolver);
+    public function resolveUsersUsing(Closure $callback);
 
     /**
      * Register a custom driver creator Closure.

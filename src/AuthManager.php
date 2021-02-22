@@ -7,7 +7,6 @@ use CodeIgniter\Config\Factories;
 use CodeIgniter\Config\Services;
 use Fluent\Auth\Config\Auth;
 use Fluent\Auth\Contracts\AuthenticationInterface;
-use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\Contracts\AuthFactoryInterface;
 use Fluent\Auth\UserDatabase;
 use InvalidArgumentException;
@@ -121,9 +120,9 @@ class AuthManager implements AuthFactoryInterface
     /**
      * {@inheritdoc}
      */
-    public function resolveUsersUsing(Closure $userResolver)
+    public function resolveUsersUsing(Closure $callback)
     {
-        $this->userResolver = $userResolver;
+        $this->userResolver = $callback;
 
         return $this;
     }
@@ -157,9 +156,9 @@ class AuthManager implements AuthFactoryInterface
 
         switch ($driver) {
             case 'model':
-                return $this->createModelProvider($config);
+                return new $config['table']();
             case 'connection':
-                return $this->createDatabaseProvider($config);
+                return new UserDatabase($config['table']);
             default:
                 throw new InvalidArgumentException(
                     "Authentication user provider [{$driver}] is not defined."
@@ -297,28 +296,6 @@ class AuthManager implements AuthFactoryInterface
         if ($provider = $provider ?: $this->getDefaultUserProvider()) {
             return $this->config->providers[$provider];
         }
-    }
-
-    /**
-     * Create an instance of the database user provider.
-     *
-     * @param  array  $config
-     * @return AuthenticatorInterface
-     */
-    protected function createModelProvider($config)
-    {
-        return new $config['table']();
-    }
-
-    /**
-     * Create an instance of the Eloquent user provider.
-     *
-     * @param  array  $config
-     * @return UserDatabase
-     */
-    protected function createDatabaseProvider($config)
-    {
-        return new UserDatabase($config['table']);
     }
 
     /**
