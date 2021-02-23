@@ -1,6 +1,6 @@
 # CodeIgniter4 Authentication
 
-![tests](https://github.com/agungsugiarto/codeigniter4-authentication/workflows/tests/badge.svg)
+[![tests](https://github.com/agungsugiarto/codeigniter4-authentication/actions/workflows/php.yml/badge.svg)](https://github.com/agungsugiarto/codeigniter4-authentication/actions/workflows/php.yml)
 [![Latest Stable Version](https://poser.pugx.org/agungsugiarto/codeigniter4-authentication/v)](https://github.com/agungsugiarto/codeigniter4-authentication/releases)
 [![Total Downloads](https://poser.pugx.org/agungsugiarto/codeigniter4-authentication/downloads)](https://packagist.org/packages/agungsugiarto/codeigniter4-authentication/stats)
 [![Latest Unstable Version](https://poser.pugx.org/agungsugiarto/codeigniter4-authentication/v/unstable)](https://packagist.org/packages/agungsugiarto/codeigniter4-authentication)
