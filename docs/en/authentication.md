@@ -120,7 +120,20 @@ Now you can try the codeigniter4-authentication, open the browser to see what ha
 php spark routes
 ```
 
-### 7. Optional Registering auth garbage collector
+### 7. Registering Event dispatcher
+This event will be dispatch to send reset password and verify email, you are free to implement this dispatcher example
+using twilio service to send sms. Open `app\Config\Events` and add this line:
+```php
+Events::on(\Fluent\Auth\Contracts\VerifyEmailInterface::class, function ($email) {
+    (new \App\Notifications\VerificationNotification($email))->send();
+});
+
+Events::on(\Fluent\Auth\Contracts\ResetPasswordInterface::class, function ($email, $token) {
+    (new \App\Notifications\ResetPasswordNotification($email, $token))->send();
+});
+```
+
+### 8. Optional Registering auth garbage collector
 Open `app\Config\Toolbar` see property `collectors` add this collector
 ```php
 public $collectors = [

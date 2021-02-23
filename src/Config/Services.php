@@ -50,13 +50,13 @@ class Services extends BaseService
      *
      * @return AbstractManager|HashManager|HasherInterface
      */
-    public static function hash(bool $getshared = true)
+    public static function hash(bool $getShared = true)
     {
-        if ($getshared) {
+        if ($getShared) {
             return self::getSharedInstance('hash');
         }
 
-        return new HashManager(new Factories(), $getshared);
+        return new HashManager(new Factories(), $getShared);
     }
 
     /**
@@ -64,9 +64,9 @@ class Services extends BaseService
      *
      * @return RateLimiter
      */
-    public static function limiter(bool $getshared = true)
+    public static function limiter(bool $getShared = true)
     {
-        if ($getshared) {
+        if ($getShared) {
             return self::getSharedInstance('limiter');
         }
 

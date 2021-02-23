@@ -1,4 +1,4 @@
-<?= $this->extend('Fluent\Auth\Views\Email\Layout\index') ?>
+<?= $this->extend('Fluent\Auth\Views\Email\layout') ?>
 
 <?= $this->section('content') ?>
 <tr>

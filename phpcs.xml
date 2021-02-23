@@ -15,9 +15,9 @@
     <file>src</file>
     <file>tests</file>
 
-    <exclude-pattern>/src/Database/*</exclude-pattern>
-    <exclude-pattern>/src/Notifications/*</exclude-pattern>
-    <exclude-pattern>/src/Views/*</exclude-pattern>
+    <exclude-pattern>/src/Database</exclude-pattern>
+    <exclude-pattern>/src/Notifications</exclude-pattern>
+    <exclude-pattern>/src/Views</exclude-pattern>
 
     <!-- Include all rules from the Laminas Coding Standard -->
     <rule ref="LaminasCodingStandard"/>

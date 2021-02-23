@@ -67,6 +67,7 @@ class AuthPublishCommand extends BaseCommand
 
         $this->publishModels();
         $this->publishViews();
+        $this->publishNotifications();
         $this->publishControllers();
         $this->publishMigration();
         $this->publishConfig();
@@ -122,15 +123,47 @@ class AuthPublishCommand extends BaseCommand
     {
         $map = directory_map($this->sourcePath . '/Views/Auth');
 
+        // Auth view
         foreach ($map as $file) {
             $content = file_get_contents("{$this->sourcePath}/Views/Auth/{$file}");
 
             $this->writeFile("Views/Auth/{$file}", $content);
         }
 
+        // Email view
+        foreach (['layout', 'reset_email', 'verify_email'] as $view) {
+            $content = file_get_contents("{$this->sourcePath}/Views/Email/{$view}.php");
+            $content = str_replace('Fluent\Auth\Views\Email\layout', 'Email\layout', $content);
+            $this->writeFile("Views/Email/{$view}.php", $content);
+        }
+
         foreach (['dashboard', 'welcome_message'] as $view) {
             $content = file_get_contents("{$this->sourcePath}/Views/{$view}.php");
             $this->writeFile("Views/{$view}.php", $content);
+        }
+    }
+
+    /**
+     * Publish notifications.
+     *
+     * @return void
+     */
+    protected function publishNotifications()
+    {
+        $notifications = ['ResetPasswordNotification', 'VerificationNotification'];
+
+        foreach ($notifications as $notif) {
+            $path = "{$this->sourcePath}/Notifications/{$notif}.php";
+
+            $content = file_get_contents($path);
+            $content = $this->replaceNamespace($content, 'Fluent\Auth\Notifications', 'Notifications');
+
+            $namespace = defined('APP_NAMESPACE') ? APP_NAMESPACE : 'App';
+            $content   = str_replace('Fluent\Auth\Notifications', $namespace . 'App\Notifications', $content);
+            $content   = str_replace('Fluent\Auth\Views\Email\reset_email', 'Email\reset_email', $content);
+            $content   = str_replace('Fluent\Auth\Views\Email\verify_email', 'Email\verify_email', $content);
+
+            $this->writeFile("Notifications/{$notif}.php", $content);
         }
     }
 
