@@ -28,9 +28,12 @@ trait MustVerifyEmailTrait
      */
     public function markEmailAsVerified()
     {
-        return Services::auth()->createUserProvider()
+        return Services::auth()
+            ->getProvider()
+            ->instance()
             ->where('email', $this->getEmailForVerification())
-            ->set('email_verified_at', Time::now())->update();
+            ->set('email_verified_at', Time::now())
+            ->update();
     }
 
     /**

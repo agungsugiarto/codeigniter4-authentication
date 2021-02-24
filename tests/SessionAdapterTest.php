@@ -37,7 +37,7 @@ class SessionAdapterTest extends CIDatabaseTestCase implements AuthenticationTes
     public function testAuthenticate()
     {
         $this->expectException(AuthenticationException::class);
-        $this->expectExceptionMessage(lang('Auth.invalidUser'));
+        $this->expectExceptionMessage('Unauthenticated.');
 
         $this->auth->authenticate();
 

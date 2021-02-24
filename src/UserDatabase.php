@@ -2,8 +2,8 @@
 
 namespace Fluent\Auth;
 
-use CodeIgniter\Database\ConnectionInterface;
-use Config\Database;
+use CodeIgniter\Database\BaseBuilder;
+use CodeIgniter\Database\Config;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Entities\User;
@@ -20,26 +20,18 @@ class UserDatabase implements UserProviderInterface
     /**
      * The active database connection.
      *
-     * @var ConnectionInterface
+     * @var BaseBuilder
      */
     protected $connection;
-
-    /**
-     * The table containing the users.
-     *
-     * @var string
-     */
-    protected $table;
 
     /**
      * Create a new database user provider.
      *
      * @return void
      */
-    public function __construct(string $table)
+    public function __construct(string $table, string $connection = 'default')
     {
-        $this->table      = $table;
-        $this->connection = Database::connect();
+        $this->connection = Config::connect($connection)->table($table);
     }
 
     /**
@@ -47,7 +39,7 @@ class UserDatabase implements UserProviderInterface
      */
     public function findById(int $id)
     {
-        return $this->connection->table($this->table)->where('id', $id)->get()->getFirstRow(User::class);
+        return $this->connection->where('id', $id)->get()->getFirstRow(User::class);
     }
 
     /**
@@ -55,7 +47,7 @@ class UserDatabase implements UserProviderInterface
      */
     public function findByRememberToken(int $id, $token)
     {
-        $retriveDatabase = $this->connection->table($this->table)->where('id', $id)->get()->getFirstRow(User::class);
+        $retriveDatabase = $this->connection->where('id', $id)->get()->getFirstRow(User::class);
 
         $rememberToken = $retriveDatabase->getRememberToken();
 
@@ -69,7 +61,7 @@ class UserDatabase implements UserProviderInterface
      */
     public function updateRememberToken(AuthenticatorInterface $user, $token)
     {
-        return $this->connection->table($this->table)
+        return $this->connection
             ->where($user->getAuthIdColumn(), $user->getAuthId())
             ->set($user->getRememberColumn(), $token)
             ->update();
@@ -91,7 +83,7 @@ class UserDatabase implements UserProviderInterface
         // First we will add each credential element to the query as a where clause.
         // Then we can execute the query and, if we found a user, return it in a
         // generic "user" object that will be utilized by the Guard instances.
-        $query = $this->connection->table($this->table);
+        $query = $this->connection;
 
         foreach ($credentials as $key => $value) {
             if (Str::contains($key, 'password')) {
@@ -117,5 +109,13 @@ class UserDatabase implements UserProviderInterface
     public function validateCredentials(AuthenticatorInterface $user, array $credentials)
     {
         return Hash::check($credentials['password'], $user->getAuthPassword());
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function instance()
+    {
+        return $this->connection;
     }
 }

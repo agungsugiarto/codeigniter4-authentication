@@ -37,7 +37,7 @@ class ThrottleFilter implements FilterInterface
                 return $this->fail(lang('Auth.throttle', [$seconds]));
             }
 
-            return redirect()->back()->with('error', lang('Auth.throttle', [$seconds]));
+            return redirect()->back()->with('error', lang('Auth.throttler', [$this->maxAttempt($arguments), $seconds]));
         }
 
         RateLimiter::hit($this->throttleKey($request), $this->decaySecond($arguments));
