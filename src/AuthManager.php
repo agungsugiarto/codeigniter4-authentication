@@ -158,7 +158,7 @@ class AuthManager implements AuthFactoryInterface
             case 'model':
                 return new $config['table']();
             case 'connection':
-                return new UserDatabase($config['table']);
+                return new UserDatabase($config['table'], $config['connection']);
             default:
                 throw new InvalidArgumentException(
                     "Authentication user provider [{$driver}] is not defined."

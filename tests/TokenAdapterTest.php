@@ -44,7 +44,7 @@ class TokenAdapterTest extends CIDatabaseTestCase implements AuthenticationTestI
     public function testAuthenticate()
     {
         $this->expectException(AuthenticationException::class);
-        $this->expectExceptionMessage(lang('Auth.invalidUser'));
+        $this->expectExceptionMessage('Unauthenticated.');
 
         $this->auth->authenticate();
 

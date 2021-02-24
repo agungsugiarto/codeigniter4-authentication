@@ -2,6 +2,7 @@
 
 namespace Fluent\Auth\Traits;
 
+use CodeIgniter\Database\BaseBuilder;
 use CodeIgniter\Model;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\Facades\Hash;
@@ -100,5 +101,15 @@ trait UserProviderTrait
     public function validateCredentials(AuthenticatorInterface $user, array $credentials)
     {
         return Hash::check($credentials['password'], $user->getAuthPassword());
+    }
+
+    /**
+     * Get instance class user provider.
+     *
+     * @return BaseBuilder|Model
+     */
+    public function instance()
+    {
+        return $this;
     }
 }

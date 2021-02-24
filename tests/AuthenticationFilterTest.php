@@ -64,7 +64,7 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
     public function testDefaultGuardFilter()
     {
         $this->expectException(AuthenticationException::class);
-        $this->expectExceptionMessage('Unauthenticated');
+        $this->expectExceptionMessage('Unauthenticated.');
 
         $this->call('get', 'secret/treasure');
 
@@ -89,7 +89,7 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
         $this->guard = 'web';
 
         $this->expectException(AuthenticationException::class);
-        $this->expectExceptionMessage('Unauthenticated');
+        $this->expectExceptionMessage('Unauthenticated.');
 
         $this->call('get', 'secret/treasure');
 
@@ -114,7 +114,7 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
         $this->guard = 'token';
 
         $this->expectException(AuthenticationException::class);
-        $this->expectExceptionMessage('Unauthenticated');
+        $this->expectExceptionMessage('Unauthenticated.');
 
         $this->call('get', 'secret/treasure');
 
@@ -138,7 +138,7 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
         $this->guard = 'token';
 
         $this->expectException(AuthenticationException::class);
-        $this->expectExceptionMessage('Unauthenticated');
+        $this->expectExceptionMessage('Unauthenticated.');
 
         $this->call('get', 'secret/treasure');
 
@@ -157,14 +157,14 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
         $this->guard = 'token';
 
         $this->expectException(AuthenticationException::class);
-        $this->expectExceptionMessage('Unauthenticated');
+        $this->expectExceptionMessage('Unauthenticated.');
 
         $this->call('get', 'secret/treasure');
 
         $user  = fake(UserModel::class);
         $token = $user->generateAccessToken('foo');
 
-        $result = $this->call('get', "secret/treasure?{$token->raw_token}");
+        $result = $this->call('get', "secret/treasure?token={$token->raw_token}");
 
         $this->assertEquals('you found gems', $result);
         $this->assertNotNull($this->auth->guard('token')->user());

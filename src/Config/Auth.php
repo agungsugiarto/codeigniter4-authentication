@@ -15,10 +15,9 @@ class Auth extends BaseConfig
      * Authentication Defaults
      * --------------------------------------------------------------------------
      *
-     * This option controls the default authentication "adapter".
-     * You may change these defaults as required,
-     * but they're a perfect start for
-     * most applications.
+     * This option controls the default authentication "guard" and password
+     * reset option for your application. You may change these defaults
+     * as required, but they're a perfect start for most applications.
      *
      * @var array
      */
@@ -30,7 +29,7 @@ class Auth extends BaseConfig
 
     /**
      * --------------------------------------------------------------------------
-     * Authentication Adapters
+     * Authentication Guards
      * --------------------------------------------------------------------------
      *
      * Next, you may define every authentication adapter for your application.
@@ -80,8 +79,9 @@ class Auth extends BaseConfig
             'table'  => UserModel::class,
         ],
         'database' => [
-            'driver' => 'connection',
-            'table'  => 'users',
+            'connection' => 'default',
+            'driver'     => 'connection',
+            'table'      => 'users',
         ],
     ];
 

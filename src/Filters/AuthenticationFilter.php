@@ -25,23 +25,66 @@ class AuthenticationFilter implements FilterInterface
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        if (empty($arguments)) {
-            $arguments = [null];
-        }
+        $this->authenticate($request, $arguments);
 
-        foreach ($arguments as $guard) {
-            if ($this->auth->guard($guard)->check()) {
-                return $this->auth->shouldUse($guard);
-            }
-        }
-
-        throw new AuthenticationException('Unauthenticated', ResponseInterface::HTTP_UNAUTHORIZED);
+        return $request;
     }
 
     /**
      * {@inheritdoc}
      */
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
+    {
+    }
+
+    /**
+     * Determine if the user is logged in to any of the given guards.
+     *
+     * @param RequestInterface $request
+     * @param array $guards
+     * @return void
+     * @throws AuthenticationException
+     */
+    protected function authenticate($request, $guards)
+    {
+        if (empty($guards)) {
+            $guards = [null];
+        }
+
+        foreach ($guards as $guard) {
+            if ($this->auth->guard($guard)->check()) {
+                return $this->auth->shouldUse($guard);
+            }
+        }
+
+        $this->unauthenticated($request, $guards);
+    }
+
+     /**
+      * Handle an unauthenticated user.
+      *
+      * @param RequestInterface $request
+      * @param array $guards
+      * @return void
+      * @throws AuthenticationException
+      */
+    protected function unauthenticated($request, $guards)
+    {
+        throw new AuthenticationException(
+            'Unauthenticated.',
+            $guards,
+            ResponseInterface::HTTP_UNAUTHORIZED,
+            $this->redirectTo($request)
+        );
+    }
+
+    /**
+     * Get the path the user should be redirected to when they are not authenticated.
+     *
+     * @param RequestInterface $request
+     * @return string|null
+     */
+    protected function redirectTo($request)
     {
     }
 }

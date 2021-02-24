@@ -2,6 +2,9 @@
 
 namespace Fluent\Auth\Contracts;
 
+use CodeIgniter\Database\BaseBuilder;
+use CodeIgniter\Model;
+
 interface UserProviderInterface
 {
     /**
@@ -42,4 +45,11 @@ interface UserProviderInterface
      * @return bool
      */
     public function validateCredentials(AuthenticatorInterface $user, array $credentials);
+
+    /**
+     * Get instance class user provider.
+     *
+     * @return BaseBuilder|Model
+     */
+    public function instance();
 }

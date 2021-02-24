@@ -320,7 +320,7 @@ Auth::loginById(1);
 
 You may pass a boolean value as the second argument to the `loginById` method. This value indicates if "remember me" functionality is desired for the authenticated session. Remember, this means that the session will be authenticated indefinitely or until the user manually logs out of the application:
 ```php
-Auth::loginUsingId(1, $remember = true);
+Auth::loginById(1, $remember = true);
 ```
 
 ## Logging Out

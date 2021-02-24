@@ -78,7 +78,7 @@ abstract class AbstractAdapter implements AuthenticationInterface
             return $user;
         }
 
-        throw AuthenticationException::forInvalidUser();
+        throw new AuthenticationException('Unauthenticated.', ['guard' => $this->name]);
     }
 
     /**

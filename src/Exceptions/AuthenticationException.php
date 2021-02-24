@@ -2,29 +2,57 @@
 
 namespace Fluent\Auth\Exceptions;
 
-use CodeIgniter\HTTP\ResponseInterface;
 use Exception;
 
 class AuthenticationException extends Exception
 {
-    /** @var string */
-    protected $code = ResponseInterface::HTTP_FORBIDDEN;
+    /**
+     * All of the guards that were checked.
+     *
+     * @var array
+     */
+    protected $guards;
 
-    /** @return self */
-    public static function forUnknownAdapter(string $adapter)
+    /**
+     * The path the user should be redirected to.
+     *
+     * @var string
+     */
+    protected $redirectTo;
+
+    /**
+     * Create a new authentication exception.
+     *
+     * @param string $message
+     * @param array $guards
+     * @param string|null $redirectTo
+     * @return void
+     */
+    public function __construct($message = 'Unauthenticated.', array $guards = [], int $code = 401, $redirectTo = null)
     {
-        return new self(lang('Auth.unknownAdapter', [$adapter]));
+        parent::__construct($message, $code);
+
+        $this->guards     = $guards;
+        $this->redirectTo = $redirectTo;
     }
 
-    /** @return self */
-    public static function forUnknownUserProvider()
+    /**
+     * Get the guards that were checked.
+     *
+     * @return array
+     */
+    public function guards()
     {
-        return new self(lang('Auth.unknownUserProvider'));
+        return $this->guards;
     }
 
-    /** @return self */
-    public static function forInvalidUser()
+    /**
+     * Get the path the user should be redirected to.
+     *
+     * @return string
+     */
+    public function redirectTo()
     {
-        return new self(lang('Auth.invalidUser'));
+        return $this->redirectTo;
     }
 }
