@@ -5,8 +5,8 @@ namespace Fluent\Auth\Traits;
 trait AuthenticatableTrait
 {
     /**
-     * Returns the name of the column used to
-     * uniquely identify this user, typically 'id'.
+     * Returns the name of the column used to uniquely
+     * identify this user, typically 'id'.
      */
     public function getAuthIdColumn(): string
     {
@@ -14,17 +14,14 @@ trait AuthenticatableTrait
     }
 
     /**
-     * Returns the unique identifier of
-     * the object for authentication purposes.
-     * Typically the user's id.
+     * Returns the unique identifier of the object for
+     * authentication purposes. Typically user's id.
      *
      * @return mixed
      */
     public function getAuthId()
     {
-        $column = $this->getAuthIdColumn();
-
-        return $this->{$column} ?? null;
+        return $this->attributes[$this->getAuthIdColumn()] ?? null;
     }
 
     /**
@@ -43,9 +40,7 @@ trait AuthenticatableTrait
      */
     public function getAuthEmail()
     {
-        $column = $this->getAuthEmailColumn();
-
-        return $this->{$column} ?? null;
+        return $this->attributes[$this->getAuthEmailColumn()] ?? null;
     }
 
     /**
@@ -78,9 +73,7 @@ trait AuthenticatableTrait
      */
     public function setRememberToken(string $value)
     {
-        $column = $this->getRememberColumn();
-
-        $this->{$column} = $value;
+        $this->attributes[$this->getRememberColumn()] = $value;
 
         return $this;
     }

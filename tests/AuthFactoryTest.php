@@ -81,10 +81,8 @@ class AuthFactoryTest extends CIDatabaseTestCase
 
     public function testExtendDriver()
     {
-        $config = config('Auth');
-
-        $extend = $this->auth->extend('jwt', function () use ($config) {
-            return new TokenAdapter($config, 'jwt_name', $this->auth->createUserProvider('users'));
+        $extend = $this->auth->extend('jwt', function ($auth, $name, $config) {
+            return new TokenAdapter($this->auth->createUserProvider($config['provider']), service('request'));
         });
 
         $this->assertInstanceOf(AuthFactoryInterface::class, $extend);

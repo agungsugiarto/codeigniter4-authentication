@@ -18,18 +18,19 @@ trait UserProviderTrait
     /**
      * Locates an identity object by ID.
      *
-     * @return AuthenticatorInterface|HasAccessTokensInterface|null
+     * @param int|string $userId
+     * @return AuthenticatorInterface|null
      */
-    public function findById(int $id)
+    public function findById($userId)
     {
-        return $this->find($id);
+        return $this->find($userId);
     }
 
     /**
      * Locate a user by the given credentials.
      *
      * @param array $credentials
-     * @return AuthenticatorInterface|HasAccessTokensInterface|null
+     * @return AuthenticatorInterface|null
      */
     public function findByCredentials(array $credentials)
     {
@@ -62,12 +63,13 @@ trait UserProviderTrait
     /**
      * Find a user by their ID and "remember-me" token.
      *
+     * @param int|string $userId
      * @param string $token
-     * @return AuthenticatorInterface|HasAccessTokensInterface|null
+     * @return AuthenticatorInterface|null
      */
-    public function findByRememberToken(int $id, $token)
+    public function findByRememberToken($userId, $token)
     {
-        $retrievedModel = $this->where('id', $id)->first();
+        $retrievedModel = $this->where('id', $userId)->first();
 
         if (! $retrievedModel) {
             return;

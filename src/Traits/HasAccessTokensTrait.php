@@ -5,7 +5,9 @@ namespace Fluent\Auth\Traits;
 use Fluent\Auth\Entities\AccessToken;
 use Fluent\Auth\Models\AccessTokenModel;
 
+use function bin2hex;
 use function hash;
+use function random_bytes;
 
 /**
  * Trait HasAccessTokensTrait
@@ -26,12 +28,11 @@ trait HasAccessTokensTrait
     public function generateAccessToken(string $name, array $scopes = ['*'])
     {
         $tokens = new AccessTokenModel();
-        helper('text');
 
         $tokens->insert(new AccessToken([
             'user_id' => $this->id,
             'name'    => $name,
-            'token'   => hash('sha256', $rawToken = random_string('crypto', 64)),
+            'token'   => hash('sha256', $rawToken = bin2hex(random_bytes(64))),
             'scopes'  => $scopes,
         ]));
 

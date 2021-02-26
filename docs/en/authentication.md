@@ -402,28 +402,51 @@ $routes->group('settings', ['filter' => 'confirm'], function () {
 <a name="adding-custom-guards"></a>
 ## Adding Custom Guards
 
-You may define your own authentication guards, you can place the code in that drivers:
+You may define your own authentication guards using the `extend` method on the `Auth` facade or service. You should place your call to the `extend` method within a service provider. Since codeigniter4-authentication already ships with an AuthServiceProvider, we can place the code in that provider. Open `\App\Providers\AuthServiceProvider`:
 ```php
 
-namespace App\Auth\Drivers;
+namespace App\Providers;
 
-use Fluent\Auth\Adapters\AbstractAdapter;
+use App\Providers\ExampleAdapter;
+use Fluent\Auth\Facades\Auth;
+use Fluent\Auth\AbstractServiceProvider;
 
-class ExampleAdapter extends AbstractAdapter
+class AuthServiceProvider extends AbstractServiceProvider
 {
-    // do your implementation
+    /**
+     * {@inheritdoc}
+     */
+    public static function register()
+    {
+        // You're free to register any flow codeigniter4-authentication,
+        // in this below example we're register custom guard.
+        // If you wish you can also register provider,
+        // hash implementation, password broker etc.
+
+        // Example adding guard implementation.
+        Auth::extend('exampleGuard', function($auth, $name, array $config) {
+            return new ExampleAdapter(
+                $auth, $name, Auth::createUserProvider($config['provider'])
+            );
+        });
+    }
 }
 ```
 
-Otherwise you may also implement contract `Fluent\Auth\Contracts\AuthenticationInterface` interface instead of using extends `AbstractAdapter`. This interface contains a few methods you will need to implement to define a custom guard. Once your custom guard has been defined, you may reference the guard in the `guards` configuration of your `Auth.php` configuration file:
+As you can see in the example above, the callback passed to the `extend` method should return an implementation of `Fluent\Auth\Contracts\AuthenticationInterface`. This interface contains a few methods you will need to implement to define a custom guard. Once your custom guard has been defined, you may reference the guard in the guards configuration of your `Auth.php` configuration file:
 ```php
 public $guards = [
     // ..
     'example' => [
-        'driver'   => App\Auth\Drivers\ExampleAdapter::class,
+        'driver'   => 'exampleGuard',
         'provider' => 'users',
     ],
 ],
+```
+
+Next we need to register this `App\Providers\AuthServiceProvider` to lifecycle application. Open `App\Config\Events` add this line:
+```php
+Events::on('pre_system', [\App\Providers\AuthServiceProvider::class, 'register']);
 ```
 
 <a name="the-user-provider-contract"></a>

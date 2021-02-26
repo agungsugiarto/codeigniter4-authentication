@@ -37,17 +37,17 @@ class UserDatabase implements UserProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function findById(int $id)
+    public function findById($userId)
     {
-        return $this->connection->where('id', $id)->get()->getFirstRow(User::class);
+        return $this->connection->where('id', $userId)->get()->getFirstRow(User::class);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function findByRememberToken(int $id, $token)
+    public function findByRememberToken($userId, $token)
     {
-        $retriveDatabase = $this->connection->where('id', $id)->get()->getFirstRow(User::class);
+        $retriveDatabase = $this->connection->where('id', $userId)->get()->getFirstRow(User::class);
 
         $rememberToken = $retriveDatabase->getRememberToken();
 
