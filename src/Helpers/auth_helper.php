@@ -4,7 +4,7 @@ use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthFactoryInterface;
 
-if (! defined('auth')) {
+if (! function_exists('auth')) {
     /**
      * Provides convenient access to the main authentication class.
      *
@@ -21,7 +21,7 @@ if (! defined('auth')) {
     }
 }
 
-if (! defined('user_id()')) {
+if (! function_exists('user_id')) {
     /**
      * Provide codeigniter4/authentitication-implementation.
      * Get the unique identifier for a current user.

@@ -5,14 +5,14 @@ namespace Fluent\Auth\Contracts;
 interface AuthenticatorInterface
 {
     /**
-     * Returns the name of the column used to uniquely identify
-     * this user, typically 'id'.
+     * Returns the name of the column used to uniquely
+     * identify this user, typically 'id'.
      */
     public function getAuthIdColumn(): string;
 
     /**
-     * Returns the unique identifier of the object for authentication
-     * purposes, typically the user's id.
+     * Returns the unique identifier of the object for
+     * authentication purposes, typically user's id.
      *
      * @return mixed
      */
