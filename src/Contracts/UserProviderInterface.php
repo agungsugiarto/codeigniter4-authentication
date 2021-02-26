@@ -10,9 +10,10 @@ interface UserProviderInterface
     /**
      * Locates an identity object by ID.
      *
+     * @param int|string $userId
      * @return AuthenticatorInterface|HasAccessTokensInterface|null
      */
-    public function findById(int $id);
+    public function findById($userId);
 
     /**
      * Locate a user by the given credentials.
@@ -25,10 +26,11 @@ interface UserProviderInterface
     /**
      * Find a user by their ID and "remember-me" token.
      *
+     * @param int|string $userId
      * @param string $token
      * @return AuthenticatorInterface|HasAccessTokensInterface|null
      */
-    public function findByRememberToken(int $id, $token);
+    public function findByRememberToken($userId, $token);
 
     /**
      * Update the "remember me" token for the given user in storage.

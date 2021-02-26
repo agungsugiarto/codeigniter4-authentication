@@ -3,17 +3,60 @@
 namespace Fluent\Auth\Adapters;
 
 use CodeIgniter\Events\Events;
+use CodeIgniter\HTTP\RequestInterface;
+use Exception;
+use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\Contracts\HasAccessTokensInterface;
+use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\Models\AccessTokenModel;
+use Fluent\Auth\Traits\GuardHelperTrait;
 
 use function hash;
 use function is_null;
 use function preg_replace;
 use function trim;
 
-class TokenAdapter extends AbstractAdapter
+class TokenAdapter implements AuthenticationInterface
 {
+    use GuardHelperTrait;
+
+    /** @var boolean */
+    protected $loggedOut = false;
+
+    /** @var RequestInterface */
+    protected $request;
+
+    public function __construct(UserProviderInterface $provider, RequestInterface $request)
+    {
+        $this->provider = $provider;
+        $this->request  = $request;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getSessionName()
+    {
+        throw new Exception('Not implemented.');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getCookieName()
+    {
+        throw new Exception('Not implemented.');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function viaRemember()
+    {
+        throw new Exception('Not implemented.');
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -59,6 +102,9 @@ class TokenAdapter extends AbstractAdapter
 
         Events::trigger('fireLoginEvent', $user, false);
 
+        // Provide codeigniter4/authentitication-implementation
+        Events::trigger('login', $user, false);
+
         /** @var HasAccessTokensInterface $user */
         $user->withAccessToken(
             $user->getAccessToken($this->getTokenForRequest())
@@ -68,7 +114,7 @@ class TokenAdapter extends AbstractAdapter
     /**
      * {@inheritdoc}
      */
-    public function loginById(int $userId, bool $remember = false)
+    public function loginById($userId, bool $remember = false)
     {
         if (! is_null($user = $this->provider->findById($userId))) {
             $this->login($user, $remember);
@@ -87,6 +133,9 @@ class TokenAdapter extends AbstractAdapter
         $user = $this->user();
 
         Events::trigger('fireLogoutEvent', $user);
+
+        // Provide codeigniter4/authentitication-implementation
+        Events::trigger('logout', $user);
 
         // Once we have fired the logout event we will clear the users out of memory
         // so they are no longer available as the user is no longer considered as

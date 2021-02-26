@@ -5,16 +5,92 @@ namespace Fluent\Auth\Adapters;
 use Codeigniter\Config\Services;
 use Codeigniter\Encryption\EncrypterInterface;
 use CodeIgniter\Events\Events;
+use CodeIgniter\HTTP\RequestInterface;
+use CodeIgniter\HTTP\ResponseInterface;
+use CodeIgniter\Session\SessionInterface;
 use Exception;
+use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
+use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\CookieRecaller;
+use Fluent\Auth\Traits\GuardHelperTrait;
 
 use function bin2hex;
 use function is_null;
 use function random_bytes;
+use function sha1;
 
-class SessionAdapter extends AbstractAdapter
+class SessionAdapter implements AuthenticationInterface
 {
+    use GuardHelperTrait;
+
+    /** @var AuthenticatorInterface */
+    protected $lastAttempted;
+
+    /** @var boolean */
+    protected $loggedOut = false;
+
+    /** @var boolean */
+    protected $viaRemember = false;
+
+    /** @var boolean */
+    protected $recallAttempted = false;
+
+    /** @var string */
+    protected $name;
+
+    /** @var RequestInterface */
+    protected $request;
+
+    /** @var ResponseInterface */
+    protected $response;
+
+    /** @var SessionInterface */
+    protected $session;
+
+    /**
+     * Create new session adapter guard.
+     *
+     * @return void
+     */
+    public function __construct(
+        string $name,
+        UserProviderInterface $provider,
+        RequestInterface $request,
+        ResponseInterface $response,
+        SessionInterface $session
+    ) {
+        $this->name     = $name;
+        $this->provider = $provider;
+        $this->request  = $request;
+        $this->response = $response;
+        $this->session  = $session;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getSessionName()
+    {
+        return 'login_' . "{$this->name}_" . sha1(static::class);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getCookieName()
+    {
+        return 'remember_' . "{$this->name}_" . sha1(static::class);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function viaRemember()
+    {
+        return $this->viaRemember;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -59,13 +135,16 @@ class SessionAdapter extends AbstractAdapter
 
         Events::trigger('fireLoginEvent', $user, $remember);
 
+        // Provide codeigniter4/authentitication-implementation
+        Events::trigger('login', $user, $remember);
+
         $this->setUser($user);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function loginById(int $userId, bool $remember = false)
+    public function loginById($userId, bool $remember = false)
     {
         if (! is_null($user = $this->provider->findById($userId))) {
             $this->login($user, $remember);
@@ -90,6 +169,9 @@ class SessionAdapter extends AbstractAdapter
         }
 
         Events::trigger('fireLogoutEvent', $user);
+
+        // Provide codeigniter4/authentitication-implementation
+        Events::trigger('logout', $user);
 
         // Once we have fired the logout event we will clear the users out of memory
         // so they are no longer available as the user is no longer considered as
@@ -120,7 +202,7 @@ class SessionAdapter extends AbstractAdapter
         // First we will try to load the user using the identifier in the session if
         // one exists. Otherwise we will check for a "remember me" cookie in this
         // request, and if one exists, attempt to retrieve the user using that.
-        if (! is_null($id) && $this->user = $this->provider->findById((int) $id)) {
+        if (! is_null($id) && $this->user = $this->provider->findById($id)) {
             Events::trigger('fireAuthenticatedEvent', $this->user);
         }
 
@@ -149,7 +231,7 @@ class SessionAdapter extends AbstractAdapter
         $app = config('App');
 
         // If using login with remember, make sure to send cookie with redirect()->withCookies()
-        $this->response()->setCookie(
+        $this->response->setCookie(
             $this->getCookieName(),
             $this->encrypter()->encrypt($user->getAuthId() . '|' . $user->getRememberToken() . '|' . $user->getAuthPassword()),
             1 * MONTH,
@@ -168,7 +250,7 @@ class SessionAdapter extends AbstractAdapter
      */
     protected function recaller()
     {
-        if ($recaller = $this->request()->getCookie($this->getCookieName())) {
+        if ($recaller = $this->request->getCookie($this->getCookieName())) {
             try {
                 $decrypted = $this->encrypter()->decrypt($recaller);
             } catch (Exception $e) {
@@ -284,7 +366,7 @@ class SessionAdapter extends AbstractAdapter
 
         if (! is_null($this->recaller())) {
             // If using login with remember, make sure to send cookie with redirect()->withCookies()
-            $this->response()->deleteCookie(
+            $this->response->deleteCookie(
                 $this->getCookieName(),
                 $app->cookieDomain,
                 $app->cookiePath,

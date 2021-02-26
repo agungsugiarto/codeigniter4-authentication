@@ -5,6 +5,8 @@ namespace Fluent\Auth;
 use Closure;
 use CodeIgniter\Config\Factories;
 use CodeIgniter\Config\Services;
+use Fluent\Auth\Adapters\SessionAdapter;
+use Fluent\Auth\Adapters\TokenAdapter;
 use Fluent\Auth\Config\Auth;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthFactoryInterface;
@@ -247,15 +249,42 @@ class AuthManager implements AuthFactoryInterface
             return $this->callCustomCreator($name, $config);
         }
 
-        $driverMethod = new $config['driver']($this->config, $name, $this->createUserProvider($config['provider']));
-
-        if ($driverMethod instanceof AuthenticationInterface) {
-            return $driverMethod;
+        switch ($config['driver']) {
+            case SessionAdapter::class:
+                return $this->createSessionDriver($name, $config);
+            case TokenAdapter::class:
+                return $this->createTokenDriver($config);
+            default:
+                throw new InvalidArgumentException(
+                    "Auth driver [{$config['driver']}] for guard [{$name}] is not defined."
+                );
         }
+    }
 
-        throw new InvalidArgumentException(
-            "Auth driver [{$config['driver']}] for guard [{$name}] must be instance of AuthenticationInterface."
+    /**
+     * Create a session based authentication guard.
+     *
+     * @return AuthenticationInterface
+     */
+    protected function createSessionDriver(string $name, array $config)
+    {
+        return new SessionAdapter(
+            $name,
+            $this->createUserProvider($config['provider']),
+            Services::request(),
+            Services::response(),
+            Services::session()
         );
+    }
+
+    /**
+     * Create a token based authentication guard.
+     *
+     * @return AuthenticationInterface
+     */
+    protected function createTokenDriver(array $config)
+    {
+        return new TokenAdapter($this->createUserProvider($config['provider']), Services::request());
     }
 
     /**

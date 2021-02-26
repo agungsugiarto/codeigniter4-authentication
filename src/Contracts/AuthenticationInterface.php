@@ -49,9 +49,10 @@ interface AuthenticationInterface
     /**
      * Logs a user in based on their ID.
      *
+     * @param int|string $userId
      * @return AuthenticatorInterface|bool
      */
-    public function loginById(int $userId, bool $remember = false);
+    public function loginById($userId, bool $remember = false);
 
     /**
      * Logs the current user out.

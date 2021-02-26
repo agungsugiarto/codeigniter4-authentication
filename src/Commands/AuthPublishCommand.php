@@ -68,6 +68,7 @@ class AuthPublishCommand extends BaseCommand
         $this->publishModels();
         $this->publishViews();
         $this->publishNotifications();
+        $this->publishAuthServiceProvider();
         $this->publishControllers();
         $this->publishMigration();
         $this->publishConfig();
@@ -165,6 +166,21 @@ class AuthPublishCommand extends BaseCommand
 
             $this->writeFile("Notifications/{$notif}.php", $content);
         }
+    }
+
+    /**
+     * Publish auth service provider.
+     *
+     * @return void
+     */
+    protected function publishAuthServiceProvider()
+    {
+        $path = "{$this->sourcePath}/AuthServiceProvider.php";
+
+        $content = file_get_contents($path);
+        $content = $this->replaceNamespace($content, 'Fluent\Auth', 'Providers');
+
+        $this->writeFile("Providers/AuthServiceProvider.php", $content);
     }
 
     /**
