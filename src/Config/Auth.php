@@ -6,7 +6,6 @@ use CodeIgniter\Config\BaseConfig;
 use Fluent\Auth\Adapters\SessionAdapter;
 use Fluent\Auth\Adapters\TokenAdapter;
 use Fluent\Auth\Models\UserModel;
-use Fluent\Auth\Passwords\PasswordResetRepository;
 
 class Auth extends BaseConfig
 {
@@ -22,9 +21,9 @@ class Auth extends BaseConfig
      * @var array
      */
     public $defaults = [
-        'guard'     => 'web',
-        'provider'  => 'users',
-        'passwords' => 'users',
+        'guard'    => 'web',
+        'provider' => 'users',
+        'password' => 'users',
     ];
 
     /**
@@ -102,10 +101,11 @@ class Auth extends BaseConfig
      */
     public $passwords = [
         'users' => [
-            'provider' => 'users',
-            'table'    => PasswordResetRepository::class,
-            'expire'   => 60,
-            'throttle' => 60,
+            'provider'   => 'users',
+            'connection' => 'default',
+            'table'      => 'auth_password_reset',
+            'expire'     => 60,
+            'throttle'   => 60,
         ],
     ];
 

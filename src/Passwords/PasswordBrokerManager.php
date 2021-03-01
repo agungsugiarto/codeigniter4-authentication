@@ -68,7 +68,7 @@ class PasswordBrokerManager implements PasswordBrokerFactoryInterface
      */
     protected function createTokenRepository(array $config)
     {
-        return new $config['table']($config['expire'], $config['throttle']);
+        return new PasswordResetRepository($config['table'], $config['connection'], $config['expire'], $config['throttle']);
     }
 
     /**
@@ -91,7 +91,7 @@ class PasswordBrokerManager implements PasswordBrokerFactoryInterface
      */
     public function getDefaultDriver()
     {
-        return $this->config->defaults['passwords'];
+        return $this->config->defaults['password'];
     }
 
     /**
@@ -99,7 +99,7 @@ class PasswordBrokerManager implements PasswordBrokerFactoryInterface
      */
     public function setDefaultDriver($name)
     {
-        $this->config->defaults['passwords'] = $name;
+        $this->config->defaults['password'] = $name;
 
         return $this;
     }

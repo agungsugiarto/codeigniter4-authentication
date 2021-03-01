@@ -27,9 +27,10 @@ class UserDatabase implements UserProviderInterface
     /**
      * Create a new database user provider.
      *
+     * @param string|null $connection
      * @return void
      */
-    public function __construct(string $table, string $connection = 'default')
+    public function __construct(string $table, $connection = null)
     {
         $this->connection = Config::connect($connection)->table($table);
     }

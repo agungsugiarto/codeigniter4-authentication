@@ -39,7 +39,7 @@ class ResetPasswordNotification
             ->setMessage(view('Fluent\Auth\Views\Email\reset_email', [
                 'token'  => $this->token,
                 'email'  => $this->email,
-                'expire' => config('Auth')->passwords['users']['expire'],
+                'expire' => config('Auth')->passwords[config('Auth')->defaults['password']]['expire'],
             ]))
             ->setMailType('html')
             ->send();

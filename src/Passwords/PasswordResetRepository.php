@@ -2,8 +2,9 @@
 
 namespace Fluent\Auth\Passwords;
 
+use CodeIgniter\Database\BaseBuilder;
+use CodeIgniter\Database\Config;
 use CodeIgniter\I18n\Time;
-use CodeIgniter\Model;
 use Fluent\Auth\Contracts\PasswordResetRepositoryInterface;
 use Fluent\Auth\Contracts\ResetPasswordInterface;
 use Fluent\Auth\Facades\Hash;
@@ -12,38 +13,14 @@ use function bin2hex;
 use function hash_hmac;
 use function random_bytes;
 
-class PasswordResetRepository extends Model implements PasswordResetRepositoryInterface
+class PasswordResetRepository implements PasswordResetRepositoryInterface
 {
     /**
-     * Name of database table
+     * The active database connection.
      *
-     * @var string
+     * @var BaseBuilder
      */
-    protected $table = 'auth_password_resets';
-
-    /**
-     * The format that the results should be returned as.
-     * Will be overridden if the as* methods are used.
-     *
-     * @var string
-     */
-    protected $returnType = 'object';
-
-    /**
-     * If true, will set created_at, and updated_at
-     * values during insert and update routines.
-     *
-     * @var boolean
-     */
-    protected $useTimestamps = true;
-
-    /**
-     * An array of field names that are allowed
-     * to be set by the user in inserts/updates.
-     *
-     * @var array
-     */
-    protected $allowedFields = ['email', 'token'];
+    protected $connection;
 
     /**
      * The number of seconds a token should last.
@@ -61,13 +38,15 @@ class PasswordResetRepository extends Model implements PasswordResetRepositoryIn
 
     /**
      * Create new token repository instance.
+     * 
+     * @param string|null $connection
+     * @return void
      */
-    public function __construct(int $expires = 60, int $throttle = 60)
+    public function __construct(string $table, $connection = null, int $expires = 60, int $throttle = 60)
     {
-        parent::__construct();
-
-        $this->expires  = $expires * 60;
-        $this->throttle = $throttle;
+        $this->connection = Config::connect($connection)->table($table);
+        $this->expires    = $expires * 60;
+        $this->throttle   = $throttle;
     }
 
     /**
@@ -77,14 +56,14 @@ class PasswordResetRepository extends Model implements PasswordResetRepositoryIn
     {
         $email = $user->getEmailForPasswordReset();
 
-        $this->deleteExisting($user);
+        $this->destroy($user);
 
         // We will create a new, random token for the user so that we can e-mail them
         // a safe link to the password reset form. Then we will insert a record in
         // the database so that we can verify the token within the actual reset.
         $token = $this->createNewToken();
 
-        $this->insert($this->getPayload($email, $token));
+        $this->connection->insert($this->getPayload($email, $token));
 
         return $token;
     }
@@ -102,7 +81,7 @@ class PasswordResetRepository extends Model implements PasswordResetRepositoryIn
      */
     public function exists(ResetPasswordInterface $user, $token)
     {
-        $record = $this->where('email', $user->getEmailForPasswordReset())->first();
+        $record = $this->connection->where('email', $user->getEmailForPasswordReset())->get()->getFirstRow();
 
         $expiredAt = Time::now()->subSeconds($this->expires);
 
@@ -118,7 +97,7 @@ class PasswordResetRepository extends Model implements PasswordResetRepositoryIn
             return false;
         }
 
-        $record = $this->where('email', $user->getEmailForPasswordReset())->first();
+        $record = $this->connection->where('email', $user->getEmailForPasswordReset())->get()->getFirstRow();
 
         $expiredAt = Time::now()->subSeconds($this->throttle);
 
@@ -130,7 +109,7 @@ class PasswordResetRepository extends Model implements PasswordResetRepositoryIn
      */
     public function destroy(ResetPasswordInterface $user)
     {
-        return $this->deleteExisting($user);
+        return $this->connection->where('email', $user->getEmailForPasswordReset())->delete();
     }
 
     /**
@@ -140,17 +119,7 @@ class PasswordResetRepository extends Model implements PasswordResetRepositoryIn
     {
         $expiredAt = Time::now()->subSeconds($this->expires);
 
-        return $this->where('created_at <', $expiredAt)->delete();
-    }
-
-    /**
-     * Delete all existing reset tokens from the database.
-     *
-     * @return int
-     */
-    protected function deleteExisting(ResetPasswordInterface $user)
-    {
-        return $this->where('email', $user->getEmailForPasswordReset())->delete();
+        return $this->connection->where('created_at <', $expiredAt)->delete();
     }
 
     /**
@@ -162,6 +131,11 @@ class PasswordResetRepository extends Model implements PasswordResetRepositoryIn
      */
     protected function getPayload($email, $token)
     {
-        return ['email' => $email, 'token' => Hash::make($token), 'created_at' => Time::now()];
+        return [
+            'email'      => $email,
+            'token'      => Hash::make($token),
+            'created_at' => Time::now(),
+            'updated_at' => Time::now(),
+        ];
     }
 }

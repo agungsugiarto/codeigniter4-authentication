@@ -20,7 +20,7 @@ class PasswordResetRepositoryTest extends CIDatabaseTestCase
     {
         parent::setUp();
 
-        $this->repository = new PasswordResetRepository();
+        $this->repository = new PasswordResetRepository('auth_password_resets');
     }
 
     public function testCreateResetToken()
@@ -75,6 +75,11 @@ class PasswordResetRepositoryTest extends CIDatabaseTestCase
         $user = fake(UserModel::class);
 
         $this->repository->create($user);
+
+        $this->seeInDatabase('auth_password_resets', [
+            'email' => $user->email,
+        ]);
+
         $this->repository->destroy($user);
 
         $this->dontSeeInDatabase('auth_password_resets', [
