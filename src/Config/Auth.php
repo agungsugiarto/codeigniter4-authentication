@@ -103,7 +103,7 @@ class Auth extends BaseConfig
         'users' => [
             'provider'   => 'users',
             'connection' => 'default',
-            'table'      => 'auth_password_reset',
+            'table'      => 'auth_password_resets',
             'expire'     => 60,
             'throttle'   => 60,
         ],
