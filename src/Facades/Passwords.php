@@ -2,7 +2,7 @@
 
 namespace Fluent\Auth\Facades;
 
-use CodeIgniter\Config\Services;
+use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\PasswordBrokerFactoryInterface;
 use Fluent\Auth\Contracts\PasswordBrokerInterface;
 use Fluent\Auth\Contracts\PasswordResetRepositoryInterface;

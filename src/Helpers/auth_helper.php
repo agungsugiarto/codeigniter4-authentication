@@ -14,10 +14,10 @@ if (! function_exists('auth')) {
     function auth($guard = null)
     {
         if (is_null($guard)) {
-            return Services::auth();
+            return Services::getSharedInstance('auth');
         }
 
-        return Services::auth()->guard($guard);
+        return Services::getSharedInstance('auth')->guard($guard);
     }
 }
 

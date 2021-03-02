@@ -3,7 +3,7 @@
 namespace Fluent\Auth\Facades;
 
 use Closure;
-use CodeIgniter\Config\Services;
+use Fluent\Auth\Config\Services;
 
 /**
  * @see \Fluent\Auth\Passwords\RateLimiter

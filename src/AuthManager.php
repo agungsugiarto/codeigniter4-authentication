@@ -330,12 +330,12 @@ class AuthManager implements AuthFactoryInterface
     /**
      * Dynamically call the default driver instance.
      *
-     * @param  string  $method
-     * @param  array  $parameters
-     * @return mixed
+     * @param string $method
+     * @param array $arguments
+     * @return AuthenticationInterface
      */
-    public function __call($method, $parameters)
+    public function __call($method, $arguments)
     {
-        return $this->guard()->{$method}(...$parameters);
+        return $this->guard()->{$method}(...$arguments);
     }
 }

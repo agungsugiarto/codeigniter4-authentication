@@ -2,7 +2,7 @@
 
 namespace Fluent\Auth\Facades;
 
-use CodeIgniter\Config\Services;
+use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\HasherInterface;
 use Fluent\Auth\Passwords\Hash\AbstractManager;
 use Fluent\Auth\Passwords\Hash\HashManager;
@@ -24,7 +24,7 @@ use Fluent\Auth\Passwords\Hash\HashManager;
 class Hash
 {
     /**
-     * Static instance hash service.
+     * Facade hash instance service.
      *
      * @param string $method
      * @param array $arguments

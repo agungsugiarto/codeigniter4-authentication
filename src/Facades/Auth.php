@@ -3,7 +3,7 @@
 namespace Fluent\Auth\Facades;
 
 use Closure;
-use CodeIgniter\Config\Services;
+use Fluent\Auth\Config\Services;
 use CodeIgniter\Router\RouteCollection;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
@@ -47,7 +47,7 @@ use Fluent\Auth\Contracts\VerifyEmailInterface;
 class Auth
 {
     /**
-     * Facade auth instance authentication service.
+     * Facade auth instance service.
      *
      * @param string $method
      * @param array $arguments
