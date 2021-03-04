@@ -96,7 +96,7 @@ class TokenAdapter implements AuthenticationInterface
     /**
      * {@inheritdoc}
      */
-    public function login(AuthenticatorInterface $user, bool $remember = false): void
+    public function login(AuthenticatorInterface $user, bool $remember = false)
     {
         $this->setUser($user);
 

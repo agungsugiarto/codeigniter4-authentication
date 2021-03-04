@@ -43,8 +43,10 @@ interface AuthenticationInterface
 
     /**
      * Logs the given user in.
+     * 
+     * @return mixed
      */
-    public function login(AuthenticatorInterface $user, bool $remember = false): void;
+    public function login(AuthenticatorInterface $user, bool $remember = false);
 
     /**
      * Logs a user in based on their ID.
