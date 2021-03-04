@@ -32,7 +32,7 @@ use Fluent\Auth\Contracts\VerifyEmailInterface;
  * @method static bool viaRemember()
  * @method static bool validate(array $credentials)
  * @method static bool check()
- * @method static void login(AuthenticatorInterface $user, bool $remember = false)
+ * @method static mixed login(AuthenticatorInterface $user, bool $remember = false)
  * @method static AuthenticatorInterface|bool loginById(int $userId, bool $remember = false)
  * @method static void logout()
  * @method static AuthenticatorInterface|ResetPasswordInterface|VerifyEmailInterface|HasAccessTokensInterface|null user()
