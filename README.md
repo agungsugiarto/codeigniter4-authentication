@@ -17,6 +17,9 @@ includes concrete authentication adapters for common use case scenarios.
 ## Documentation
 - [en/authentication](docs/en/authentication.md)
 
+## Community Authentication Guards
+- JWT (JSON Web Token) - [agungsugiarto/codeigniter4-authentication-jwt](https://github.com/agungsugiarto/codeigniter4-authentication-jwt)
+
 ## Authentication Demo
 - [codeigniter4-authentication-demo](https://github.com/agungsugiarto/codeigniter4-authentication-demo)
 
