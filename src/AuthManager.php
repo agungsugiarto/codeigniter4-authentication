@@ -151,7 +151,7 @@ class AuthManager implements AuthFactoryInterface
         if (isset($this->customProviderCreators[$driver = $config['driver']])) {
             return call_user_func(
                 $this->customProviderCreators[$driver],
-                $this->config,
+                $this,
                 $config
             );
         }
@@ -311,7 +311,7 @@ class AuthManager implements AuthFactoryInterface
      */
     protected function callCustomCreator($name, array $config)
     {
-        return $this->customCreators[$config['driver']]($this->config, $name, $config);
+        return $this->customCreators[$config['driver']]($this, $name, $config);
     }
 
     /**
