@@ -10,6 +10,7 @@ use CodeIgniter\HTTP\Response;
 use CodeIgniter\HTTP\ResponseInterface;
 use Fluent\Auth\Facades\Auth;
 use Fluent\Auth\Facades\RateLimiter;
+use Fluent\Auth\Helpers\Str;
 
 use function array_values;
 
@@ -87,6 +88,6 @@ class ThrottleFilter implements FilterInterface
      */
     public function throttleKey(RequestInterface $request)
     {
-        return 'throttle_' . Auth::user()->email . '_' . $request->getIPAddress();
+        return 'throttle_' . Str::extractName(Auth::user()->email) . '_' . $request->getIPAddress();
     }
 }

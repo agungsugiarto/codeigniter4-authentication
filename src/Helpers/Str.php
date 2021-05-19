@@ -43,4 +43,15 @@ class Str
 
         return false;
     }
+
+    /**
+     * Extract username from given email.
+     * 
+     * @param string $email
+     * @return string|empty
+     */
+    public static function extractName(string $email)
+    {
+        return strstr($email, '@', true);
+    }
 }
