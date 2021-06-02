@@ -1,6 +1,11 @@
 # Release Notes
 
-## [Unreleased](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.2...1.x)
+## [Unreleased](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.3...1.x)
+
+## [v1.0.3 (2021-06-03)](https://github.com/laravel/framework/compare/v1.0.1...v1.0.2)
+
+### Changed
+- Refactor auth view [(f7a4cb7)](https://github.com/agungsugiarto/codeigniter4-authentication/commit/f7a4cb7e3f7c75599225a9c182e258f478a2f32d)
 
 ## [v1.0.2 (2021-05-19)](https://github.com/laravel/framework/compare/v1.0.1...v1.0.2)
 
