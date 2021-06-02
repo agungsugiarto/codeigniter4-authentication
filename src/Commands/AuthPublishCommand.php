@@ -161,8 +161,8 @@ class AuthPublishCommand extends BaseCommand
 
             $namespace = defined('APP_NAMESPACE') ? APP_NAMESPACE : 'App';
             $content   = str_replace('Fluent\Auth\Notifications', $namespace . 'App\Notifications', $content);
-            $content   = str_replace('Fluent\Auth\Views\Email\reset_email', 'Email\reset_email', $content);
-            $content   = str_replace('Fluent\Auth\Views\Email\verify_email', 'Email\verify_email', $content);
+            $content   = str_replace('Fluent\Auth\Views\Email\reset_email', 'Email/reset_email', $content);
+            $content   = str_replace('Fluent\Auth\Views\Email\verify_email', 'Email/verify_email', $content);
 
             $this->writeFile("Notifications/{$notif}.php", $content);
         }
