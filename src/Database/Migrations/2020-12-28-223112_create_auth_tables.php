@@ -44,7 +44,7 @@ class CreateAuthTables extends Migration
         ]);
 
         $this->forge->addPrimaryKey('id');
-        $this->forge->createTable('auth_password_resets');
+        $this->forge->createTable('auth_password_resets', true);
 
         /**
          * Access tokens table.
@@ -62,7 +62,7 @@ class CreateAuthTables extends Migration
 
         $this->forge->addPrimaryKey('id');
         $this->forge->addUniqueKey('token');
-        $this->forge->createTable('auth_access_tokens');
+        $this->forge->createTable('auth_access_tokens', true);
     }
 
     //--------------------------------------------------------------------

@@ -134,7 +134,7 @@ class AuthPublishCommand extends BaseCommand
         // Email view
         foreach (['layout', 'reset_email', 'verify_email'] as $view) {
             $content = file_get_contents("{$this->sourcePath}/Views/Email/{$view}.php");
-            $content = str_replace('Fluent\Auth\Views\Email\layout', 'Email\layout', $content);
+            $content = str_replace('Fluent\Auth\Views\Email\layout', 'Email/layout', $content);
             $this->writeFile("Views/Email/{$view}.php", $content);
         }
 

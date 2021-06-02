@@ -6,7 +6,7 @@
 
 <?php if (session()->has('error')) : ?>
     <div class="alert alert-danger" role="alert">
-        <h4 class="alert-heading">Whoops! Something went wrong.</h4>
+        <h5 class="alert-heading">Whoops! Something went wrong.</h5>
         <hr>
         <p class="mb-0"><?= session('error') ?></p>
     </div>
@@ -14,7 +14,7 @@
 
 <?php if (session()->has('errors')) : ?>
     <div class="alert alert-danger" role="alert">
-        <h4 class="alert-heading">Whoops! Something went wrong.</h4>
+        <h5 class="alert-heading">Whoops! Something went wrong.</h5>
         <hr>
         <?php foreach (session('errors') as $error) : ?>
             <li class="mb-0"><?= $error ?></li>

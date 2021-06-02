@@ -38,7 +38,7 @@ class AuthenticatedSessionController extends BaseController
      */
     public function new()
     {
-        return view('Auth\login');
+        return view('Auth/login');
     }
 
     /**
