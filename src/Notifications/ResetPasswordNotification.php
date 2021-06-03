@@ -33,7 +33,7 @@ class ResetPasswordNotification
      */
     public function send()
     {
-        return $this->service
+        $this->service
             ->setTo($this->email)
             ->setSubject("Reset Password Notification")
             ->setMessage(view('Fluent\Auth\Views\Email\reset_email', [
@@ -41,7 +41,14 @@ class ResetPasswordNotification
                 'email'  => $this->email,
                 'expire' => config('Auth')->passwords[config('Auth')->defaults['password']]['expire'],
             ]))
-            ->setMailType('html')
-            ->send();
+            ->setMailType('html');
+
+        if (! $this->service->send()) {
+            log_message('error', $this->service->printDebugger());
+
+            return false;
+        }
+
+        return true;
     }
 }

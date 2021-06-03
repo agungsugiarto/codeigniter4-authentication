@@ -30,7 +30,7 @@ class VerificationNotification
      */
     public function send()
     {
-        return $this->service
+        $this->service
             ->setTo($this->email)
             ->setSubject('Verify Email Notification')
             ->setMessage(view('Fluent\Auth\Views\Email\verify_email', [
@@ -38,7 +38,14 @@ class VerificationNotification
                 'expire'    => Time::now()->addMinutes(config('Auth')->passwords[config('Auth')->defaults['password']]['expire'])->getTimestamp(),
                 'signature' => hash_hmac('sha256', $this->email, config('Encryption')->key),
             ]))
-            ->setMailType('html')
-            ->send();
+            ->setMailType('html');
+
+        if (! $this->service->send()) {
+            log_message('error', $this->service->printDebugger());
+
+            return false;
+        }
+
+        return true;
     }
 }
