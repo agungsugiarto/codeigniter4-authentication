@@ -23,6 +23,10 @@ includes concrete authentication adapters for common use case scenarios.
 ## Authentication Demo
 - [codeigniter4-authentication-demo](https://github.com/agungsugiarto/codeigniter4-authentication-demo)
 
+Changelog
+--------
+Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.
+
 ## Contributing
 Contributions are very welcome.
 
