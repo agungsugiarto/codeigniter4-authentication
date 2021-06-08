@@ -136,6 +136,7 @@ class AuthenticatedSessionController extends BaseController
      */
     public function throttleKey()
     {
-        return strtolower(Str::extractName($this->request->getPost('email'))) . '_' . $this->request->getIPAddress();
+        //return strtolower(Str::extractName($this->request->getPost('email'))) . '_' . $this->request->getIPAddress();
+        return str_replace("::","",strtolower(Str::extractName($this->request->getPost('email'))) . '_' . $this->request->getIPAddress());        
     }
 }
