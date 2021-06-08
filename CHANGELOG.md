@@ -2,7 +2,12 @@
 
 ## [Unreleased](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.4...1.x)
 
-## [v1.0.5 (2021-06-08)](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.4...v1.0.4)
+## [v1.0.6 (2021-06-08)](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.5...v1.0.6)
+
+### BUG
+- FIx return on filter authentication [(baf5130)](https://github.com/agungsugiarto/codeigniter4-authentication/commit/baf513071b0c31ec78bfecaab0f0309da2e70830)
+
+## [v1.0.5 (2021-06-08)](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.4...v1.0.5)
 
 ### Changed
 - Filter show message when request is ajax [(497af3b)](https://github.com/agungsugiarto/codeigniter4-authentication/commit/497af3be8fc9e922b8cfe22ccc49a4e682ae31f7)
