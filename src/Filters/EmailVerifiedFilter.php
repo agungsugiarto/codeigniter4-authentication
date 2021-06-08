@@ -2,16 +2,27 @@
 
 namespace Fluent\Auth\Filters;
 
+use CodeIgniter\API\ResponseTrait;
+use CodeIgniter\Config\Services;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Fluent\Auth\Contracts\VerifyEmailInterface;
-use Fluent\Auth\Exceptions\AuthenticationException;
 
 use function auth;
 
 class EmailVerifiedFilter implements FilterInterface
 {
+    use ResponseTrait;
+
+    /** @var ResponseInterface */
+    protected $response;
+
+    public function __construct()
+    {
+        $this->response = Services::response();
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -25,7 +36,7 @@ class EmailVerifiedFilter implements FilterInterface
             ! $user->hasVerifiedEmail())
         ) {
             if ($request->isAjax()) {
-                throw new AuthenticationException('Your email address is not verified', [], ResponseInterface::HTTP_FORBIDDEN);
+                return $this->fail('Your email address is not verified', ResponseInterface::HTTP_FORBIDDEN);
             }
 
             session()->set('intended', current_url());

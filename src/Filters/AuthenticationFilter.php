@@ -2,6 +2,7 @@
 
 namespace Fluent\Auth\Filters;
 
+use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -12,12 +13,18 @@ use Fluent\Auth\Exceptions\AuthenticationException;
 
 class AuthenticationFilter implements FilterInterface
 {
+    use ResponseTrait;
+
     /** @var AuthFactoryInterface|AuthenticationInterface */
     protected $auth;
+
+    /** @var ResponseInterface */
+    protected $response;
 
     public function __construct()
     {
         $this->auth = Services::auth();
+        $this->response = Services::response();
     }
 
     /**
@@ -70,6 +77,10 @@ class AuthenticationFilter implements FilterInterface
       */
     protected function unauthenticated($request, $guards)
     {
+        if ($request->isAJAX()) {
+            return $this->fail('Unauthenticated.', ResponseInterface::HTTP_UNAUTHORIZED);
+        }
+
         throw new AuthenticationException(
             'Unauthenticated.',
             $guards,
