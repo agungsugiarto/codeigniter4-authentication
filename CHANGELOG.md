@@ -6,6 +6,7 @@
 
 ### Changed
 - Filter show message when request is ajax [(497af3b)](https://github.com/agungsugiarto/codeigniter4-authentication/commit/497af3be8fc9e922b8cfe22ccc49a4e682ae31f7)
+- Login issue bug, throttleKey function [(1cf1999)](https://github.com/agungsugiarto/codeigniter4-authentication/commit/1cf19994dc4b8e3b93dbcbc685888182987317dc)
 
 ## [v1.0.4 (2021-06-03)](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.3...v1.0.4)
 
