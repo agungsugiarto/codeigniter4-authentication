@@ -32,9 +32,7 @@ class AuthenticationFilter implements FilterInterface
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        $this->authenticate($request, $arguments);
-
-        return $request;
+        return $this->authenticate($request, $arguments);
     }
 
     /**
@@ -64,7 +62,7 @@ class AuthenticationFilter implements FilterInterface
             }
         }
 
-        $this->unauthenticated($request, $guards);
+        return $this->unauthenticated($request, $guards);
     }
 
      /**
