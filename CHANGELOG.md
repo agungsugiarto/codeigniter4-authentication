@@ -1,10 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.4...1.x)
+## [Unreleased](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.7...1.x)
+
+## [v1.0.7 (2021-10-05)](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.6...v1.0.7)
+
+### Fixed
+- Register.php calls for invalid file [(aa6eb79)](https://github.com/agungsugiarto/codeigniter4-authentication/commit/aa6eb799dda140a11aa5cfd5352f0cb58635e87c)
+- ErrorException | On login with email & password [(aa6eb79)](https://github.com/agungsugiarto/codeigniter4-authentication/commit/aa6eb799dda140a11aa5cfd5352f0cb58635e87c)
 
 ## [v1.0.6 (2021-06-08)](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.5...v1.0.6)
 
-### BUG
+### Fixed
 - FIx return on filter authentication [(baf5130)](https://github.com/agungsugiarto/codeigniter4-authentication/commit/baf513071b0c31ec78bfecaab0f0309da2e70830)
 
 ## [v1.0.5 (2021-06-08)](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.4...v1.0.5)
