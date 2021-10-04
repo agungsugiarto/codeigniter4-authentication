@@ -18,7 +18,7 @@
                         <h1 class="mb-0 h3">Create Account </h1>
                     </div>
                     <!-- Validation Errors and Message -->
-                    <?= $this->include('Auth\messages') ?>
+                    <?= $this->include('Auth/messages') ?>
                     <form method="post" action="<?= route_to('register') ?>" class="mt-4">
                         <!-- Form -->
                         <?= csrf_field() ?>

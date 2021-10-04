@@ -88,6 +88,6 @@ class ThrottleFilter implements FilterInterface
      */
     public function throttleKey(RequestInterface $request)
     {
-        return 'throttle_' . Str::extractName(Auth::user()->email) . '_' . str_replace("::", "", $this->request->getIPAddress());
+        return 'throttle_' . Str::extractName(Auth::user()->email) . '_' . str_replace("::", "", $request->getIPAddress());
     }
 }
