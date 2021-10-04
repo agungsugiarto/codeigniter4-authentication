@@ -2,15 +2,25 @@
 
 namespace Fluent\Auth\Filters;
 
+use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\Config\Services;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 
 use function time;
-
 class ConfirmPasswordFilter implements FilterInterface
 {
+    use ResponseTrait;
+
+    /** @var ResponseInterface */
+    protected $response;
+
+    public function __construct()
+    {
+        $this->response = Services::response();
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -18,9 +28,7 @@ class ConfirmPasswordFilter implements FilterInterface
     {
         if ($this->shouldConfirmPassword()) {
             if ($request->isAjax()) {
-                return Services::response()->setJSON([
-                    'message' => 'Password confirmation required.',
-                ])->setStatusCode(ResponseInterface::HTTP_LOCKED);
+                return $this->fail('Password confirmation required.', ResponseInterface::HTTP_LOCKED);
             }
 
             session()->set('intended', current_url());
