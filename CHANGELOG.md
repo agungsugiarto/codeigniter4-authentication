@@ -1,7 +1,12 @@
 # Release Notes
 
-## [Unreleased](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.7...1.x)
+## [Unreleased](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.8...1.x)
 
+## [v1.0.8 (2022-03-10)](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.7...v1.0.8)
+
+### Added
+- Unit test added InteractsWithAuthentication [(#27)](https://github.com/agungsugiarto/codeigniter4-authentication/pull/27)
+- Unit testing using php upto 8.x [(#27)](https://github.com/agungsugiarto/codeigniter4-authentication/pull/27)
 ## [v1.0.7 (2021-10-05)](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.6...v1.0.7)
 
 ### Fixed
