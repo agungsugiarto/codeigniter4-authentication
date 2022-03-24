@@ -87,8 +87,6 @@ class Gate implements GateInterface
         array $afterCallbacks = [],
         callable $guessPolicyNamesUsingCallback = null
     ) {
-        helper('inflector');
-
         $this->policies = $policies;
         $this->abilities = $abilities;
         $this->userResolver = $userResolver;
@@ -741,7 +739,7 @@ class Gate implements GateInterface
      */
     protected function formatAbilityToMethod($ability)
     {
-        return strpos($ability, '-') !== false ? camelize($ability) : $ability;
+        return strpos($ability, '-') !== false ? Str::camel($ability) : $ability;
     }
 
     /**
