@@ -532,7 +532,7 @@ class Gate implements GateInterface
      */
     protected function dispatchGateEvaluatedEvent($user, $ability, array $arguments, $result)
     {
-        Events::on(GateEvaluated::class, new GateEvaluated($user, $ability, $result, $arguments));
+        Events::trigger(GateEvaluated::class, new GateEvaluated($user, $ability, $result, $arguments));
     }
 
     /**
