@@ -5,6 +5,7 @@ namespace Fluent\Auth\Config;
 use CodeIgniter\Config\BaseService;
 use CodeIgniter\Config\Factories;
 use Fluent\Auth\AuthManager;
+use Fluent\Auth\Authorization\Gate;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthFactoryInterface;
 use Fluent\Auth\Contracts\HasherInterface;
@@ -29,6 +30,22 @@ class Services extends BaseService
         }
 
         return new AuthManager(new Factories(), $getShared);
+    }
+
+    /**
+     * Register the access gate service.
+     *
+     * @return Gate
+     */
+    public static function gate(bool $getShared = true)
+    {
+        if ($getShared) {
+            return self::getSharedInstance('gate');
+        }
+
+        return new Gate(function () {
+            return call_user_func(auth()->userResolver());
+        });
     }
 
     /**

@@ -2,7 +2,7 @@
 
 namespace Fluent\Auth\Entities;
 
-use CodeIgniter\Entity;
+use CodeIgniter\Entity\Entity;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\Contracts\HasAccessTokensInterface;
 use Fluent\Auth\Contracts\ResetPasswordInterface;

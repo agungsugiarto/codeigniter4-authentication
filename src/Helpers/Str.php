@@ -27,6 +27,18 @@ class Str
     }
 
     /**
+     * Parse a Class[@]method style callback into class and method.
+     *
+     * @param  string  $callback
+     * @param  string|null  $default
+     * @return array<int, string|null>
+     */
+    public static function parseCallback($callback, $default = null)
+    {
+        return static::contains($callback, '@') ? explode('@', $callback, 2) : [$callback, $default];
+    }
+
+    /**
      * Determine if a given string starts with a given substring.
      *
      * @param  string  $haystack
