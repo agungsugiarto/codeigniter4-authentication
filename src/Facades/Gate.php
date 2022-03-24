@@ -6,6 +6,7 @@ use Fluent\Auth\Config\Services;
 
 /**
  * @method static \Fluent\Auth\Authorization\Gate guessPolicyNamesUsing(callable $callback)
+ * @method static mixed resolvePolicy(string $class)
  * @method static \Fluent\Auth\Authorization\Response authorize(string $ability, array|mixed $arguments = [])
  * @method static \Fluent\Auth\Authorization\Response inspect(string $ability, array|mixed $arguments = [])
  * @method static \Fluent\Auth\Authorization\Response allowIf(\Closure|bool $condition, string|null $message = null, mixed $code = null)
@@ -13,9 +14,11 @@ use Fluent\Auth\Config\Services;
  * @method static \Fluent\Auth\Contracts\GateInterface after(callable $callback)
  * @method static \Fluent\Auth\Contracts\GateInterface before(callable $callback)
  * @method static \Fluent\Auth\Contracts\GateInterface define(string $ability, callable|string $callback)
+ * @method static \Fluent\Auth\Contracts\GateInterface resource(string $name, string $class, array $abilities = null)
  * @method static \Fluent\Auth\Contracts\GateInterface forUser(\Illuminate\Contracts\Auth\Authenticatable|mixed $user)
  * @method static \Fluent\Auth\Contracts\GateInterface policy(string $class, string $policy)
  * @method static array abilities()
+ * @method static array policies()
  * @method static bool allows(string $ability, array|mixed $arguments = [])
  * @method static bool any(iterable|string $abilities, array|mixed $arguments = [])
  * @method static bool check(iterable|string $abilities, array|mixed $arguments = [])

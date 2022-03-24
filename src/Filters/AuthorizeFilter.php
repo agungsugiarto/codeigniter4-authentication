@@ -35,9 +35,9 @@ class AuthorizeFilter implements FilterInterface
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        [$ability, $model] = $arguments;
+        [$ability] = $arguments;
 
-        $this->gate->authorize($ability, $this->getGateArguments($request, $model));
+        $this->gate->authorize($ability, $this->getGateArguments(isset($arguments[1]) ? $arguments[1] : null));
 
         return $request;
     }
@@ -52,29 +52,27 @@ class AuthorizeFilter implements FilterInterface
     /**
      * Get the arguments parameter for the gate.
      *
-     * @param  RequestInterface  $request
      * @param  array|null  $models
      * @return \CodeIgniter\Model|array|string
      */
-    protected function getGateArguments($request, $models)
+    protected function getGateArguments($models)
     {
         if (is_null($models)) {
             return [];
         }
 
-        return collect($models)->map(function ($model) use ($request) {
-            return $model instanceof Model ? $model : $this->getModel($request, $model);
+        return collect($models)->map(function ($model) {
+            return $model instanceof Model ? $model : $this->getModel($model);
         })->all();
     }
 
     /**
      * Get the model to authorize.
      *
-     * @param  RequestInterface  $request
      * @param  string  $model
      * @return \CodeIgniter\Model|string
      */
-    protected function getModel($request, $model)
+    protected function getModel($model)
     {
         if ($this->isClassName($model)) {
             return trim($model);

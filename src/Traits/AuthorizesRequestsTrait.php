@@ -71,38 +71,6 @@ trait AuthorizesRequestsTrait
     }
 
     /**
-     * Authorize a resource action based on the incoming request.
-     *
-     * @param  string|array  $model
-     * @param  string|array|null  $parameter
-     * @param  array  $options
-     * @param  \CodeIgniter\HTTP\RequestInterface|null  $request
-     * @return void
-     */
-    public function authorizeResource($model, $parameter = null, array $options = [], $request = null)
-    {
-        helper('url');
-
-        $model = is_array($model) ? implode(',', $model) : $model;
-
-        $parameter = is_array($parameter) ? implode(',', $parameter) : $parameter;
-
-        $parameter = $parameter ?: url_title(class_basename($model), '_', true);
-
-        $middleware = [];
-
-        foreach ($this->resourceAbilityMap() as $method => $ability) {
-            $modelName = in_array($method, $this->resourceMethodsWithoutModels()) ? $model : $parameter;
-
-            $middleware["can:{$ability},{$modelName}"][] = $method;
-        }
-
-        foreach ($middleware as $middlewareName => $methods) {
-            $this->middleware($middlewareName, $options)->only($methods);
-        }
-    }
-
-    /**
      * Get the map of resource methods to ability names.
      *
      * @return array
@@ -112,21 +80,11 @@ trait AuthorizesRequestsTrait
         return [
             'index' => 'viewAny',
             'show' => 'view',
+            'new' => 'create',
             'create' => 'create',
-            'store' => 'create',
             'edit' => 'update',
             'update' => 'update',
-            'destroy' => 'delete',
+            'delete' => 'delete',
         ];
-    }
-
-    /**
-     * Get the list of resource methods which do not have model parameters.
-     *
-     * @return array
-     */
-    protected function resourceMethodsWithoutModels()
-    {
-        return ['index', 'create', 'store'];
     }
 }
