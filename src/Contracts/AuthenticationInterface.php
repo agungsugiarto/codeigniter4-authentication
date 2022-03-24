@@ -9,7 +9,7 @@ interface AuthenticationInterface
     /**
      * Determine if current user is authenticated. If not, throw an exception.
      *
-     * @return AuthenticatorInterface|ResetPasswordInterface|HasAccessTokensInterface|VerifyEmailInterface
+     * @return AuthenticatorInterface|AuthorizableInterface|ResetPasswordInterface|HasAccessTokensInterface|VerifyEmailInterface
      * @throws AuthenticationException
      */
     public function authenticate();
@@ -52,7 +52,7 @@ interface AuthenticationInterface
      * Logs a user in based on their ID.
      *
      * @param int|string $userId
-     * @return AuthenticatorInterface|bool
+     * @return AuthenticatorInterface|AuthorizableInterface|bool
      */
     public function loginById($userId, bool $remember = false);
 
@@ -66,7 +66,7 @@ interface AuthenticationInterface
     /**
      * Returns the currently logged in user.
      *
-     * @return AuthenticatorInterface|ResetPasswordInterface|HasAccessTokensInterface|VerifyEmailInterface|null
+     * @return AuthenticatorInterface|AuthorizableInterface|ResetPasswordInterface|HasAccessTokensInterface|VerifyEmailInterface|null
      */
     public function user();
 
