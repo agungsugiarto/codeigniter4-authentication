@@ -105,6 +105,7 @@ Open `app\Config\FIlters` see property with `aliases` and add this array to regi
 public $aliases = [
     // ...
     'auth'     => \Fluent\Auth\Filters\AuthenticationFilter::class,
+    'can'      => \Fluent\Auth\Filters\AuthorizeFilter::class,
     'confirm'  => [
         \Fluent\Auth\Filters\AuthenticationFilter::class,
         \Fluent\Auth\Filters\ConfirmPasswordFilter::class,

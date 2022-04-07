@@ -4,6 +4,7 @@ namespace Fluent\Auth\Traits;
 
 use CodeIgniter\Events\Events;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
+use Fluent\Auth\Contracts\AuthorizableInterface;
 use Fluent\Auth\Contracts\HasAccessTokensInterface;
 use Fluent\Auth\Contracts\ResetPasswordInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
@@ -17,7 +18,7 @@ trait GuardHelperTrait
     /** @var UserProviderInterface */
     protected $provider;
 
-    /** @var AuthenticatorInterface|ResetPasswordInterface|VerifyEmailInterface|HasAccessTokensInterface */
+    /** @var AuthenticatorInterface|AuthorizableInterface|ResetPasswordInterface|VerifyEmailInterface|HasAccessTokensInterface */
     protected $user;
 
     /**
