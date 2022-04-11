@@ -14,6 +14,13 @@ includes concrete authentication adapters for common use case scenarios.
 - Most inspired from auth by laravel https://github.com/illuminate/auth
 
 ## Upgrade from v1.x to 2.x
+### Composer Dependencies
+You should update the following dependencies in your application's composer.json file:
+
+`agungsugiarto/codeigniter4-authentication` to `^2.0`
+
+### User Entity
+
 Open class `App\Entities\User` add interface and trait to implement.
 ```diff
 namespace Fluent\Auth\Entities;
@@ -46,6 +53,8 @@ class User extends Entity implements
     use MustVerifyEmailTrait;
 }
 ```
+
+### AuthServiceProvider
 
 Open `App\Providers\AuthServiceProvider`
 ```diff

@@ -509,7 +509,7 @@ class PostController extends BaseController
 <a name="via-controller-helpers"></a>
 ### Via Controller Helpers
 
-In addition to helpful methods provided to the `App\Models\User` model, provides a helpful `authorize` method to any of your controllers must use trait of `Flunet\Auth\Traits\AuthorizesRequestsTrait`.
+In addition to helpful methods provided to the `App\Models\User` model, provides a helpful `authorize` method to any of your controllers must use trait of `Fluent\Auth\Traits\AuthorizesRequestsTrait`.
 
 Like the `can` method, this method accepts the name of the action you wish to authorize and the relevant model. If the action is not authorized, the `authorize` method will throw an `Fluent\Auth\Authorization\AuthorizationException` exception which the exception handler will automatically convert to an HTTP response with a 403 status code:
 ```php
