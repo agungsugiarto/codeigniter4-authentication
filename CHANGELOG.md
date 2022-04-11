@@ -1,6 +1,12 @@
 # Release Notes
 
-## [Unreleased](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.8...1.x)
+## [Unreleased](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v2.0.0...2.x)
+
+## [v2.0.0 (2022-04-11)](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.8...v2.0.0)
+### What's Changed
+* Porting gate authorization from laravel by @agungsugiarto in [#28](https://github.com/agungsugiarto/codeigniter4-authentication/pull/28)
+
+**Full Changelog**: [v1.0.8...v2.0.0](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.8...v2.0.0)
 
 ## [v1.0.8 (2022-03-10)](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.7...v1.0.8)
 
