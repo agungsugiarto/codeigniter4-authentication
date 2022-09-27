@@ -9,10 +9,12 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\Session\SessionInterface;
 use Exception;
+use Fluent\Auth\Contracts\AuthenticationBasicInterface;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\Contracts\UserProviderInterface;
 use Fluent\Auth\CookieRecaller;
+use Fluent\Auth\Exceptions\AuthenticationException;
 use Fluent\Auth\Traits\GuardHelperTrait;
 
 use function bin2hex;
@@ -20,7 +22,7 @@ use function is_null;
 use function random_bytes;
 use function sha1;
 
-class SessionAdapter implements AuthenticationInterface
+class SessionAdapter implements AuthenticationBasicInterface, AuthenticationInterface
 {
     use GuardHelperTrait;
 
@@ -119,6 +121,86 @@ class SessionAdapter implements AuthenticationInterface
         $this->lastAttempted = $user = $this->provider->findByCredentials($credentials);
 
         return $this->hasValidCredentials($user, $credentials);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function basic($field = 'email', $extraConditions = [])
+    {
+        if ($this->check()) {
+            return;
+        }
+
+        // If a username is set on the HTTP basic request, we will return out without
+        // interrupting the request lifecycle. Otherwise, we'll need to generate a
+        // request indicating that the given credentials were invalid for login.
+        if ($this->attemptBasic($field, $extraConditions)) {
+            return;
+        }
+
+        throw new AuthenticationException('Invalid credentials.');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function onceBasic($field = 'email', $extraConditions = [])
+    {
+        $credentials = $this->basicCredentials($field);
+
+        if (! $this->once(array_merge($credentials, $extraConditions))) {
+            throw new AuthenticationException('Invalid credentials.');
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function once(array $credentials = [])
+    {
+        Events::trigger('fireAttemptEvent', $credentials);
+
+        if ($this->validate($credentials)) {
+            $this->setUser($this->lastAttempted);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Attempt to authenticate using basic authentication.
+     *
+     * @param  string  $field
+     * @param  array  $extraConditions
+     * @return bool
+     */
+    protected function attemptBasic($field, $extraConditions = [])
+    {
+        if (! $this->request->getHeaderLine('PHP_AUTH_USER')) {
+            return false;
+        }
+
+        return $this->attempt(array_merge(
+            $this->basicCredentials($field),
+            $extraConditions
+        ));
+    }
+
+    /**
+     * Get the credential array for an HTTP Basic request.
+     *
+     * @param  string  $field
+     * @return array
+     */
+    protected function basicCredentials($field)
+    {
+        return [
+            $field     => $this->request->getHeaderLine('PHP_AUTH_USER'),
+            'password' => $this->request->getHeaderLine('PHP_AUTH_PW')
+        ];
     }
 
     /**

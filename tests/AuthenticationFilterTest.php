@@ -6,10 +6,12 @@ use CodeIgniter\Config\Factories;
 use CodeIgniter\Router\RouteCollection;
 use CodeIgniter\Test\CIDatabaseTestCase;
 use CodeIgniter\Test\FeatureTestTrait;
+use Exception;
 use Fluent\Auth\Config\Services;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthFactoryInterface;
 use Fluent\Auth\Exceptions\AuthenticationException;
+use Fluent\Auth\Filters\AuthenticationBasicFilter;
 use Fluent\Auth\Filters\AuthenticationFilter;
 use Fluent\Auth\Models\UserModel;
 
@@ -37,10 +39,23 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
 
         $filters                  = config('Filters');
         $filters->aliases['auth'] = AuthenticationFilter::class;
+        $filters->aliases['auth.basic'] = AuthenticationBasicFilter::class;
         Factories::injectMock('filters', 'filters', $filters);
 
         $routes = Services::routes();
         $routes->group('secret', ['filter' => "auth:{$this->guard}"], function ($routes) {
+            $routes->get('treasure', function () {
+                return 'you found gems';
+            });
+        });
+
+        $routes->group('basic', ['filter' => "auth.basic:web,email,basic"], function ($routes) {
+            $routes->get('treasure', function () {
+                return 'you found gems';
+            });
+        });
+        
+        $routes->group('onceBasic', ['filter' => "auth.basic:web,email,onceBasic"], function ($routes) {
             $routes->get('treasure', function () {
                 return 'you found gems';
             });
@@ -59,6 +74,76 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
     {
         $request = service('request');
         $request->setHeader('Authorization', 'Token ' . $token);
+    }
+
+    public function testBasicFilter()
+    {
+        $user = fake(UserModel::class);
+
+        $result = $this
+            ->withHeaders([
+                'php_auth_user' => $user->email,
+                'php_auth_pw'   => 'secret',
+            ])
+            ->call('get', 'basic/treasure');
+
+        $result->assertOK();
+        $result->assertSee('you found gems');
+        $this->assertNotNull($this->auth->user());
+    }
+
+    public function testFailedBasicFilter()
+    {
+        $this->expectException(AuthenticationException::class);
+        $this->expectExceptionMessage('Invalid credentials.');
+
+        $user = fake(UserModel::class);
+
+        $result = $this
+            ->withHeaders([
+                'php_auth_user' => $user->email,
+                'php_auth_pw'   => 'secrets',
+            ])
+            ->call('get', 'basic/treasure');
+
+        $result->assertNotOK();
+        $result->assertDontSee('you found gems');
+        $this->assertNull($this->auth->user());
+    }
+
+    public function testOnceBasicFilter()
+    {
+        $user = fake(UserModel::class);
+
+        $result = $this
+            ->withHeaders([
+                'php_auth_user' => $user->email,
+                'php_auth_pw'   => 'secret',
+            ])
+            ->call('get', 'onceBasic/treasure');
+
+        $result->assertOK();
+        $result->assertSee('you found gems');
+        $this->assertNotNull($this->auth->user());
+    }
+
+    public function testFailedOnceBasicFilter()
+    {
+        $this->expectException(AuthenticationException::class);
+        $this->expectExceptionMessage('Invalid credentials.');
+
+        $user = fake(UserModel::class);
+
+        $result = $this
+            ->withHeaders([
+                'php_auth_user' => $user->email,
+                'php_auth_pw'   => 'secrets',
+            ])
+            ->call('get', 'onceBasic/treasure');
+
+        $result->assertNotOK();
+        $result->assertDontSee('you found gems');
+        $this->assertNull($this->auth->user());
     }
 
     public function testDefaultGuardFilter()
