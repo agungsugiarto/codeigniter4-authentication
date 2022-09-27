@@ -82,8 +82,7 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
 
         $result = $this
             ->withHeaders([
-                'php_auth_user' => $user->email,
-                'php_auth_pw'   => 'secret',
+                'Authorization' => 'Basic ' . base64_encode("{$user->email}:secret"),
             ])
             ->call('get', 'basic/treasure');
 
@@ -101,8 +100,7 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
 
         $result = $this
             ->withHeaders([
-                'php_auth_user' => $user->email,
-                'php_auth_pw'   => 'secrets',
+                'Authorization' => 'Basic ' . base64_encode("{$user->email}:secrets"),
             ])
             ->call('get', 'basic/treasure');
 
@@ -117,8 +115,7 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
 
         $result = $this
             ->withHeaders([
-                'php_auth_user' => $user->email,
-                'php_auth_pw'   => 'secret',
+                'Authorization' => 'Basic ' . base64_encode("{$user->email}:secret"),
             ])
             ->call('get', 'onceBasic/treasure');
 
@@ -136,8 +133,7 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
 
         $result = $this
             ->withHeaders([
-                'php_auth_user' => $user->email,
-                'php_auth_pw'   => 'secrets',
+                'Authorization' => 'Basic ' . base64_encode("{$user->email}:secrets"),
             ])
             ->call('get', 'onceBasic/treasure');
 

@@ -179,10 +179,6 @@ class SessionAdapter implements AuthenticationBasicInterface, AuthenticationInte
      */
     protected function attemptBasic($field, $extraConditions = [])
     {
-        if (! $this->request->getHeaderLine('PHP_AUTH_USER')) {
-            return false;
-        }
-
         return $this->attempt(array_merge(
             $this->basicCredentials($field),
             $extraConditions
@@ -197,10 +193,37 @@ class SessionAdapter implements AuthenticationBasicInterface, AuthenticationInte
      */
     protected function basicCredentials($field)
     {
-        return [
-            $field     => $this->request->getHeaderLine('PHP_AUTH_USER'),
-            'password' => $this->request->getHeaderLine('PHP_AUTH_PW')
-        ];
+        if (! $this->request->hasHeader('Authorization')) {
+            return [];
+        }
+
+        $authHeaders = [$this->request->header('Authorization')->getValue()];
+
+        if (1 !== count($authHeaders)) {
+            return [];
+        }
+
+        $authHeader = array_shift($authHeaders);
+
+        if (! preg_match('/Basic (?P<credentials>.+)/', $authHeader, $match)) {
+            return [];
+        }
+
+        $decodedCredentials = base64_decode($match['credentials'], true);
+
+        if (false === $decodedCredentials) {
+            return [];
+        }
+
+        $credentialParts = explode(':', $decodedCredentials, 2);
+
+        if (2 !== count($credentialParts)) {
+            return [];
+        }
+
+        [$username, $password] = $credentialParts;
+
+        return [$field => $username, 'password' => $password];
     }
 
     /**
