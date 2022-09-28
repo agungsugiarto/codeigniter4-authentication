@@ -10,6 +10,8 @@
 - [Manually Authenticating Users](#authenticating-users)
     - [Remembering Users](#remembering-users)
     - [Other Authentication Methods](#other-authentication-methods)
+- [HTTP Basic Authentication](#http-basic-authentication)
+    - [Stateless HTTP Basic Authentication](#stateless-http-basic-authentication)
 - [Logging Out](#logging-out)
 - [Password Confirmation](#password-confirmation)
     - [Configuration](#password-confirmation-configuration)
@@ -104,9 +106,10 @@ Open `app\Config\FIlters` see property with `aliases` and add this array to regi
 ```php
 public $aliases = [
     // ...
-    'auth'     => \Fluent\Auth\Filters\AuthenticationFilter::class,
-    'can'      => \Fluent\Auth\Filters\AuthorizeFilter::class,
-    'confirm'  => [
+    'auth'       => \Fluent\Auth\Filters\AuthenticationFilter::class,
+    'auth.basic' => \Fluent\Auth\Filters\AuthenticationBasicFilter::class,
+    'can'        => \Fluent\Auth\Filters\AuthorizeFilter::class,
+    'confirm'    => [
         \Fluent\Auth\Filters\AuthenticationFilter::class,
         \Fluent\Auth\Filters\ConfirmPasswordFilter::class,
     ],
@@ -322,6 +325,43 @@ Auth::loginById(1);
 You may pass a boolean value as the second argument to the `loginById` method. This value indicates if "remember me" functionality is desired for the authenticated session. Remember, this means that the session will be authenticated indefinitely or until the user manually logs out of the application:
 ```php
 Auth::loginById(1, $remember = true);
+```
+
+<a name="http-basic-authentication"></a>
+## HTTP Basic Authentication
+
+[HTTP Basic Authentication](https://en.wikipedia.org/wiki/Basic_access_authentication) provides a quick way to authenticate users of your application without setting up a dedicated "login" page. To get started, attach the `auth.basic` filter to a route:
+
+```php
+$routes->group('basic', ['filter' => "auth.basic:web,email,basic"], function ($routes) {
+    $routes->get('treasure', function () {
+       // Only authenticated users may access this route...
+    });
+});
+```
+
+Once the filter has been attached to the route, you will automatically be prompted for credentials when accessing the route in your browser. By default, the `auth.basic` filter will assume the `email` column on your `users` database table is the user's "username".
+
+<a name="a-note-on-fastcgi"></a>
+#### A Note On FastCGI
+
+If you are using PHP FastCGI and Apache to serve your Laravel application, HTTP Basic authentication may not work correctly. To correct these problems, the following lines may be added to your application's `.htaccess` file:
+
+```apache
+RewriteCond %{HTTP:Authorization} ^(.+)$
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+```
+
+<a name="stateless-http-basic-authentication"></a>
+### Stateless HTTP Basic Authentication
+
+You may also use HTTP Basic Authentication without setting a user identifier cookie in the session. This is primarily helpful if you choose to use HTTP Authentication to authenticate requests to your application's API. To accomplish this calls the `onceBasic` method. If no response is returned by the `onceBasic` method, the request may be passed further into the application:
+```php
+$routes->group('onceBasic', ['filter' => "auth.basic:web,email,onceBasic"], function ($routes) {
+    $routes->get('treasure', function () {
+       // Only authenticated users may access this route...
+    });
+});
 ```
 
 ## Logging Out
