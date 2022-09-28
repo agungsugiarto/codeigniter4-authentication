@@ -4,7 +4,7 @@
 
 ## [v2.0.1 (2022-09-28)](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v2.0.0...v2.0.1)
 ### Added
-* Implement HTTP Basic Authentication provides a quick way to authenticate users of your application without setting up a dedicated "login" page by @agungsugiarto in [#32](https://github.com/agungsugiarto/codeigniter4-authentication/pull/32)
+* Implement HTTP Basic Authentication provides a quick way to authenticate users by @agungsugiarto in [#32](https://github.com/agungsugiarto/codeigniter4-authentication/pull/32)
 
 ## [v2.0.0 (2022-04-11)](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v1.0.8...v2.0.0)
 ### What's Changed

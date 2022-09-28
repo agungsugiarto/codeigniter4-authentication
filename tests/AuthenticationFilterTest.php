@@ -89,6 +89,8 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
         $result->assertOK();
         $result->assertSee('you found gems');
         $this->assertNotNull($this->auth->user());
+        $this->assertTrue(session()->has($this->auth->getSessionName()));
+        $this->assertEquals(session($this->auth->getSessionName()), $this->auth->id());
     }
 
     public function testFailedBasicFilter()
@@ -122,6 +124,8 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
         $result->assertOK();
         $result->assertSee('you found gems');
         $this->assertNotNull($this->auth->user());
+        $this->assertFalse(session()->has($this->auth->getSessionName()));
+        $this->assertNotEquals(session($this->auth->getSessionName()), $this->auth->id());
     }
 
     public function testFailedOnceBasicFilter()
