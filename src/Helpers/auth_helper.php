@@ -1,6 +1,7 @@
 <?php
 
 use Fluent\Auth\Config\Services;
+use Fluent\Auth\Contracts\AuthenticationBasicInterface;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthFactoryInterface;
 
@@ -9,7 +10,7 @@ if (! function_exists('auth')) {
      * Provides convenient access to the main authentication class.
      *
      * @param string|null $guard
-     * @return AuthFactoryInterface|AuthenticationInterface
+     * @return AuthFactoryInterface|AuthenticationBasicInterface|AuthenticationInterface
      */
     function auth($guard = null)
     {

@@ -27,7 +27,7 @@ interface AuthFactoryInterface
      * Attempt to get the guard from the local cache.
      *
      * @param  string|null  $name
-     * @return AuthenticationInterface
+     * @return AuthenticationBasicInterface|AuthenticationInterface
      */
     public function guard($name = null);
 

@@ -5,6 +5,7 @@ namespace Fluent\Auth\Facades;
 use Closure;
 use Fluent\Auth\Config\Services;
 use CodeIgniter\Router\RouteCollection;
+use Fluent\Auth\Contracts\AuthenticationBasicInterface;
 use Fluent\Auth\Contracts\AuthenticationInterface;
 use Fluent\Auth\Contracts\AuthenticatorInterface;
 use Fluent\Auth\Contracts\HasAccessTokensInterface;
@@ -18,7 +19,7 @@ use Fluent\Auth\Contracts\VerifyEmailInterface;
  *
  * @method static UserProviderInterface createUserProvider($provider = null)
  * @method static string getDefaultUserProvider()
- * @method static AuthenticationInterface guard($name = null)
+ * @method static AuthenticationBasicInterface|AuthenticationInterface guard($name = null)
  * @method static string getDefaultDriver()
  * @method static $this setDefaultDriver($name)
  * @method static Closure userResolver()
