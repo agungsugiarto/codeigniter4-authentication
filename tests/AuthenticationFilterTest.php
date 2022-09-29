@@ -108,6 +108,7 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
 
         $result->assertNotOK();
         $result->assertDontSee('you found gems');
+        $result->assertHeader('WWW-Authenticate', 'Basic');
         $this->assertNull($this->auth->user());
     }
 
@@ -143,6 +144,7 @@ class AuthenticationFilterTest extends CIDatabaseTestCase
 
         $result->assertNotOK();
         $result->assertDontSee('you found gems');
+        $result->assertHeader('WWW-Authenticate', 'Basic');
         $this->assertNull($this->auth->user());
     }
 
