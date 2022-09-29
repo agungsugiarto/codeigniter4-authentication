@@ -139,7 +139,7 @@ class SessionAdapter implements AuthenticationBasicInterface, AuthenticationInte
             return;
         }
 
-        throw new AuthenticationException('Invalid credentials.');
+        return $this->failedBasicResponse();
     }
 
     /**
@@ -150,7 +150,7 @@ class SessionAdapter implements AuthenticationBasicInterface, AuthenticationInte
         $credentials = $this->basicCredentials($field);
 
         if (! $this->once(array_merge($credentials, $extraConditions))) {
-            throw new AuthenticationException('Invalid credentials.');
+            return $this->failedBasicResponse();
         }
     }
 
@@ -224,6 +224,23 @@ class SessionAdapter implements AuthenticationBasicInterface, AuthenticationInte
         [$username, $password] = $credentialParts;
 
         return [$field => $username, 'password' => $password];
+    }
+
+    /**
+     * Get the response for basic authentication.
+     *
+     * @return void
+     *
+     * @throws AuthenticationException
+     */
+    protected function failedBasicResponse()
+    {
+        $this->response
+            ->setHeader('WWW-Authenticate', 'Basic')
+            ->setStatusCode(401, 'Invalid credentials.')
+            ->sendHeaders();
+
+        throw new AuthenticationException('Invalid credentials.');
     }
 
     /**
