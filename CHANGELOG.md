@@ -1,6 +1,12 @@
 # Release Notes
 
-## [Unreleased](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v2.0.2...2.x)
+## [Unreleased](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v2.1.0...2.x)
+
+## [v2.1.0 (2024-03-13)](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v2.1.0...v2.0.2)
+
+### Fixed
+* Fix InvalidArgumentException when logging in by @agungsugiarto in [#35](https://github.com/agungsugiarto/codeigniter4-authentication/pull/35)
+* Fix config cookie codeigniter4 by @agungsugiarto in [#36](https://github.com/agungsugiarto/codeigniter4-authentication/pull/36)
 
 ## [v2.0.2 (2022-09-29)](https://github.com/agungsugiarto/codeigniter4-authentication/compare/v2.0.1...v2.0.2)
 
