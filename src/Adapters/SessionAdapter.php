@@ -350,18 +350,19 @@ class SessionAdapter implements AuthenticationBasicInterface, AuthenticationInte
      */
     protected function recallerCookie(AuthenticatorInterface $user)
     {
-        $app = config('App');
+        /** @var \Config\Cookie $cookie */
+        $cookie = config('Cookie');
 
         // If using login with remember, make sure to send cookie with redirect()->withCookies()
         $this->response->setCookie(
             $this->getCookieName(),
             $this->encrypter()->encrypt($user->getAuthId() . '|' . $user->getRememberToken() . '|' . $user->getAuthPassword()),
             1 * MONTH,
-            $app->cookieDomain,
-            $app->cookiePath,
-            $app->cookiePrefix,
-            $app->cookieSecure,
-            $app->cookieHTTPOnly
+            $cookie->domain,
+            $cookie->path,
+            $cookie->prefix,
+            $cookie->secure,
+            $cookie->httponly
         );
     }
 
@@ -483,16 +484,17 @@ class SessionAdapter implements AuthenticationBasicInterface, AuthenticationInte
      */
     protected function clearUserDataFromStorage()
     {
-        $app = config('App');
+        /** @var \Config\Cookie $cookie */
+        $cookie = config('Cookie');
         $this->session->remove($this->getSessionName());
 
         if (! is_null($this->recaller())) {
             // If using login with remember, make sure to send cookie with redirect()->withCookies()
             $this->response->deleteCookie(
                 $this->getCookieName(),
-                $app->cookieDomain,
-                $app->cookiePath,
-                $app->cookiePrefix
+                $cookie->domain,
+                $cookie->path,
+                $cookie->prefix
             );
         }
     }
